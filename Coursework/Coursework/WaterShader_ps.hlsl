@@ -74,8 +74,6 @@ struct InputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float3 worldPos : TEXCOORD1;
-    float waterDepth : TEXCOORD2;
-    float3 mountainWorldPos : TEXCOORD3;
 };
 
 //ATTENUATION--------------------------------------------------------------------------------------------------------------------------------------
@@ -218,7 +216,7 @@ float4 main(InputType input) : SV_TARGET
     float4 shallowWaterColour = float4(0.26f, 0.83f, 0.9f, 0.5f);
     float4 deepWaterColour = float4(0.f,0.678f,0.819f,1.0f);
 	
-    float4 finalDepthColour = lerp(deepWaterColour, shallowWaterColour, input.waterDepth);
+    //float4 finalDepthColour = lerp(deepWaterColour, shallowWaterColour, input.waterDepth);
     
     
     //-------------------------------------------------------------------------------
@@ -238,12 +236,12 @@ float4 main(InputType input) : SV_TARGET
             //directional light
             if (lightType[i] == -1.0f)
             {
-                combinedLightColour = saturate(float4(PBR(input, roughness, finalDepthColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]), 1.0f));
+                combinedLightColour = saturate(float4(PBR(input, roughness, deepWaterColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]), 1.0f));
             }
             //spotlight
             if (lightType[i] == 0.0f)
             {
-                combinedLightColour = saturate(spotlightLighting(input, lightVector, roughness, finalDepthColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]));
+                combinedLightColour = saturate(spotlightLighting(input, lightVector, roughness, deepWaterColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]));
 
             }
             
@@ -254,7 +252,7 @@ float4 main(InputType input) : SV_TARGET
         
     }
     
-    return float4(finalLight.xyz, finalDepthColour.a);
+    return float4(finalLight.xyz, deepWaterColour.a);
     
 }
 
