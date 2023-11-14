@@ -5,7 +5,7 @@ class PlaneMeshTessellated :
     public PlaneMesh
 {
 public:
-	PlaneMeshTessellated(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution = 100);
+	PlaneMeshTessellated(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution);
 	~PlaneMeshTessellated();
 
 protected:

@@ -34,6 +34,7 @@ private:
 	//Meshes------------------------------------------------------
 	WaterShader* waterShader;
 	PlaneMeshTessellated* water;
+	int waterPlaneResolution = 1000;
 
 	SunShader* sunShader;
 	SphereMesh* sun;

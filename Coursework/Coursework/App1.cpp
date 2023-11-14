@@ -15,7 +15,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
 	// Create Mesh object and shader object
-	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext());
+	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 
@@ -212,6 +212,7 @@ void App1::gui()
 	if (ImGui::TreeNode("Water")) {
 		if (ImGui::TreeNode("Water Manipulation")) {
 			//To manipulate terrain with waves
+			ImGui::SliderInt("Plane resolution", &waterPlaneResolution, 10, 500);
 			ImGui::SliderFloat("Wave steepness", &steepness, 0.00f, 2.f);
 			ImGui::SliderFloat("Water Height", &waterHeight, 0, 20.f);
 			ImGui::Text("WAVE 1");
