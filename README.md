@@ -1,6 +1,5 @@
-# CMP301-Starter
-Starter application for CMP301 coursework
-Updated for 2020
+# CMP400
+Feasibility Demo
 
 Name: Melina Garcia Ayala
 
