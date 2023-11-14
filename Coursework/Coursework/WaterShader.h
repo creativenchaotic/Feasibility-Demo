@@ -73,7 +73,7 @@ public:
 	WaterShader(ID3D11Device* device, HWND hwnd);
 	~WaterShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* texture, XMFLOAT4 waterSpecular, XMFLOAT4 cameraPos);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT4 waterSpecular, XMFLOAT4 cameraPos);
 	void setWaveParameters(ID3D11DeviceContext* deviceContext, float deltaTime, float ampl, float freq, float speed, XMFLOAT3 direction, float ampl2, float freq2, float speed2, XMFLOAT3 direction2, float ampl3, float freq3, float speed3, XMFLOAT3 direction3,float steepnessFactor, float waterHeight);
 	void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light, Light* light2, float lightType, float lightType2, float spotlightSize);
 	void setAttenuationFactors(ID3D11DeviceContext* deviceContext, XMFLOAT3 attenuationFactor);
@@ -84,7 +84,6 @@ private:
 
 private:
 	ID3D11Buffer* matrixBuffer;
-	ID3D11SamplerState* sampleState;
 	ID3D11Buffer* lightBuffer;
 	ID3D11Buffer* timeBuffer;
 	ID3D11Buffer* cameraBuffer;

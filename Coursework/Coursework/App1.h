@@ -4,7 +4,6 @@
 
 // Includes
 #include "DXF.h"
-#include "TerrainManipulation.h"
 #include "WaterShader.h"
 #include "SunShader.h"
 #include "PlaneMeshTessellated.h"
@@ -21,8 +20,6 @@ public:
 
 protected:
 	bool render();
-	void directionalLightDepthPass();//Rendering the distance from the directional light
-	void spotlightDepthPass();//Rendering the distance from the spotlight
 	void gui();
 
 private:
@@ -35,10 +32,6 @@ private:
 	XMFLOAT3 forward;//used to store the lookat vector as a float3
 
 	//Meshes------------------------------------------------------
-	TerrainManipulation* terrainShader;
-	PlaneMeshTessellated* plane;
-	XMMATRIX terrainScaling = XMMatrixScaling(2.0f, 2.0f, 2.0f);
-
 	WaterShader* waterShader;
 	PlaneMeshTessellated* water;
 
@@ -78,9 +71,6 @@ private:
 	//----------------------------------------------------------------
 	// Changing background colour
 	XMFLOAT4 skyColour = XMFLOAT4(0.92f, 0.57f, 0.26f, 1.0f);
-	//Changing map
-	bool isMap1=true;
-	bool isMap2 =false;
 
 
 	//delta time
@@ -110,38 +100,9 @@ private:
 	float waterMetallic = 0.039f;
 	float waterBaseReflectivity = 0.681f;
 
-	//-----------------------------------------------------------------
-	//Mountain lighting values
-	//Grass
-	float grassMetallic = 0.039f;
-	float grassBaseReflectivity = 0.681f;
-
-	//Rock
-	float rockMetallic = 0.039f;
-	float rockBaseReflectivity = 0.681f;
-
-	//Snow
-	float snowMetallic = 0.039f;
-	float snowBaseReflectivity = 0.681f;
-
-	//Sand
-	float sandMetallic = 0.039f;
-	float sandBaseReflectivity = 0.681f;
-
-	//SHADOWS----------------------------------------------------------------
-	//Depth Map-------------------
-	DepthShader* depthShader;
-	DepthShader* heightmapDirectionalDepthShader;
-
-	//Shadow Map------------------
-	// Variables for defining shadow map
-	int shadowmapWidth = 4096;
-	int shadowmapHeight = 4096;
 	int sceneWidth = 1200;
 	int sceneHeight = 1200;
 
-	ShadowMap* directionalShadowMap;
-	ShadowMap* spotlightShadowMap;
 
 
 };

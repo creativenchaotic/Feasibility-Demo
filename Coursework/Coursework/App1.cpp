@@ -12,35 +12,13 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
 	// Initalise scene variables.
-	
-	//TEXTURES---------------------------------------------------------------------------------------
-	// Load textures
-	//Heightmaps
-	textureMgr->loadTexture(L"map", L"res/height.png");
-	textureMgr->loadTexture(L"map1", L"res/height2.png");
-	textureMgr->loadTexture(L"cliffHeight",L"res/RockCliffHeight.png");
-	textureMgr->loadTexture(L"mossHeight", L"res/MossHeight.png");
-	textureMgr->loadTexture(L"snowHeight", L"res/SnowHeight.png");
-
-	//Material Albedo Textures
-	textureMgr->loadTexture(L"mossTexture", L"res/MossAlbedo.png");
-	textureMgr->loadTexture(L"cliffTexture", L"res/RockCliffAlbedo.png");
-	textureMgr->loadTexture(L"snowTexture", L"res/SnowAlbedo.png");
-
-	//Material Roughness Textures
-	textureMgr->loadTexture(L"cliffRoughness", L"res/RockCliffRoughness.png");
-	textureMgr->loadTexture(L"mossRoughness", L"res/MossRoughness.png");
-	textureMgr->loadTexture(L"snowRoughness", L"res/SnowRoughness.png");
-
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
 	// Create Mesh object and shader object
-	plane = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext());
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext());
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 
-	terrainShader = new TerrainManipulation(renderer->getDevice(), hwnd);
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	sunShader = new SunShader(renderer->getDevice(), hwnd);
 
@@ -65,15 +43,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	spotlight->generateProjectionMatrix(0.1f, 600.f);
 	spotlight->setPosition(spotlightPosition.x,spotlightPosition.y,spotlightPosition.z);
 
-	//SHADOWS---------------------------------------------------------------------------------------
-	//Depth Map
-	depthShader = new DepthShader(renderer->getDevice(), hwnd, false);
-	heightmapDirectionalDepthShader = new DepthShader(renderer->getDevice(), hwnd, true);
-
-	//Shadow Map
-	directionalShadowMap = new ShadowMap(renderer->getDevice(), shadowmapWidth, shadowmapHeight);
-	spotlightShadowMap = new ShadowMap(renderer->getDevice(), shadowmapWidth, shadowmapHeight);
-
 }
 
 
@@ -83,12 +52,6 @@ App1::~App1()
 	BaseApplication::~BaseApplication();
 
 	// Release the Direct3D object.---------------
-	//Terrain meshes and shader
-	if (plane)
-	{
-		delete plane;
-		plane = 0;
-	}
 
 	if (water)
 	{
@@ -99,12 +62,6 @@ App1::~App1()
 	if (sun) {
 		delete sun;
 		sun = 0;
-	}
-
-	if (terrainShader)
-	{
-		delete terrainShader;
-		terrainShader = 0;
 	}
 
 	if (waterShader) {
@@ -120,26 +77,6 @@ App1::~App1()
 	if (spotlight) {
 		delete spotlight;
 		spotlight = 0;
-	}
-
-	if (depthShader) {
-		delete depthShader;
-		depthShader = 0;
-	}
-
-	if (directionalShadowMap) {
-		delete directionalShadowMap;
-		directionalShadowMap = 0;
-	}
-
-	if (spotlightShadowMap) {
-		delete spotlightShadowMap;
-		spotlightShadowMap = 0;
-	}
-
-	if (heightmapDirectionalDepthShader){
-		delete heightmapDirectionalDepthShader;
-		heightmapDirectionalDepthShader = 0;
 	}
 
 	if (spotlightMesh) {
@@ -169,56 +106,9 @@ bool App1::frame()
 	return true;
 }
 
-//Directional Light Depth Texture Creation
-void App1::directionalLightDepthPass()
-{
-	// Set the render target to be the render to texture.
-	directionalShadowMap->BindDsvAndSetNullRenderTarget(renderer->getDeviceContext());
-
-	// get the world, view, and projection matrices from the camera and d3d objects.
-	directionalLight->generateViewMatrix();
-	XMMATRIX lightViewMatrix = directionalLight->getViewMatrix();
-	XMMATRIX lightProjectionMatrix = directionalLight->getOrthoMatrix();
-	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX terrainScale = XMMatrixScaling(2.0F,2.0F,2.0F);
-
-	plane->sendData(renderer->getDeviceContext());
-	heightmapDirectionalDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * terrainScale, lightViewMatrix, lightProjectionMatrix );
-	heightmapDirectionalDepthShader->render(renderer->getDeviceContext(), plane->getIndexCount());
-
-	// Set back buffer as render target and reset view port.
-	renderer->setBackBufferRenderTarget();
-	renderer->resetViewport();
-}
-
-//Spotlight Depth Texture Creation
-void App1::spotlightDepthPass()
-{
-	// Set the render target to be the render to texture.
-	spotlightShadowMap->BindDsvAndSetNullRenderTarget(renderer->getDeviceContext());
-
-	// get the world, view, and projection matrices from the camera and d3d objects.
-	spotlight->generateViewMatrix();
-	XMMATRIX lightViewMatrix = spotlight->getViewMatrix();
-	XMMATRIX lightProjectionMatrix = spotlight->getProjectionMatrix();
-	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX terrainScale = XMMatrixScaling(2.0F, 2.0F, 2.0F);
-
-	plane->sendData(renderer->getDeviceContext());
-	heightmapDirectionalDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * terrainScale, lightViewMatrix, lightProjectionMatrix);
-	heightmapDirectionalDepthShader->render(renderer->getDeviceContext(), plane->getIndexCount());
-
-	// Set back buffer as render target and reset view port.
-	renderer->setBackBufferRenderTarget();
-	renderer->resetViewport();
-}
-
 //Final scene render
 bool App1::render()
 {
-	directionalLightDepthPass();
-	spotlightDepthPass();
-
 	// Clear the scene. (default blue colour)
 	renderer->beginScene(skyColour.x, skyColour.y, skyColour.z, skyColour.w);
 
@@ -263,28 +153,10 @@ bool App1::render()
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 
-	//Pass values into shaders
-	plane->sendData(renderer->getDeviceContext());
-	if (isMap1) {
-		terrainShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"map"), textureMgr->getTexture(L"cliffHeight"), textureMgr->getTexture(L"cliffTexture"), textureMgr->getTexture(L"mossHeight"), textureMgr->getTexture(L"mossTexture"), textureMgr->getTexture(L"snowHeight"), textureMgr->getTexture(L"snowTexture"), textureMgr->getTexture(L"cliffRoughness"), textureMgr->getTexture(L"mossRoughness"), textureMgr->getTexture(L"snowRoughness"), directionalLight, spotlight);
-	}
-	if (isMap2) {
-		terrainShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"map1"), textureMgr->getTexture(L"cliffHeight"), textureMgr->getTexture(L"cliffTexture"), textureMgr->getTexture(L"mossHeight"), textureMgr->getTexture(L"mossTexture"), textureMgr->getTexture(L"snowHeight"), textureMgr->getTexture(L"snowTexture"), textureMgr->getTexture(L"cliffRoughness"), textureMgr->getTexture(L"mossRoughness"), textureMgr->getTexture(L"snowRoughness"), directionalLight, spotlight);
-	}
-	terrainShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
-	terrainShader->setShadowValues(renderer->getDeviceContext(), directionalShadowMap->getDepthMapSRV(), spotlightShadowMap->getDepthMapSRV());
-	terrainShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
-	terrainShader->setMaterialValues(renderer->getDeviceContext(), grassMetallic, grassBaseReflectivity, rockMetallic, rockBaseReflectivity, snowMetallic, snowBaseReflectivity, sandMetallic, sandBaseReflectivity);
-	terrainShader->render(renderer->getDeviceContext(), plane->getIndexCount());
-
 	renderer->setAlphaBlending(true);
 	water->sendData(renderer->getDeviceContext());
-	if (isMap1) {
-		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"map"), waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F));
-	}
-	if (isMap2) {
-		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"map1"), waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F));
-	}
+
+	waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F));
 	waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
 	waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
 	waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
@@ -331,71 +203,6 @@ void App1::gui()
 	if (ImGui::TreeNode("Sky")) {
 		//SkyColour
 		ImGui::ColorEdit4("Sky Colour", (float*)&skyColour);
-
-		ImGui::TreePop();
-	}
-
-	//MAP
-	if (ImGui::TreeNode("Map")) {
-		ImGui::Text("Leave only 1 checked box to activate\nthe heightmap with the check ");
-
-		ImGui::Checkbox("Map 1", &isMap1);
-
-		if (isMap2 && !isMap1) {
-			isMap1 = false;
-		}
-		if (isMap1 && !isMap2) {
-			isMap2 = false;
-		}
-
-		ImGui::Checkbox("Map 2", &isMap2);
-
-		if (isMap2 && !isMap1) {
-			isMap1 = false;
-		}
-		if (isMap1 && !isMap2) {
-			isMap2 = false;
-		}
-
-		if (!isMap1 && !isMap2) {
-			isMap1 = true;
-		}
-
-		ImGui::TreePop();
-	}
-
-	if (ImGui::TreeNode("Mountain")) {
-		if (ImGui::TreeNode("Grass Material")) {
-
-			ImGui::SliderFloat("Grass Metallic Amount", &grassMetallic, 0.001, 1);
-			ImGui::SliderFloat("Grass Base Reflectivity", &grassBaseReflectivity, 0.001, 1);
-
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Rock Material")) {
-
-			ImGui::SliderFloat("Rock Metallic Amount", &rockMetallic, 0.001, 1);
-			ImGui::SliderFloat("Rock Base Reflectivity", &rockBaseReflectivity, 0.001, 1);
-
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Snow Material")) {
-
-			ImGui::SliderFloat("Snow Metallic Amount", &snowMetallic, 0.001, 1);
-			ImGui::SliderFloat("Snow Base Reflectivity", &snowBaseReflectivity, 0.001, 1);
-
-			ImGui::TreePop();
-		}
-
-		/*if (ImGui::TreeNode("Sand Material")) {
-
-			ImGui::SliderFloat("Sand Metallic Amount", &sandMetallic, 0.001, 1);
-			ImGui::SliderFloat("Sand Base Reflectivity", &sandBaseReflectivity, 0.001, 1);
-
-			ImGui::TreePop();
-		}*/
 
 		ImGui::TreePop();
 	}

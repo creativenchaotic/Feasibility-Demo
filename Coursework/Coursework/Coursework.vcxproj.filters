@@ -21,9 +21,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainManipulation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WaterShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -58,12 +55,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="TerrainManipulation_vs.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="TerrainManipulation_ps.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
     <FxCompile Include="WaterShader_vs.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
@@ -80,12 +71,6 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="WaterShader_ds.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="TerrainManipulation_hs.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="TerrainManipulation_ds.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="DepthShader_vs.hlsl">

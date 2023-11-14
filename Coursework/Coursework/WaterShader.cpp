@@ -147,7 +147,7 @@ void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 }
 
 
-void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, XMFLOAT4 waterSpecular, XMFLOAT4 cameraPos)
+void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT4 waterSpecular, XMFLOAT4 cameraPos)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -176,17 +176,6 @@ void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	cameraPtr->cameraPosition = cameraPos;
 	deviceContext->Unmap(cameraBuffer, 0 );
 	deviceContext->PSSetConstantBuffers(1,1,&cameraBuffer);
-
-	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
-	deviceContext->PSSetSamplers(0, 1, &sampleState);
-
-
-
-	// Set shader texture resource in the pixel shader.
-	deviceContext->VSSetShaderResources(0, 1, &texture);
-	deviceContext->VSSetSamplers(0, 1, &sampleState);
-
 }
 
 void WaterShader::setWaveParameters(ID3D11DeviceContext* deviceContext, float deltaTime, float ampl, float freq, float speed, XMFLOAT3 direction, float ampl2, float freq2, float speed2, XMFLOAT3 direction2, float ampl3, float freq3, float speed3, XMFLOAT3 direction3, float steepnessFactor, float waterHeight)

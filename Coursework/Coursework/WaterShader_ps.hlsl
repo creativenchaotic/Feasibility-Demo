@@ -1,8 +1,8 @@
 // Water pixel shader
 // Caculate PBR lighting and final water colour
 
-Texture2D texture0 : register(t0);
-SamplerState sampler0 : register(s0);
+//Texture2D texture0 : register(t0);
+//SamplerState sampler0 : register(s0);
 
 //Lighting values
 cbuffer LightBuffer : register(b0)
