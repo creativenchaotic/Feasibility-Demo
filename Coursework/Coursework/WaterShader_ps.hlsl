@@ -215,8 +215,6 @@ float4 main(InputType input) : SV_TARGET
     //Calculating depth colour-------------------------------------
     float4 shallowWaterColour = float4(0.26f, 0.83f, 0.9f, 0.5f);
     float4 deepWaterColour = float4(0.f,0.678f,0.819f,1.0f);
-	
-    //float4 finalDepthColour = lerp(deepWaterColour, shallowWaterColour, input.waterDepth);
     
     
     //-------------------------------------------------------------------------------
@@ -245,7 +243,6 @@ float4 main(InputType input) : SV_TARGET
 
             }
             
-            //combinedLightColour += saturate(float4(0.4 * finalDepthColour.x, 0.4 * finalDepthColour.y, 0.4 * finalDepthColour.z, 1.0));
         }
         
         finalLight += combinedLightColour;

@@ -53,8 +53,6 @@ struct OutputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float3 worldPos : TEXCOORD1;
-    //float waterDepth : TEXCOORD2;
-    //float3 mountainWorldPos : TEXCOORD3;
 };
 
 
@@ -107,26 +105,6 @@ float3 findNormals(InputType inputVal)
     return newNormal;
 }
 
-/*float getHeightMapTextureHeight(float2 uv)
-{
-    //Returns height from texture at a texture based on colour
-    float height;
-    height = texture0.SampleLevel(sampler0, uv, 0).r;
-    return height * 20;
-}*/
-
-/*//Calculating water depth
-float waterDepth(InputType inputVal)
-{
-    float depth;
-    
-    depth = (getHeightMapTextureHeight(inputVal.tex) - (getWaveOffset(inputVal.position.x, inputVal.position.z) + waterHeight) + 4);
-    
-    depth = depth / (amplitude1 + amplitude2 + amplitude3 + 1);
-    
-    return depth;
-}*/
-
 OutputType main(InputType input)
 {
     OutputType output;
@@ -157,12 +135,6 @@ OutputType main(InputType input)
     
     //World position
     output.worldPos = mul(input.position, worldMatrix).xyz;
-    
-    //Getting the world position of the terrain
-    //output.mountainWorldPos = mul(float4(input.position.x, getHeightMapTextureHeight(input.tex),input.position.z,input.position.w), worldMatrix).xyz;
-    
-    //Water depth
-    //output.waterDepth = waterDepth(input);
 
     return output;
 }
