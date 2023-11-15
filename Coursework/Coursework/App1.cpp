@@ -106,6 +106,12 @@ bool App1::frame()
 	return true;
 }
 
+void App1::rebuildWaterPlane()
+{
+	delete water;
+	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
+}
+
 //Final scene render
 bool App1::render()
 {
@@ -212,7 +218,10 @@ void App1::gui()
 	if (ImGui::TreeNode("Water")) {
 		if (ImGui::TreeNode("Water Manipulation")) {
 			//To manipulate terrain with waves
-			ImGui::SliderInt("Plane resolution", &waterPlaneResolution, 10, 500);
+			ImGui::SliderInt("Plane resolution", &waterPlaneResolution, 10, 1000);
+			if (ImGui::Button("Rebuild Water")) {
+				rebuildWaterPlane();
+			}
 			ImGui::SliderFloat("Wave steepness", &steepness, 0.00f, 2.f);
 			ImGui::SliderFloat("Water Height", &waterHeight, 0, 20.f);
 			ImGui::Text("WAVE 1");

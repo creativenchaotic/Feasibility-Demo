@@ -3,7 +3,7 @@
 
 PlaneMeshTessellated::PlaneMeshTessellated(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution):PlaneMesh(device, deviceContext, lresolution)
 {
-	
+	resolution = lresolution;
 }
 
 PlaneMeshTessellated::~PlaneMeshTessellated()

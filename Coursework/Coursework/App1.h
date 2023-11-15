@@ -17,6 +17,7 @@ public:
 	~App1();
 	void init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input* in, bool VSYNC, bool FULL_SCREEN);
 	bool frame();
+	void rebuildWaterPlane();
 
 protected:
 	bool render();
@@ -34,7 +35,7 @@ private:
 	//Meshes------------------------------------------------------
 	WaterShader* waterShader;
 	PlaneMeshTessellated* water;
-	int waterPlaneResolution = 1000;
+	int waterPlaneResolution = 200;
 
 	SunShader* sunShader;
 	SphereMesh* sun;
