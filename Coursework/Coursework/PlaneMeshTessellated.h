@@ -11,6 +11,7 @@ public:
 protected:
 	void initBuffers(ID3D11Device* device);
 	int resolution;
+	int screenSize = 200;
 
 };
 

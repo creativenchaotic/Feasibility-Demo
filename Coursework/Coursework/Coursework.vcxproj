@@ -170,6 +170,7 @@
     <ClCompile Include="DepthShader.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PlaneMeshTessellated.cpp" />
+    <ClCompile Include="SPH_Particle.cpp" />
     <ClCompile Include="SunShader.cpp" />
     <ClCompile Include="WaterShader.cpp" />
   </ItemGroup>
@@ -177,6 +178,7 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="DepthShader.h" />
     <ClInclude Include="PlaneMeshTessellated.h" />
+    <ClInclude Include="SPH_Particle.h" />
     <ClInclude Include="SunShader.h" />
     <ClInclude Include="TerrainManipulation.h" />
     <ClInclude Include="WaterShader.h" />

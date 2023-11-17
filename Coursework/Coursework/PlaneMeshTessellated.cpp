@@ -4,6 +4,7 @@
 PlaneMeshTessellated::PlaneMeshTessellated(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution):PlaneMesh(device, deviceContext, lresolution)
 {
 	resolution = lresolution;
+	initBuffers(device);
 }
 
 PlaneMeshTessellated::~PlaneMeshTessellated()
@@ -16,13 +17,13 @@ void PlaneMeshTessellated::initBuffers(ID3D11Device* device)
 {
 	VertexType* vertices;
 	unsigned long* indices;
-	int i, j;
-	float u, v, increment;
+	int index, i, j;
+	float positionX, positionZ, u, v, increment;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 
 	// Calculate the number of vertices in the terrain mesh.
-	vertexCount = (resolution) * (resolution) * 4;
+	vertexCount = (resolution - 1) * (resolution - 1) * 6;
 
 
 	indexCount = vertexCount;
@@ -30,49 +31,84 @@ void PlaneMeshTessellated::initBuffers(ID3D11Device* device)
 	indices = new unsigned long[indexCount];
 
 
+	index = 0;
 	// UV coords.
 	u = 0;
 	v = 0;
-	increment = 1.0f / resolution+1;
+	increment = 1.0f / resolution;
 
-	for (i = 0; i < (resolution); i++)
+	for (j = 0; j < (resolution - 1); j++)
 	{
-		for (j = 0; j < (resolution); j++)
+		for (i = 0; i < (resolution - 1); i++)
 		{
-			int vIndex = (i * resolution + j) * 4;//vertex index
-			int iIndex = (i * resolution + j) * 4;//indices index
-
 			// Upper left.
-			vertices[vIndex].position = XMFLOAT3(i, 0.0f, j+1);
-			vertices[vIndex].texture = XMFLOAT2(u, v + increment);
-			vertices[vIndex].normal = XMFLOAT3(0.0, 1.0, 0.0);
-			indices[iIndex] = vIndex;
+			positionX = (float)i;
+			positionZ = (float)(j);
 
-
-			// Bottom left
-			vertices[vIndex].position = XMFLOAT3(i, 0.0f, j);
-			vertices[vIndex].texture = XMFLOAT2(u, v);
-			vertices[vIndex].normal = XMFLOAT3(0.0, 1.0, 0.0);
-			indices[iIndex+1] = vIndex + 1;
-
-			// Bottom right
-			vertices[vIndex].position = XMFLOAT3(i+1, 0.0f, j);
-			vertices[vIndex].texture = XMFLOAT2(u + increment, v);
-			vertices[vIndex].normal = XMFLOAT3(0.0, 1.0, 0.0);
-			indices[iIndex+2] = vIndex+2;
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].texture = XMFLOAT2(u, v);
+			vertices[index].normal = XMFLOAT3(0.0, 1.0, 0.0);
+			indices[index] = index;
+			index++;
 
 			// Upper right.
-			vertices[vIndex].position = XMFLOAT3(i+1, 0.0f, j+1);
-			vertices[vIndex].texture = XMFLOAT2(u + increment, v + increment);
-			vertices[vIndex].normal = XMFLOAT3(0.0, 1.0, 0.0);
-			indices[iIndex+3] = vIndex+3;
+			positionX = (float)(i + 1);
+			positionZ = (float)(j + 1);
 
-			v += increment;
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].texture = XMFLOAT2(u + increment, v + increment);
+			vertices[index].normal = XMFLOAT3(0.0, 1.0, 0.0);
+			indices[index] = index;
+			index++;
+
+
+			// lower left
+			positionX = (float)(i);
+			positionZ = (float)(j + 1);
+
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].texture = XMFLOAT2(u, v + increment);
+			vertices[index].normal = XMFLOAT3(0.0, 1.0, 0.0);
+			indices[index] = index;
+			index++;
+
+			// Upper left
+			positionX = (float)(i);
+			positionZ = (float)(j);
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].texture = XMFLOAT2(u, v);
+			vertices[index].normal = XMFLOAT3(0.0, 1.0, 0.0);
+			indices[index] = index;
+			index++;
+
+			// Bottom right
+			positionX = (float)(i + 1);
+			positionZ = (float)(j);
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].texture = XMFLOAT2(u + increment, v);
+			vertices[index].normal = XMFLOAT3(0.0, 1.0, 0.0);
+			indices[index] = index;
+			index++;
+
+			// Upper right.
+			positionX = (float)(i + 1);
+			positionZ = (float)(j + 1);
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].texture = XMFLOAT2(u + increment, v + increment);
+			vertices[index].normal = XMFLOAT3(0.0, 1.0, 0.0);
+			indices[index] = index;
+			index++;
+
+			u += increment;
 
 		}
 
-		v = 0;
-		u += increment;
+		u = 0;
+		v += increment;
 	}
 
 	// Set up the description of the static vertex buffer.

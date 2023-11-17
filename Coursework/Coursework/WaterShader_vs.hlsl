@@ -108,11 +108,6 @@ float3 findNormals(InputType inputVal)
 OutputType main(InputType input)
 {
     OutputType output;
-	
-    //Increase plane size
-    input.position.x *= 2.f;
-    input.position.z *= 2.f;
-    input.position.y *= 2.f;
 
     //Calculating wave height
     input = wavePlane(input);

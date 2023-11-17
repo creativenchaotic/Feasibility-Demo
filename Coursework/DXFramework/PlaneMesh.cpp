@@ -6,7 +6,7 @@
 PlaneMesh::PlaneMesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution)
 {
 	resolution = lresolution;
-	initBuffers(device);
+	//initBuffers(device);
 }
 
 // Release resources.
