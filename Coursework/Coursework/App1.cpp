@@ -119,7 +119,7 @@ void App1::rebuildWaterPlane()
 //Final scene render
 bool App1::render()
 {
-	// Clear the scene. (default blue colour)
+	// Clear the scene. (default orange colour)
 	renderer->beginScene(skyColour.x, skyColour.y, skyColour.z, skyColour.w);
 
 	// Generate the view matrix based on the camera's position.
@@ -162,11 +162,12 @@ bool App1::render()
 	XMMATRIX scaleSun = XMMatrixScaling(3.0f,3.0f,3.0f);
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
+	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
 
 	renderer->setAlphaBlending(true);
 	water->sendData(renderer->getDeviceContext());
 
-	waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
+	waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix*translateWaterPlane, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
 	waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
 	waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
 	waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
@@ -205,6 +206,8 @@ void App1::gui()
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+	ImGui::Text("Camera Position: %f, %f, %f", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
+	ImGui::Text("Camera Rotation: %f, %f, %f", camera->getRotation().x, camera->getRotation().y, camera->getRotation().z);
 
 	//------------------------------------------------------------------------
 	//RENDER SETTINGS
@@ -235,6 +238,7 @@ void App1::gui()
 	}
 
 
+
 	//------------------------------------------------------------------------
 	//SKY
 	if (ImGui::TreeNode("Sky")) {
@@ -253,7 +257,8 @@ void App1::gui()
 			if (ImGui::Button("Rebuild Water")) {
 				rebuildWaterPlane();
 			}
-			ImGui::SliderFloat("Wave steepness", &steepness, 0.00f, 2.f);
+			ImGui::SliderFloat3("Translate Water Plane", (float*) & waterTranslationGUI, -100.f, 100.f);
+			ImGui::SliderFloat("Wave Steepness", &steepness, 0.00f, 2.f);
 			ImGui::SliderFloat("Water Height", &waterHeight, 0, 20.f);
 			ImGui::Text("WAVE 1");
 			ImGui::SliderFloat("Amplitude 1", &waterAmpl1, 0, 10);

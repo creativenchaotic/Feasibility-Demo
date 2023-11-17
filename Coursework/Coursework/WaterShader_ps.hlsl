@@ -256,7 +256,7 @@ float4 main(InputType input) : SV_TARGET
     }
     else if (renderSetting.x == 0.f)
     {
-        return float4(input.worldPos.xyz, 1.0f);
+        return float4(saturate(input.worldPos.xyz), 1.0f);
 
     }
     else if (renderSetting.x == 1.f)
