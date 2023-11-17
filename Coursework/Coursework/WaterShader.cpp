@@ -1,5 +1,6 @@
 #include "WaterShader.h"
 
+
 WaterShader::WaterShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
 	initShader(L"WaterShader_vs.cso", L"WaterShader_ps.cso");
@@ -147,7 +148,7 @@ void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 }
 
 
-void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT4 waterSpecular, XMFLOAT4 cameraPos)
+void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT4 waterSpecular, XMFLOAT4 cameraPos, RenderSettings renderSetting)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -174,6 +175,18 @@ void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	cameraPtr = (CameraBufferType*)mappedResource.pData;
 	cameraPtr->cameraPosition = cameraPos;
+	switch (renderSetting) {
+		case RenderSettings::RenderColours:
+			cameraPtr->renderSettings = XMFLOAT4(-1.f, 0.0f, 0.0f, 0.0f);
+			break;
+		case RenderSettings::WorldPosition:
+			cameraPtr->renderSettings = XMFLOAT4(0.f, 0.0f, 0.0f, 0.0f);
+			break;
+		case RenderSettings::Normals:
+			cameraPtr->renderSettings = XMFLOAT4(1.f, 0.0f, 0.0f, 0.0f);
+			break;
+	}
+
 	deviceContext->Unmap(cameraBuffer, 0 );
 	deviceContext->PSSetConstantBuffers(1,1,&cameraBuffer);
 }

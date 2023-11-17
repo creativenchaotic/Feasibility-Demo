@@ -8,6 +8,7 @@
 #include "SunShader.h"
 #include "PlaneMeshTessellated.h"
 #include "DepthShader.h"
+#include "RenderSettings.h"
 
 class App1 : public BaseApplication
 {
@@ -74,10 +75,12 @@ private:
 	// Changing background colour
 	XMFLOAT4 skyColour = XMFLOAT4(0.92f, 0.57f, 0.26f, 1.0f);
 
-
 	//delta time
 	float time;
 
+
+	//----------------------------------------------------------------
+	//Water Manipulation----------------------------------------------
 	//to manipulate water with waves
 	float steepness = 2.f;
 	float waterHeight = 3.291f;
@@ -106,7 +109,12 @@ private:
 	int sceneHeight = 1200;
 
 
+	//----------------------------------------------------------------
+	//DISPLAYING DIFFERENT RENDERING SETTINGS
 
+	const char* renderSettings[3];
+	const char* currentRenderSetting = "Render Colours";
+	RenderSettings currentRenderSettingForShader;
 };
 
 #endif

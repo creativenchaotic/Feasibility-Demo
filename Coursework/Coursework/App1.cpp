@@ -12,6 +12,10 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
 	// Initalise scene variables.
+	renderSettings[0] = "Render Colours";
+	renderSettings[1] = "World Position";
+	renderSettings[2] = "Normals";
+
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
 	// Create Mesh object and shader object
@@ -162,7 +166,7 @@ bool App1::render()
 	renderer->setAlphaBlending(true);
 	water->sendData(renderer->getDeviceContext());
 
-	waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F));
+	waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
 	waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
 	waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
 	waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
@@ -202,9 +206,36 @@ void App1::gui()
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 
-	//Change map
-	//ImGui::Checkbox("Change map", &isDirectionalLightOn);
-	
+	//------------------------------------------------------------------------
+	//RENDER SETTINGS
+	if (ImGui::BeginCombo("Rendering Settings", currentRenderSetting)) {
+		for (int i = 0; i < IM_ARRAYSIZE(renderSettings); i++) {
+
+			bool isSelected = (currentRenderSetting == renderSettings[i]);
+
+			if (ImGui::Selectable(renderSettings[i], isSelected)) {
+				currentRenderSetting = renderSettings[i];
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+
+	}
+
+	if (currentRenderSetting == "Render Colours") {
+		currentRenderSettingForShader = RenderSettings::RenderColours;
+	}
+	else if(currentRenderSetting == "World Position") {
+		currentRenderSettingForShader = RenderSettings::WorldPosition;
+	}
+	else if(currentRenderSetting == "Normals") {
+		currentRenderSettingForShader = RenderSettings::Normals;
+	}
+
+
+	//------------------------------------------------------------------------
 	//SKY
 	if (ImGui::TreeNode("Sky")) {
 		//SkyColour
@@ -213,7 +244,7 @@ void App1::gui()
 		ImGui::TreePop();
 	}
 
-
+	//------------------------------------------------------------------------
 	//WAVES
 	if (ImGui::TreeNode("Water")) {
 		if (ImGui::TreeNode("Water Manipulation")) {
@@ -256,6 +287,7 @@ void App1::gui()
 		ImGui::TreePop();
 	}
 
+	//------------------------------------------------------------------------
 	//LIGHTS
 	if (ImGui::TreeNode("Lights")) {
 

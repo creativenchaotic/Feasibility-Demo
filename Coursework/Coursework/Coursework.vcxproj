@@ -180,6 +180,7 @@
     <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="DepthShader.h" />
     <ClInclude Include="PlaneMeshTessellated.h" />
+    <ClInclude Include="RenderSettings.h" />
     <ClInclude Include="SPH_Particle.h" />
     <ClInclude Include="SunShader.h" />
     <ClInclude Include="TerrainManipulation.h" />

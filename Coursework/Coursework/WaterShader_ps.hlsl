@@ -20,6 +20,7 @@ cbuffer LightBuffer : register(b0)
 cbuffer CameraBuffer : register(b1)
 {
     float4 cameraPos;
+    float4 renderSetting;
 }
 
 //Wave vertex manipulation values
@@ -249,7 +250,23 @@ float4 main(InputType input) : SV_TARGET
         
     }
     
-    return float4(finalLight.xyz, deepWaterColour.a);
+    if (renderSetting.x == -1.f)
+    {
+        return float4(finalLight.xyz, deepWaterColour.a);
+    }
+    else if (renderSetting.x == 0.f)
+    {
+        return float4(input.worldPos.xyz, 1.0f);
+
+    }
+    else if (renderSetting.x == 1.f)
+    {
+        return float4(input.normal.xyz, 1.0f);
+    }
+    else
+    {
+        return float4(finalLight.xyz, deepWaterColour.a);
+    }
     
 }
 
