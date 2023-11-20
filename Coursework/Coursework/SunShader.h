@@ -8,8 +8,6 @@ using namespace DirectX;
 
 class SunShader : public BaseShader
 {
-private:
-
 public:
 	SunShader(ID3D11Device* device, HWND hwnd);
 	~SunShader();
@@ -19,7 +17,6 @@ public:
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
 
-private:
 	ID3D11Buffer* matrixBuffer;
 };
 

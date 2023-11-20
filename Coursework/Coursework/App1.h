@@ -10,6 +10,7 @@
 #include "DepthShader.h"
 #include "RenderSettings.h"
 #include "SPH_Particle.h"
+#include "SPHShader.h"
 
 class App1 : public BaseApplication
 {
@@ -42,13 +43,14 @@ private:
 	WaterShader* waterShader;
 	PlaneMeshTessellated* water;
 	int waterPlaneResolution = 200;
+
 	SunShader* sunShader;
 	SphereMesh* sun;
 	SphereMesh* spotlightMesh;
-	//----------------------------------------------------------------
+
 	SPH_Particle* sphParticle;
 	int sphParticleResolution = 10;
-	
+	SPHShader* sphParticleShader;
 
 
 	//----------------------------------------------------------------

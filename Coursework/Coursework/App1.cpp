@@ -27,6 +27,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	//Creating shaders
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	sunShader = new SunShader(renderer->getDevice(), hwnd);
+	sphParticleShader = new SPHShader(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Confirgure directional light
@@ -88,6 +89,16 @@ App1::~App1()
 	if (spotlightMesh) {
 		delete spotlightMesh;
 		spotlightMesh = 0;
+	}
+
+	if (sphParticle) {
+		delete sphParticle;
+		sphParticle = 0;
+	}
+
+	if (sphParticleShader) {
+		delete sphParticleShader;
+		sphParticleShader = 0;
 	}
 }
 
@@ -172,10 +183,10 @@ bool App1::render()
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
 
+	//WATER PLANE-----------------------------------------------------------------------------
 	if (displayWaterPlane) {
 		renderer->setAlphaBlending(true);
 		water->sendData(renderer->getDeviceContext());
-
 		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateWaterPlane, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
 		waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
 		waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
@@ -185,6 +196,17 @@ bool App1::render()
 		renderer->setAlphaBlending(false);
 	}
 
+	//SPH PARTICLES---------------------------------------------------------------------------
+	if (displaySPHSimulation) {
+		renderer->setAlphaBlending(true);
+		sphParticle->sendData(renderer->getDeviceContext());
+		sphParticleShader->setShaderParameters(renderer->getDeviceContext(),worldMatrix, viewMatrix, projectionMatrix);
+		sphParticleShader->render(renderer->getDeviceContext(), sphParticle->getIndexCount());
+		renderer->setAlphaBlending(false);
+	}
+
+
+	//LIGHTING DEBUG SPHERES-------------------------------------------------------------------
 	if (isDirectionalLightOn) {
 		sun->sendData(renderer->getDeviceContext());
 		sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSun * scaleSun, viewMatrix, projectionMatrix);
@@ -232,6 +254,11 @@ void App1::gui()
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));
 	ImGui::Text("Camera Position: %f, %f, %f", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 	ImGui::Text("Camera Rotation: %f, %f, %f", camera->getRotation().x, camera->getRotation().y, camera->getRotation().z);
+	if (ImGui::Button("Reset Camera Position")) {//Added in case the user gets lost in the scene when moving the camera
+		camera->setPosition(64.0f, 38.0f, -96.0f);
+		camera->setRotation(11.5f, -28.75f, 0.f);
+	}
+
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
 
@@ -286,7 +313,10 @@ void App1::gui()
 			ImGui::TextWrapped("In the final project the SPH simulation should not be visible since the main focus of the project is the generation of the surface. For this reason there is a toggle to turn the SPH simulation rendering on or off. I added the possibility of still rendering it so that the user can ensure that the simulation is working correctly.");
 		}
 		ImGui::Checkbox("Display SPH simulation", &displaySPHSimulation);
-		ImGui::SliderInt("Particle Resolution",&sphParticleResolution ,10, 100);
+		ImGui::SliderInt("Particle Resolution",&sphParticleResolution ,4, 10);
+		if (ImGui::Button("Rebuild SPH Simulation")) {
+			rebuildSPHParticles();
+		}
 		ImGui::TreePop();
 	}
 
