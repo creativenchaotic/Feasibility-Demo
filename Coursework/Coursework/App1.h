@@ -9,6 +9,7 @@
 #include "PlaneMeshTessellated.h"
 #include "DepthShader.h"
 #include "RenderSettings.h"
+#include "SPH_Particle.h"
 
 class App1 : public BaseApplication
 {
@@ -19,6 +20,7 @@ public:
 	void init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input* in, bool VSYNC, bool FULL_SCREEN);
 	bool frame();
 	void rebuildWaterPlane();
+	void rebuildSPHParticles();
 
 protected:
 	bool render();
@@ -27,24 +29,30 @@ protected:
 private:
 
 	//----------------------------------------------------------------
-
+	//CAMERA----------------------------------------------------------
 	//Values to get the camera's forward/lookat vector
 	XMVECTOR view;//lookat vector
 	XMMATRIX viewM;//view matrix
 	XMFLOAT3 forward;//used to store the lookat vector as a float3
 
-	//Meshes------------------------------------------------------
+
+
+	//----------------------------------------------------------------
+	//MESHES----------------------------------------------------------
 	WaterShader* waterShader;
 	PlaneMeshTessellated* water;
 	int waterPlaneResolution = 200;
-
 	SunShader* sunShader;
 	SphereMesh* sun;
-
 	SphereMesh* spotlightMesh;
-	
 	//----------------------------------------------------------------
-	//Lighting-------------------------------------------------------
+	SPH_Particle* sphParticle;
+	int sphParticleResolution = 10;
+	
+
+
+	//----------------------------------------------------------------
+	//LIGHTING--------------------------------------------------------
 	XMFLOAT3 attenuationValues = XMFLOAT3(0.5f,0.125f,0.0f);
 
 	//Directional Light
@@ -79,8 +87,9 @@ private:
 	float time;
 
 
+
 	//----------------------------------------------------------------
-	//Water Manipulation----------------------------------------------
+	//WATER MANIPULATION----------------------------------------------
 	//to manipulate water with waves
 	float steepness = 2.f;
 	float waterHeight = 3.291f;
@@ -110,12 +119,18 @@ private:
 
 	XMFLOAT3 waterTranslationGUI = XMFLOAT3(-97.647f,-3.529f, -83.721f);
 
+
+
 	//----------------------------------------------------------------
 	//DISPLAYING DIFFERENT RENDERING SETTINGS
 
 	const char* renderSettings[3];
 	const char* currentRenderSetting = "Render Colours";
 	RenderSettings currentRenderSettingForShader;
+
+	bool hideInstructions = false;
+	bool displaySPHSimulation = true;
+	bool displayWaterPlane = true;
 };
 
 #endif

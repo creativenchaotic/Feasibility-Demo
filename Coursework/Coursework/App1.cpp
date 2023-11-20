@@ -18,11 +18,13 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
-	// Create Mesh object and shader object
+	// Create Mesh objects
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
+	sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
 
+	//Creating shaders
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	sunShader = new SunShader(renderer->getDevice(), hwnd);
 
@@ -116,6 +118,12 @@ void App1::rebuildWaterPlane()
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 }
 
+void App1::rebuildSPHParticles()
+{
+	delete sphParticle;
+	sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
+}
+
 //Final scene render
 bool App1::render()
 {
@@ -164,16 +172,18 @@ bool App1::render()
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
 
-	renderer->setAlphaBlending(true);
-	water->sendData(renderer->getDeviceContext());
+	if (displayWaterPlane) {
+		renderer->setAlphaBlending(true);
+		water->sendData(renderer->getDeviceContext());
 
-	waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix*translateWaterPlane, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
-	waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
-	waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
-	waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
-	waterShader->setMaterialValues(renderer->getDeviceContext(), waterRoughness, waterMetallic, waterBaseReflectivity);
-	waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
-	renderer->setAlphaBlending(false);	
+		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateWaterPlane, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
+		waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
+		waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
+		waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
+		waterShader->setMaterialValues(renderer->getDeviceContext(), waterRoughness, waterMetallic, waterBaseReflectivity);
+		waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
+		renderer->setAlphaBlending(false);
+	}
 
 	if (isDirectionalLightOn) {
 		sun->sendData(renderer->getDeviceContext());
@@ -204,13 +214,33 @@ void App1::gui()
 	renderer->getDeviceContext()->DSSetShader(NULL, NULL, 0);
 
 	// Build UI
+
+	ImGui::TextWrapped("Student Name: Melina Garcia Ayala\nStudent Number:2003132");
+	ImGui::Checkbox("Hide Instructions", &hideInstructions);
+
+	if (!hideInstructions) {
+		ImGui::Dummy(ImVec2(0.0f, 10.0f));//Adds spacing
+		ImGui::TextWrapped("This is a code sample for the Feasibility Demo of my project 'Evaluating Realistic Water Surface Creation in 3D Water Simulations for Video Games using Smoothed Particle Hydrodynamics (SPH)'");
+		ImGui::Dummy(ImVec2(0.0f, 5.0f));
+		ImGui::TextWrapped("Camera Controls\nLeft Mouse Button: Rotate Camera\nWASD: Move Camera\nEQ: Raise/Lower Camera");
+	}
+
+	ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+	ImGui::Dummy(ImVec2(0.0f, 10.0f));
 	ImGui::Text("Camera Position: %f, %f, %f", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 	ImGui::Text("Camera Rotation: %f, %f, %f", camera->getRotation().x, camera->getRotation().y, camera->getRotation().z);
+	ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
 
 	//------------------------------------------------------------------------
 	//RENDER SETTINGS
+	if (!hideInstructions) {
+		ImGui::TextWrapped("Render Settings used to display different aspects of the scene in different ways. For example: showing the normals of the objects' surfaces or showing where objects are placed in the world.");
+	}
+	//Selecting a render method in the ImGui window
 	if (ImGui::BeginCombo("Rendering Settings", currentRenderSetting)) {
 		for (int i = 0; i < IM_ARRAYSIZE(renderSettings); i++) {
 
@@ -227,6 +257,7 @@ void App1::gui()
 
 	}
 
+	//Setting the current render method
 	if (currentRenderSetting == "Render Colours") {
 		currentRenderSettingForShader = RenderSettings::RenderColours;
 	}
@@ -249,9 +280,24 @@ void App1::gui()
 	}
 
 	//------------------------------------------------------------------------
+	//SPH
+	if (ImGui::TreeNode("Smoothed Particle Hydrodynamics")) {
+		if (!hideInstructions) {
+			ImGui::TextWrapped("In the final project the SPH simulation should not be visible since the main focus of the project is the generation of the surface. For this reason there is a toggle to turn the SPH simulation rendering on or off. I added the possibility of still rendering it so that the user can ensure that the simulation is working correctly.");
+		}
+		ImGui::Checkbox("Display SPH simulation", &displaySPHSimulation);
+		ImGui::SliderInt("Particle Resolution",&sphParticleResolution ,10, 100);
+		ImGui::TreePop();
+	}
+
+	//------------------------------------------------------------------------
 	//WAVES
 	if (ImGui::TreeNode("Water")) {
+		ImGui::Checkbox("Display Water Plane", &displayWaterPlane);
 		if (ImGui::TreeNode("Water Manipulation")) {
+			if (!hideInstructions) {
+				ImGui::TextWrapped("Currently the water plane is used to visualise what the final water surface might look like once the surface generation is implemented for the SPH. Currently, there is a 2D water simulation using Gerstner Waves. In the final project the plane will adapt to the surface of the SPH, for now it is just implemented with Gerstner Waves to help aid visually.");
+			}
 			//To manipulate terrain with waves
 			ImGui::SliderInt("Plane resolution", &waterPlaneResolution, 10, 1000);
 			if (ImGui::Button("Rebuild Water")) {
@@ -277,15 +323,18 @@ void App1::gui()
 			ImGui::SliderFloat("Frequency 3", &waterFreq3, 0, 3.14);
 			ImGui::SliderFloat("Speed 3", &waterSpeed3, 0, 30);
 			ImGui::SliderFloat3("Wave 3 Direction (X,Y,Z)", (float*)&waterDirection3, -10.f, 10.f);
-
+			ImGui::Dummy(ImVec2(0.0f, 10.0f));
 			ImGui::TreePop();
 		}
 
 		if (ImGui::TreeNode("Water Material")) {
+			if (!hideInstructions) {
+				ImGui::TextWrapped("The water lighting is done using Physically Based Rendering. The values for rendering the material can be changed ");
+			}
 			ImGui::SliderFloat("Water Roughness", &waterRoughness, 0.001, 1);
 			ImGui::SliderFloat("Water Metallic Amount", &waterMetallic, 0.001, 1);
 			ImGui::SliderFloat("Water Base Reflectivity", &waterBaseReflectivity, 0.001, 1);
-
+			ImGui::Dummy(ImVec2(0.0f, 10.0f));
 			ImGui::TreePop();
 		}
 

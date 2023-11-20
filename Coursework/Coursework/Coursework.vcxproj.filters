@@ -39,6 +39,9 @@
     <ClCompile Include="ComputeShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SPHShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SPHShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
