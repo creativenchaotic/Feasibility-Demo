@@ -1,6 +1,16 @@
 #pragma once
 #include "SphereMesh.h"
 
+struct ParticleData {
+    int size;
+    float density;
+    float mass;
+    XMFLOAT3 startPosition;
+    XMFLOAT3 currentPosition;
+    XMFLOAT3 velocity;
+    float bounceDampingFactor;
+};
+
 class SPH_Particle :
     public SphereMesh
 {
@@ -10,14 +20,7 @@ public:
 
     void setStartPosition(XMFLOAT3 pos);
 
+    ParticleData particleData;
     int resolution;
-    int size;
-    float density;
-    float mass;
-    XMFLOAT3 startPosition;
-    XMFLOAT3 currentPosition;
-    XMFLOAT3 velocity;
-    float gravity = 9.8f;
-    float bounceDampingFactor;
 };
 

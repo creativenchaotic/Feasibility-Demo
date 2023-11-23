@@ -2,6 +2,7 @@
 
 ComputeShader::ComputeShader(ID3D11Device* device, HWND hwnd, int w, int h) : BaseShader(device, hwnd)
 {
+	//Setting the width and height for the output UAV texture
 	sWidth = w;
 	sHeight = h;
 	initShader(L"ComputeShader.cso", NULL);

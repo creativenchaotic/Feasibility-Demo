@@ -30,5 +30,8 @@ private:
 	int sWidth;
 	int sHeight;
 
+	float bounceDampingFactor;
+	float gravity = 9.8f;
+
 };
 

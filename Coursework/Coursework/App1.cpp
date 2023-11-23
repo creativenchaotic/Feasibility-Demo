@@ -144,14 +144,15 @@ void App1::rebuildSPHParticles()
 
 void App1::initialiseSPHParticles()
 {
-	int particlesPerRow = (int)sqrt(numParticles);
-	int particlesPerColumn = (numParticles - 1) / particlesPerRow + 1;
+	particlesPerRow = (int)sqrt(numParticles);
+	particlesPerColumn = (numParticles - 1) / particlesPerRow + 1;
 	float particleSpacing = spacing;
 
 	for (int i = 0; i < currentNumParticles; i++) {
 		sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
 		float x = (i % particlesPerRow - particlesPerRow / 2.f + 0.5f) * particleSpacing;
 		float y = (i / particlesPerRow - particlesPerColumn / 2.f + 0.5f) * particleSpacing;
+		
 		sphParticle->setStartPosition(XMFLOAT3(x, y, 0));
 		simulationParticles.push_back(sphParticle);
 
@@ -226,7 +227,7 @@ bool App1::render()
 
 		for (int i = 0; i < currentNumParticles; i++) {
 
-			XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->startPosition.x, simulationParticles[i]->startPosition.y, simulationParticles[i]->startPosition.z);
+			XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->particleData.startPosition.x, simulationParticles[i]->particleData.startPosition.y, simulationParticles[i]->particleData.startPosition.z);
 
 			simulationParticles[i]->sendData(renderer->getDeviceContext());
 			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix *  sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix);

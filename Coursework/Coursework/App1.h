@@ -145,6 +145,8 @@ private:
 	bool displayWaterPlane = false;
 	int currentNumParticles = numParticles;
 	int particleScale = 1;
+	int particlesPerRow;
+	int particlesPerColumn;
 };
 
 #endif
