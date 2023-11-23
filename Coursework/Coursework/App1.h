@@ -22,6 +22,8 @@ public:
 	bool frame();
 	void rebuildWaterPlane();
 	void rebuildSPHParticles();
+	void initialiseSPHParticles();
+
 
 protected:
 	bool render();
@@ -44,14 +46,22 @@ private:
 	PlaneMeshTessellated* water;
 	int waterPlaneResolution = 200;
 
+	//----------------------------------------------
 	SunShader* sunShader;
 	SphereMesh* sun;
 	SphereMesh* spotlightMesh;
 
-	SPH_Particle* sphParticle;
+	//----------------------------------------------
 	int sphParticleResolution = 10;
 	SPHShader* sphParticleShader;
+	int numParticles = 10;
+	float spacing = 10;
+	XMFLOAT2 bb_topAndBottomOfSimulation;//bb refers to Bounding Box
+	XMFLOAT2 bb_frontAndBackOfSim;//front and back faces of the bounding box for the simulation
+	XMFLOAT2 bb_sidesOfSim;//sides of the bounding box for the simulation
 
+	std::vector<SPH_Particle*> simulationParticles;
+	SPH_Particle* sphParticle;
 
 	//----------------------------------------------------------------
 	//LIGHTING--------------------------------------------------------
@@ -132,7 +142,9 @@ private:
 
 	bool hideInstructions = false;
 	bool displaySPHSimulation = true;
-	bool displayWaterPlane = true;
+	bool displayWaterPlane = false;
+	int currentNumParticles = numParticles;
+	int particleScale = 1;
 };
 
 #endif

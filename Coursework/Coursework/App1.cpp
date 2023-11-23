@@ -1,5 +1,6 @@
 
 #include "App1.h"
+#include <imGUI/imgui_internal.h>
 
 App1::App1()
 {
@@ -16,13 +17,14 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	renderSettings[1] = "World Position";
 	renderSettings[2] = "Normals";
 
+	currentNumParticles = numParticles;
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
 	// Create Mesh objects
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
+	initialiseSPHParticles();
 
 	//Creating shaders
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
@@ -123,16 +125,37 @@ bool App1::frame()
 	return true;
 }
 
+
 void App1::rebuildWaterPlane()
 {
 	delete water;
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 }
 
+
 void App1::rebuildSPHParticles()
 {
-	delete sphParticle;
-	sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
+	simulationParticles.clear();
+
+	initialiseSPHParticles();
+	
+}
+
+
+void App1::initialiseSPHParticles()
+{
+	int particlesPerRow = (int)sqrt(numParticles);
+	int particlesPerColumn = (numParticles - 1) / particlesPerRow + 1;
+	float particleSpacing = spacing;
+
+	for (int i = 0; i < currentNumParticles; i++) {
+		sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
+		float x = (i % particlesPerRow - particlesPerRow / 2.f + 0.5f) * particleSpacing;
+		float y = (i / particlesPerRow - particlesPerColumn / 2.f + 0.5f) * particleSpacing;
+		sphParticle->position = XMFLOAT3(x, 0, y);
+		simulationParticles.push_back(sphParticle);
+
+	}
 }
 
 //Final scene render
@@ -182,6 +205,7 @@ bool App1::render()
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
+	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(particleScale, particleScale, particleScale);
 
 	//WATER PLANE-----------------------------------------------------------------------------
 	if (displayWaterPlane) {
@@ -199,9 +223,17 @@ bool App1::render()
 	//SPH PARTICLES---------------------------------------------------------------------------
 	if (displaySPHSimulation) {
 		renderer->setAlphaBlending(true);
-		sphParticle->sendData(renderer->getDeviceContext());
-		sphParticleShader->setShaderParameters(renderer->getDeviceContext(),worldMatrix, viewMatrix, projectionMatrix);
-		sphParticleShader->render(renderer->getDeviceContext(), sphParticle->getIndexCount());
+
+		for (int i = 0; i < currentNumParticles; i++) {
+
+			XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->position.x, simulationParticles[i]->position.y, simulationParticles[i]->position.z);
+
+			simulationParticles[i]->sendData(renderer->getDeviceContext());
+			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix *  sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix);
+			sphParticleShader->render(renderer->getDeviceContext(), simulationParticles[i]->getIndexCount());
+
+		}
+
 		renderer->setAlphaBlending(false);
 	}
 
@@ -312,10 +344,33 @@ void App1::gui()
 		if (!hideInstructions) {
 			ImGui::TextWrapped("In the final project the SPH simulation should not be visible since the main focus of the project is the generation of the surface. For this reason there is a toggle to turn the SPH simulation rendering on or off. I added the possibility of still rendering it so that the user can ensure that the simulation is working correctly.");
 		}
+
+		//Changing the number of particles in the simulation
 		ImGui::Checkbox("Display SPH simulation", &displaySPHSimulation);
+		ImGui::SliderInt("Number of Particles", &numParticles, 1, 3000);
+
+		//Spacing between particles and resolution
+		ImGui::SliderFloat("Particle Spacing", &spacing, 0, 20);
 		ImGui::SliderInt("Particle Resolution",&sphParticleResolution ,4, 10);
+		ImGui::SliderInt("Particle Size", &particleScale, 1, 100);
+
+		//Boudning box for the simulation
 		if (ImGui::Button("Rebuild SPH Simulation")) {
+			currentNumParticles = numParticles;
 			rebuildSPHParticles();
+		}
+		if (ImGui::TreeNode("Bounding Box for the Simulation")) {
+			//Limits in Y-axis
+			ImGui::SliderFloat("Bottom of Bounding Box", &bb_topAndBottomOfSimulation.x, -100,100);
+			ImGui::SliderFloat("Top of Bounding Box", &bb_topAndBottomOfSimulation.y, -100, 100);
+			//Limits on X-axis
+			ImGui::SliderFloat("Left Side of Bounding Box", &bb_sidesOfSim.x, -100, 100);
+			ImGui::SliderFloat("Right Side of Bounding Box", &bb_sidesOfSim.y, -100, 100);
+			//Limits on Z-axis
+			ImGui::SliderFloat("Front of Bounding Box", &bb_frontAndBackOfSim.x, -100, 100);
+			ImGui::SliderFloat("Back of Bounding Box", &bb_frontAndBackOfSim.y, -100, 100);
+
+			ImGui::TreePop();
 		}
 		ImGui::TreePop();
 	}
@@ -404,5 +459,3 @@ void App1::gui()
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
-
-
