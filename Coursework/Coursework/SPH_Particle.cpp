@@ -11,3 +11,9 @@ SPH_Particle::SPH_Particle(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 SPH_Particle::~SPH_Particle()
 {
 }
+
+void SPH_Particle::setStartPosition(XMFLOAT3 pos)
+{
+	startPosition = pos;
+	currentPosition = startPosition;
+}
