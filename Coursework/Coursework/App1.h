@@ -61,6 +61,7 @@ private:
 	XMFLOAT2 bb_sidesOfSim;//sides of the bounding box for the simulation
 
 	std::vector<SPH_Particle*> simulationParticles;
+	std::vector<ParticleData> simulationParticlesData;
 	SPH_Particle* sphParticle;
 
 	//----------------------------------------------------------------

@@ -1,5 +1,6 @@
 #pragma once
 #include "DXF.h"
+#include "SPH_Particle.h"
 
 using namespace DirectX;
 
@@ -11,8 +12,9 @@ public:
 	~ComputeShader();
 
 	void setShaderParameters(ID3D11DeviceContext* dc, ID3D11ShaderResourceView* texture1);
-	void createOutputUAV();
-	ID3D11ShaderResourceView* getSRV() { return m_srvTexOutput; };
+	void createOutputUAV(ID3D11Device* pd3dDevice, int numParticles);
+	void createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles);
+	ID3D11ShaderResourceView* getSRV() { return particlesOutputReadable; };
 	void unbind(ID3D11DeviceContext* dc);
 
 
@@ -22,10 +24,10 @@ private:
 	ID3D11ShaderResourceView* srv;
 	ID3D11UnorderedAccessView* uav;
 
-	// texture set
-	ID3D11Texture2D* m_tex;
-	ID3D11UnorderedAccessView* m_uavAccess;
-	ID3D11ShaderResourceView* m_srvTexOutput;
+	ID3D11Buffer* particlesOutput;
+	ID3D11ShaderResourceView* particlesOutputReadable;
+	ID3D11UnorderedAccessView* particlesOutputWritable;
+
 
 	int sWidth;
 	int sHeight;

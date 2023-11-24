@@ -3,10 +3,11 @@
 
 struct ParticleData {
     int size;
-    float density;
-    float mass;
+    XMFLOAT3 padding = XMFLOAT3(0.f,0.f,0.f);
     XMFLOAT3 startPosition;
+    float density;
     XMFLOAT3 currentPosition;
+    float mass;
     XMFLOAT3 velocity;
     float bounceDampingFactor;
 };

@@ -1,10 +1,9 @@
 #include "ComputeShader.h"
 
-ComputeShader::ComputeShader(ID3D11Device* device, HWND hwnd, int w, int h) : BaseShader(device, hwnd)
+//struct ParticleData; FIX ME
+
+ComputeShader::ComputeShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	//Setting the width and height for the output UAV texture
-	sWidth = w;
-	sHeight = h;
 	initShader(L"ComputeShader.cso", NULL);
 }
 
@@ -16,47 +15,62 @@ ComputeShader::~ComputeShader()
 void ComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
 {
 	loadComputeShader(cfile);
-	createOutputUAV();
 }
 
-void ComputeShader::createOutputUAV()
+void ComputeShader::createOutputUAV(ID3D11Device* pd3dDevice, int numParticles)//Pass in the particles Initial data is the initial contents of the buffer
 {
-	D3D11_TEXTURE2D_DESC textureDesc;
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	textureDesc.Width = sWidth;
-	textureDesc.Height = sHeight;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-	m_tex = 0;
-	renderer->CreateTexture2D(&textureDesc, 0, &m_tex);
+    // Create SB
+    D3D11_BUFFER_DESC bufferDesc = {};
+    bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);//sizeofT should be the particle data struct
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    bufferDesc.StructureByteStride = sizeof(ParticleData);//make this the size of particle data
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC descUAV;
-	ZeroMemory(&descUAV, sizeof(descUAV));
-	descUAV.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; ;// DXGI_FORMAT_UNKNOWN;
-	descUAV.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
-	descUAV.Texture2D.MipSlice = 0;
-	renderer->CreateUnorderedAccessView(m_tex, &descUAV, &m_uavAccess);
+    pd3dDevice->CreateBuffer(&bufferDesc, nullptr, &particlesComputeShaderOutput);
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = textureDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
-	renderer->CreateShaderResourceView(m_tex, &srvDesc, &m_srvTexOutput);
+    // Create SRV
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    srvDesc.Buffer.ElementWidth = numParticles;
+    pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderOutput, &srvDesc, &particlesOutputReadable);
+
+    // Create UAV
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+    uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+    uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    uavDesc.Buffer.NumElements = numParticles;
+    pd3dDevice->CreateUnorderedAccessView(*&particlesComputeShaderOutput, &uavDesc, &particlesOutputWritable);
+}
+
+void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles)
+{
+    D3D11_BUFFER_DESC bufferDesc = {};
+    bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    bufferDesc.StructureByteStride = sizeof(ParticleData);
+
+    D3D11_SUBRESOURCE_DATA bufferInitData = {};
+    bufferInitData.pSysMem = particles;
+    pd3dDevice->CreateBuffer(&bufferDesc, (particles) ? &bufferInitData : nullptr, &particlesComputeShaderInput);
+
+    // Create SRV
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    srvDesc.Buffer.ElementWidth = numParticles;
+    pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderInput, &srvDesc, &particlesComputeShaderInputSRV);
 }
 
 void ComputeShader::setShaderParameters(ID3D11DeviceContext* dc, ID3D11ShaderResourceView* texture1)
 {
-	dc->CSSetShaderResources(0, 1, &texture1);
-	dc->CSSetUnorderedAccessViews(0, 1, &m_uavAccess, 0);
+	dc->CSSetShaderResources(0, 1, &particlesComputeShaderInputSRV);//same as SRVs  
+	dc->CSSetUnorderedAccessViews(0, 1, &particlesOutputWritable, 0);//Same as UAVs
 }
+
 
 void ComputeShader::unbind(ID3D11DeviceContext* dc)
 {
