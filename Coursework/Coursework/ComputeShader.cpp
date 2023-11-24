@@ -27,35 +27,35 @@ void ComputeShader::createOutputUAV(ID3D11Device* pd3dDevice, int numParticles)/
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     bufferDesc.StructureByteStride = sizeof(ParticleData);//make this the size of particle data
 
-    pd3dDevice->CreateBuffer(&bufferDesc, nullptr, &particlesComputeShaderOutput);
+    pd3dDevice->CreateBuffer(&bufferDesc, nullptr, &particlesComputeShaderOutput);//Creates the buffer
 
     // Create SRV
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_UNKNOWN;
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementWidth = numParticles;
-    pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderOutput, &srvDesc, &particlesOutputReadable);
+    pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderOutput, &srvDesc, &particlesOutputReadable);//Creates the shader resource view from the buffer so you can read values
 
     // Create UAV
     D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
     uavDesc.Format = DXGI_FORMAT_UNKNOWN;
     uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
     uavDesc.Buffer.NumElements = numParticles;
-    pd3dDevice->CreateUnorderedAccessView(*&particlesComputeShaderOutput, &uavDesc, &particlesOutputWritable);
+    pd3dDevice->CreateUnorderedAccessView(*&particlesComputeShaderOutput, &uavDesc, &particlesOutputWritable);//Creates the unordered access view so you can write to the buffer
 }
 
 void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles)
 {
     D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);
+    bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);//Size of the buffer = numParticles * particle data
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-    bufferDesc.StructureByteStride = sizeof(ParticleData);
+    bufferDesc.StructureByteStride = sizeof(ParticleData);//Stride being taken in memory to read data
 
     D3D11_SUBRESOURCE_DATA bufferInitData = {};
-    bufferInitData.pSysMem = particles;
-    pd3dDevice->CreateBuffer(&bufferDesc, (particles) ? &bufferInitData : nullptr, &particlesComputeShaderInput);
+    bufferInitData.pSysMem = particles;//Initial data that is getting passed into the buffer
+    pd3dDevice->CreateBuffer(&bufferDesc, (particles) ? &bufferInitData : nullptr, &particlesComputeShaderInput);//If particles exist set initial data
 
     // Create SRV
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

@@ -2,11 +2,13 @@
 
 struct Particle
 {
-    float3 position;
-    float3 velocity;
     int size;
+    float3 padding;
+    float3 startPosition;
     float density;
+    float3 currentPosition;
     float mass;
+    float3 velocity;
     float bounceDampingFactor;
 };
 
@@ -27,15 +29,8 @@ void main(uint3 groupThreadID : SV_DispatchThreadID, int3 dispatchThreadID : SV_
 {
     float xPosParticle = groupThreadID.x / gravity;
     Particle tempParticle = particleOutput[groupThreadID.x];
-    tempParticle.position = float3(xPosParticle, 0 , 0);
+    tempParticle.currentPosition = float3(xPosParticle, 0, 0);
     
-    particleInput.GetDimensions();
     particleOutput[groupThreadID.x] = tempParticle;
-
-}
-
-float potatofunc(in int numba, out othernumba)
-{
-    othernumba = 0;
 
 }
