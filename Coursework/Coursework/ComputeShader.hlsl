@@ -16,7 +16,7 @@ RWStructuredBuffer<Particle> particleOutput : register(u0); //Data we pass to an
 StructuredBuffer<Particle> particleInput : register(t0);
 
 
-
+//CREATE CONSTANT BUFFER IN .CPP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 cbuffer cb_simConstants : register(b0)
 {
     int numParticles;

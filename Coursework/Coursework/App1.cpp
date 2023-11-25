@@ -24,12 +24,13 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	initialiseSPHParticles();
+
 
 	//Creating shaders
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	sunShader = new SunShader(renderer->getDevice(), hwnd);
 	sphParticleShader = new SPHShader(renderer->getDevice(), hwnd);
+	sphSimulationComputeShader = new ComputeShader(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Confirgure directional light
@@ -52,6 +53,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	spotlight->generateProjectionMatrix(0.1f, 600.f);
 	spotlight->setPosition(spotlightPosition.x,spotlightPosition.y,spotlightPosition.z);
 
+	initialiseSPHParticles();//DO THIS LAST
 }
 
 
@@ -102,6 +104,11 @@ App1::~App1()
 		delete sphParticleShader;
 		sphParticleShader = 0;
 	}
+
+	if (sphSimulationComputeShader) {
+		delete sphSimulationComputeShader;
+		sphSimulationComputeShader = 0;
+	}
 }
 
 
@@ -144,19 +151,25 @@ void App1::rebuildSPHParticles()
 
 void App1::initialiseSPHParticles()
 {
-	particlesPerRow = (int)sqrt(numParticles);
-	particlesPerColumn = (numParticles - 1) / particlesPerRow + 1;
-	float particleSpacing = spacing;
+	if (currentNumParticles!=0) {
+		particlesPerRow = (int)sqrt(numParticles);
+		particlesPerColumn = (numParticles - 1) / particlesPerRow + 1;
+		float particleSpacing = spacing;
 
-	for (int i = 0; i < currentNumParticles; i++) {
-		sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
-		float x = (i % particlesPerRow - particlesPerRow / 2.f + 0.5f) * particleSpacing;
-		float y = (i / particlesPerRow - particlesPerColumn / 2.f + 0.5f) * particleSpacing;
-		
-		sphParticle->setStartPosition(XMFLOAT3(x, y, 0));
-		simulationParticles.push_back(sphParticle);
+		for (int i = 0; i < currentNumParticles; i++) {
+			sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
+			float x = (i % particlesPerRow - particlesPerRow / 2.f + 0.5f) * particleSpacing;
+			float y = (i / particlesPerRow - particlesPerColumn / 2.f + 0.5f) * particleSpacing;
 
+			sphParticle->setStartPosition(XMFLOAT3(x, y, 0));
+			simulationParticles.push_back(sphParticle);
+			simulationParticlesData.push_back(sphParticle->particleData);
+
+		}
 	}
+
+	sphSimulationComputeShader->createBuffer(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
+	sphSimulationComputeShader->createOutputUAV(renderer->getDevice(), currentNumParticles);
 }
 
 //Final scene render
@@ -355,11 +368,17 @@ void App1::gui()
 		ImGui::SliderInt("Particle Resolution",&sphParticleResolution ,4, 10);
 		ImGui::SliderInt("Particle Size", &particleScale, 1, 100);
 
+
 		//Boudning box for the simulation
 		if (ImGui::Button("Rebuild SPH Simulation")) {
 			currentNumParticles = numParticles;
 			rebuildSPHParticles();
 		}
+
+		ImGui::Dummy(ImVec2(0.0f,10.0f));
+		ImGui::SliderFloat("Gravity", &gravity, 0, 10);
+		ImGui::SliderFloat("Bounce Damping", &dampingFactor, 0, 10);
+
 		if (ImGui::TreeNode("Bounding Box for the Simulation")) {
 			//Limits in Y-axis
 			ImGui::SliderFloat("Bottom of Bounding Box", &bb_topAndBottomOfSimulation.x, -100,100);
