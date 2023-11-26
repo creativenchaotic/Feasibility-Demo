@@ -12,25 +12,27 @@ struct Particle
     float bounceDampingFactor;
 };
 
-RWStructuredBuffer<Particle> particleOutput : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<Particle> particleInput : register(t0);
+RWStructuredBuffer<Particle> particleOutput : register(u0); //Data we pass to and from the compute shader
 
-
-//CREATE CONSTANT BUFFER IN .CPP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 cbuffer cb_simConstants : register(b0)
 {
-    int numParticles;
-    float restDensity;
+    float bounceDampingFactor;
     float gravity;
+    float numParticles;
+    float restDensity;
+    float deltaTime;
+    float3 padding;
 };
 
 [numthreads(1, 1, 1)]
 void main(uint3 groupThreadID : SV_DispatchThreadID, int3 dispatchThreadID : SV_DispatchThreadID, int ID :SV_GroupIndex)
 {
-    float xPosParticle = groupThreadID.x / gravity;
-    Particle tempParticle = particleOutput[groupThreadID.x];
-    tempParticle.currentPosition = float3(xPosParticle, 0, 0);
-    
-    particleOutput[groupThreadID.x] = tempParticle;
+    for (int i = 0; i < numParticles;i++)
+    {
+        particleInput[i].velocity.xy += float2(0.0f, 1.0f) * gravity * deltaTime;
+        particleInput[i].currentPosition.xy += particleInput[i].velocity.xy * deltaTime;
+        particleOutput[i] = particleInput[i];
+    }
 
 }

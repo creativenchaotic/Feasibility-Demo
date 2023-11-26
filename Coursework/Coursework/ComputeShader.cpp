@@ -25,7 +25,7 @@ void ComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     simConstantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     simConstantsBufferDesc.MiscFlags = 0;
     simConstantsBufferDesc.StructureByteStride = 0;
-    renderer->CreateBuffer(&simConstantsBufferDesc, NULL, &simuationConstantsBuffer);
+    renderer->CreateBuffer(&simConstantsBufferDesc, NULL, &simulationConstantsBuffer);
 }
 
 void ComputeShader::createOutputUAV(ID3D11Device* pd3dDevice, int numParticles)//Called each time the number of particles is changed
@@ -78,19 +78,22 @@ void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std
     pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderInput, &srvDesc, &particlesComputeShaderInputSRV);
 }
 
-void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, float gravityVal, float bounceDamping)
+void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
     SimulationConstantsBufferType* simulationConstPtr;
-    deviceContext->Map(simuationConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    deviceContext->Map(simulationConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
     simulationConstPtr = (SimulationConstantsBufferType*)mappedResource.pData;
     simulationConstPtr->gravity = gravityVal;
     simulationConstPtr->bounceDampingFactor = bounceDamping;
+    simulationConstPtr->numParticles = numParticlesVal;
+    simulationConstPtr->restDensity = restDensityVal;
+    simulationConstPtr->deltaTime = delta;
 
-    deviceContext->Unmap(simuationConstantsBuffer, 0);
-    deviceContext->CSSetConstantBuffers(1, 1, &simuationConstantsBuffer);
+    deviceContext->Unmap(simulationConstantsBuffer, 0);
+    deviceContext->CSSetConstantBuffers(1, 1, &simulationConstantsBuffer);
 }
 
 void ComputeShader::setShaderParameters(ID3D11DeviceContext* dc, ID3D11ShaderResourceView* texture1)
