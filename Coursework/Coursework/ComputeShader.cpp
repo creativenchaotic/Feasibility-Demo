@@ -78,7 +78,7 @@ void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std
     pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderInput, &srvDesc, &particlesComputeShaderInputSRV);
 }
 
-void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides)
+void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides, float smoothingKernelRadius, float mass)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -95,6 +95,9 @@ void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, f
     simulationConstPtr->boundingBoxTopAndBottom = bb_TopBottom;
     simulationConstPtr->boudningBoxFrontAndBack = bb_FrontBack;
     simulationConstPtr->boundingBoxSides = bb_Sides;
+
+    simulationConstPtr->smoothingRadius = smoothingKernelRadius;
+    simulationConstPtr->particleMass = mass;
 
     deviceContext->Unmap(simulationConstantsBuffer, 0);
     deviceContext->CSSetConstantBuffers(1, 1, &simulationConstantsBuffer);

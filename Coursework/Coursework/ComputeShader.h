@@ -14,7 +14,7 @@ public:
 	void setShaderParameters(ID3D11DeviceContext* dc);
 	void createOutputUAV(ID3D11Device* pd3dDevice, int numParticles);
 	void createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles);
-	void setSimulationConstants(ID3D11DeviceContext* dc, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides);//Used to pass in constant variables such as gravity or damping values
+	void setSimulationConstants(ID3D11DeviceContext* dc, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides, float smoothingKernelRadius, float mass);//Used to pass in constant variables such as gravity or damping values
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return particlesOutputReadable; };
 
@@ -31,7 +31,8 @@ private:
 		XMFLOAT2 boundingBoxTopAndBottom;
 		XMFLOAT2 boudningBoxFrontAndBack;
 		XMFLOAT2 boundingBoxSides;
-		XMFLOAT2 padding = XMFLOAT2(0.0f,0.0f);
+		float smoothingRadius;
+		float particleMass;
 	};
 
 	void initShader(const wchar_t* cfile, const wchar_t* blank);

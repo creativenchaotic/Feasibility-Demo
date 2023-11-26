@@ -71,6 +71,8 @@ private:
 	float gravity = 9.8f;
 	float dampingFactor = 0.2f;
 	float restDensity = 0.0f;
+	float smoothingRadius = 1.f;
+	float particleMass = 1.0f;
 
 	std::vector<SPH_Particle*> simulationParticles;
 	std::vector<ParticleData> simulationParticlesData;
