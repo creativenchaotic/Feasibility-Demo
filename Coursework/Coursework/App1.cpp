@@ -172,8 +172,15 @@ void App1::initialiseSPHParticles()
 	sphSimulationComputeShader->createOutputUAV(renderer->getDevice(), currentNumParticles);
 }
 
-//Final scene render
-bool App1::render()
+void App1::sphSimulationComputePass()
+{
+	sphSimulationComputeShader->setShaderParameters(renderer->getDeviceContext());
+	sphSimulationComputeShader->setSimulationConstants(renderer->getDeviceContext(), gravity, dampingFactor, currentNumParticles, restDensity, time);
+	sphSimulationComputeShader->compute(renderer->getDeviceContext(), 1, currentNumParticles, 1);//Y is the number of particles since the simulation currently only works in 2D
+	sphSimulationComputeShader->unbind(renderer->getDeviceContext());
+}
+
+void App1::renderSceneShaders()
 {
 	// Clear the scene. (default orange colour)
 	renderer->beginScene(skyColour.x, skyColour.y, skyColour.z, skyColour.w);
@@ -186,13 +193,12 @@ bool App1::render()
 	view = viewM.r[2];
 	XMStoreFloat3(&forward, view);
 
-	//Add delta time
-	time += timer->getTime();
+
 
 	//Update light values
 	directionalLight->setDirection(directionalLightDirection.x, directionalLightDirection.y, directionalLightDirection.z);
 	directionalLight->setPosition(directionalLightPosition.x, directionalLightPosition.y, directionalLightPosition.z);
-	spotlight->setDirection(spotlightDirection.x,spotlightDirection.y,spotlightDirection.z);
+	spotlight->setDirection(spotlightDirection.x, spotlightDirection.y, spotlightDirection.z);
 	spotlight->setPosition(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 
 
@@ -215,7 +221,7 @@ bool App1::render()
 	XMMATRIX viewMatrix = camera->getViewMatrix();
 	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
 	XMMATRIX translateSun = XMMatrixTranslation(directionalLightPosition.x, directionalLightPosition.y + 10.f, directionalLightPosition.z);
-	XMMATRIX scaleSun = XMMatrixScaling(3.0f,3.0f,3.0f);
+	XMMATRIX scaleSun = XMMatrixScaling(3.0f, 3.0f, 3.0f);
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
@@ -238,12 +244,14 @@ bool App1::render()
 	if (displaySPHSimulation) {
 		renderer->setAlphaBlending(true);
 
+		//TODO: SET NEW POSITIONS POST-COMPUTE SHADER TO PARTICLES
+
 		for (int i = 0; i < currentNumParticles; i++) {
 
 			XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->particleData.startPosition.x, simulationParticles[i]->particleData.startPosition.y, simulationParticles[i]->particleData.startPosition.z);
 
 			simulationParticles[i]->sendData(renderer->getDeviceContext());
-			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix *  sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix);
+			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix);
 			sphParticleShader->render(renderer->getDeviceContext(), simulationParticles[i]->getIndexCount());
 
 		}
@@ -270,6 +278,17 @@ bool App1::render()
 
 	// Present the rendered scene to the screen.
 	renderer->endScene();
+}
+
+//Final scene render
+bool App1::render()
+{
+	//Add delta time
+	time += timer->getTime();
+
+	sphSimulationComputePass();
+
+	renderSceneShaders();
 
 	return true;
 }

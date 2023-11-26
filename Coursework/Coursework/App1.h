@@ -24,6 +24,8 @@ public:
 	void rebuildWaterPlane();
 	void rebuildSPHParticles();
 	void initialiseSPHParticles();
+	void sphSimulationComputePass();
+	void renderSceneShaders();
 
 
 protected:
@@ -68,6 +70,7 @@ private:
 	XMFLOAT2 bb_sidesOfSim;//sides of the bounding box for the simulation
 	float gravity = 9.8f;
 	float dampingFactor = 0.2f;
+	float restDensity = 0.0f;
 
 	std::vector<SPH_Particle*> simulationParticles;
 	std::vector<ParticleData> simulationParticlesData;

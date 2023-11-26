@@ -30,23 +30,23 @@ void ComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
 
 void ComputeShader::createOutputUAV(ID3D11Device* pd3dDevice, int numParticles)//Called each time the number of particles is changed
 {
-    // Create SB
-    D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);//sizeofT should be the particle data struct
+    //Creating a buffer to output the data from the compute shader
+    D3D11_BUFFER_DESC bufferDesc = {};//Creating a buffer description to create the buffer from
+    bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;//Setting how the buffer works
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-    bufferDesc.StructureByteStride = sizeof(ParticleData);//make this the size of particle data
+    bufferDesc.StructureByteStride = sizeof(ParticleData);//make this the size of particle data//Setting the stride that the buffer needs to take when reading each element from memory
     pd3dDevice->CreateBuffer(&bufferDesc, nullptr, &particlesComputeShaderOutput);//Creates the buffer
 
-    // Create SRV
+    // Create SRV - Lets you read from the Buffer created
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_UNKNOWN;
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementWidth = numParticles;
     pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderOutput, &srvDesc, &particlesOutputReadable);//Creates the shader resource view from the buffer so you can read values
 
-    // Create UAV
+    // Create UAV - Lets you write from the compute shader
     D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
     uavDesc.Format = DXGI_FORMAT_UNKNOWN;
     uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
@@ -56,9 +56,9 @@ void ComputeShader::createOutputUAV(ID3D11Device* pd3dDevice, int numParticles)/
 
 void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles)//Pass in the particles Initial data is the initial contents of the buffer
 {
-    int size = sizeof(ParticleData);
-    //CREATING BUFFER
-    D3D11_BUFFER_DESC bufferDesc;
+
+    //CREATING BUFFER TO INPUT DATA INTO THE COMPUTE SHADER
+    D3D11_BUFFER_DESC bufferDesc;//Creating a buffer description to create the buffer from
     ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
     bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);//Size of the buffer = numParticles * particle data
@@ -78,7 +78,7 @@ void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std
     pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderInput, &srvDesc, &particlesComputeShaderInputSRV);
 }
 
-void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta)
+void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -92,11 +92,15 @@ void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, f
     simulationConstPtr->restDensity = restDensityVal;
     simulationConstPtr->deltaTime = delta;
 
+    simulationConstPtr->boundingBoxTopAndBottom = bb_TopBottom;
+    simulationConstPtr->boudningBoxFrontAndBack = bb_FrontBack;
+    simulationConstPtr->boundingBoxSides = bb_Sides;
+
     deviceContext->Unmap(simulationConstantsBuffer, 0);
     deviceContext->CSSetConstantBuffers(1, 1, &simulationConstantsBuffer);
 }
 
-void ComputeShader::setShaderParameters(ID3D11DeviceContext* dc, ID3D11ShaderResourceView* texture1)
+void ComputeShader::setShaderParameters(ID3D11DeviceContext* dc)
 {
 	dc->CSSetShaderResources(0, 1, &particlesComputeShaderInputSRV);//same as SRVs  
 	dc->CSSetUnorderedAccessViews(0, 1, &particlesOutputWritable, 0);//Same as UAVs

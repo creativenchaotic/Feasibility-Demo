@@ -22,17 +22,20 @@ cbuffer cb_simConstants : register(b0)
     float numParticles;
     float restDensity;
     float deltaTime;
-    float3 padding;
+    float2 boundingBoxTopAndBottom;
+    float2 boundingBoxFrontAndBack;
+    float2 boudningBoxSides;
 };
 
-[numthreads(1, 1, 1)]
-void main(uint3 groupThreadID : SV_DispatchThreadID, int3 dispatchThreadID : SV_DispatchThreadID, int ID :SV_GroupIndex)
+groupshared Particle cache[numParticles];
+ 
+[numthreads(1, numParticles, 1)]
+void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
-    for (int i = 0; i < numParticles;i++)
-    {
-        particleInput[i].velocity.xy += float2(0.0f, 1.0f) * gravity * deltaTime;
-        particleInput[i].currentPosition.xy += particleInput[i].velocity.xy * deltaTime;
-        particleOutput[i] = particleInput[i];
-    }
+
+    particleInput[groupThreadID.y].velocity.xy += float2(0.0f, 1.0f) * gravity * deltaTime;
+    particleInput[groupThreadID.y].currentPosition.xy += particleInput[groupThreadID.y].velocity.xy * deltaTime;
+    particleOutput[dispatchThreadID.y] = particleInput[groupThreadID.y];
+    
 
 }
