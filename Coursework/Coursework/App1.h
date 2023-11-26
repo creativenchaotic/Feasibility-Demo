@@ -61,19 +61,6 @@ private:
 	SPHShader* sphParticleShader;
 	ComputeShader* sphSimulationComputeShader;
 
-	//UI Values for SPH
-	int sphParticleResolution = 10;
-	int numParticles = 10;
-	float spacing = 10;
-	XMFLOAT2 bb_topAndBottomOfSimulation;//bb refers to Bounding Box
-	XMFLOAT2 bb_frontAndBackOfSim;//front and back faces of the bounding box for the simulation
-	XMFLOAT2 bb_sidesOfSim;//sides of the bounding box for the simulation
-	float gravity = 9.8f;
-	float dampingFactor = 0.2f;
-	float restDensity = 0.0f;
-	float smoothingRadius = 1.f;
-	float particleMass = 1.0f;
-
 	std::vector<SPH_Particle*> simulationParticles;
 	std::vector<ParticleData> simulationParticlesData;
 	SPH_Particle* sphParticle;
@@ -155,11 +142,28 @@ private:
 	const char* currentRenderSetting = "Render Colours";
 	RenderSettings currentRenderSettingForShader;
 
+	//UI Values for SPH
+	int sphParticleResolution = 10;
+	int numParticles = 10;
+	float spacing = 10;
+	int particleScale = 1;
+	XMFLOAT2 bb_topAndBottomOfSimulation;//bb refers to Bounding Box
+	XMFLOAT2 bb_frontAndBackOfSim;//front and back faces of the bounding box for the simulation
+	XMFLOAT2 bb_sidesOfSim;//sides of the bounding box for the simulation
+	float gravity = -9.8f;
+	float dampingFactor = 0.95f;
+	float smoothingRadius = 0.2f;
+	float targetDensity = 630.0f;
+	float pressureMultiplier = 288.f;
+	float nearPressureMultiplier = 2.25f;
+	float viscosityStrength = 0.01f;
+	float particleMass = 1.0f;
+
+
 	bool hideInstructions = false;
 	bool displaySPHSimulation = true;
 	bool displayWaterPlane = false;
 	int currentNumParticles = numParticles;
-	int particleScale = 1;
 	int particlesPerRow;
 	int particlesPerColumn;
 };

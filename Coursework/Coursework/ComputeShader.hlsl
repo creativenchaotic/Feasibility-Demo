@@ -3,17 +3,15 @@
 struct Particle
 {
     int size;
-    float3 padding;
+    float2 padding;
     float3 startPosition;
     float density;
     float3 currentPosition;
     float mass;
     float3 velocity;
     float bounceDampingFactor;
+    float particleProperty;
 };
-
-StructuredBuffer<Particle> particleInput : register(t0);
-RWStructuredBuffer<Particle> particleOutput : register(u0); //Data we pass to and from the compute shader
 
 cbuffer cb_simConstants : register(b0)
 {
@@ -29,6 +27,10 @@ cbuffer cb_simConstants : register(b0)
     float mass;
 };
 
+StructuredBuffer<Particle> particleInput : register(t0);
+RWStructuredBuffer<Particle> particleOutput : register(u0); //Data we pass to and from the compute shader
+
+float particleDensities[numParticles];
 
 void resolveSimmulationBounds(uint3 groupThread)
 {
@@ -78,6 +80,20 @@ float smoothingKernel(float radius, float distance)//Sebastian Lague's smoothing
     return value * value * value / volume;//Keeping the volume the same even if the smoothing radius changes so that the density stays consistent
 }
 
+
+float smoothingKernelDerivative(float radius, float distance)//To know how quickly the density from a particle to a sample point is changing
+{
+    if (distance >= radius)
+    {
+        return 0;
+    }
+    
+    float f = radius * radius - distance * distance;
+    float scale = -24 / (3.14f * pow(radius, 8));
+    return scale * distance * f * f;
+
+}
+
 float calculateDensity(float3 samplePoint)//Calculating the density at a point in the smoothed particle field
 {
     float density = 0;
@@ -98,6 +114,37 @@ float calculateDensity(float3 samplePoint)//Calculating the density at a point i
 
 }
 
+float3 calculateDirectionOfChangeInDensity(float3 samplePoint)//Calculate the slope direction in which the density of the smoothed particles change
+{
+    float3 propertyGradient = float3(0.0f,0.0f, 0.0f);
+
+    for (int i = 0; i < numParticles; i++)
+    {
+        //Calculate the magnitude of the distance from the particle to the sample point
+        float3 distanceFromSamplePoint = (particleInput[i].currentPosition - samplePoint);
+        float distanceFromSamplePointMagnitude = sqrt(distanceFromSamplePoint.x * distanceFromSamplePoint.x + distanceFromSamplePoint.y * distanceFromSamplePoint.y + distanceFromSamplePoint.z * distanceFromSamplePoint.z);
+        float3 direction = distanceFromSamplePoint / distanceFromSamplePointMagnitude;
+        
+        float slope = smoothingKernelDerivative(distanceFromSamplePointMagnitude, smoothingRadius);
+        float density = particleDensities[i];
+        
+        propertyGradient += -particleInput[i].particleProperty * direction * slope * mass / density;
+
+    }
+    
+    return propertyGradient;
+
+}
+
+void updateParticleDensityValues()
+{
+    for (int i = 0; i < numParticles;i++){}
+    {
+        particleDensities[i] = calculateDensity(particleInput[i].currentPosition);
+
+    }
+
+}
 
 groupshared Particle cache[numParticles];
  
