@@ -175,7 +175,7 @@ void App1::initialiseSPHParticles()
 void App1::sphSimulationComputePass()
 {
 	sphSimulationComputeShader->setShaderParameters(renderer->getDeviceContext());
-	sphSimulationComputeShader->setSimulationConstants(renderer->getDeviceContext(), gravity, dampingFactor, currentNumParticles, restDensity, time);
+	//sphSimulationComputeShader->setSimulationConstants(renderer->getDeviceContext(), gravity, dampingFactor, currentNumParticles, restDensity, time);
 	sphSimulationComputeShader->compute(renderer->getDeviceContext(), 1, currentNumParticles, 1);//Y is the number of particles since the simulation currently only works in 2D
 	sphSimulationComputeShader->unbind(renderer->getDeviceContext());
 }

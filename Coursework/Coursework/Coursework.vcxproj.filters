@@ -68,7 +68,7 @@
     <ClInclude Include="ComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderSettings.h">
+    <ClInclude Include="Externals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SPHShader.h">

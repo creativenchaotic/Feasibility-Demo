@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DXF.h"
-#include "RenderSettings.h"
+#include "Externals.h"
 
 //Water shader
 using namespace std;

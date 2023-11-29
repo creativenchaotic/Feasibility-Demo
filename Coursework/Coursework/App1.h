@@ -8,7 +8,7 @@
 #include "SunShader.h"
 #include "PlaneMeshTessellated.h"
 #include "DepthShader.h"
-#include "RenderSettings.h"
+#include "Externals.h"
 #include "SPH_Particle.h"
 #include "SPHShader.h"
 #include "ComputeShader.h"
