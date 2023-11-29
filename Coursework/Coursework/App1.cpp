@@ -235,7 +235,7 @@ void App1::renderSceneShaders()
 		waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
 		waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
 		waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
-		waterShader->setMaterialValues(renderer->getDeviceContext(), waterRoughness, waterMetallic, waterBaseReflectivity);
+		waterShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
 		waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
 		renderer->setAlphaBlending(false);
 	}
@@ -455,9 +455,9 @@ void App1::gui()
 			if (!guiSettings.hideInstructions) {
 				ImGui::TextWrapped("The water lighting is done using Physically Based Rendering. The values for rendering the material can be changed ");
 			}
-			ImGui::SliderFloat("Water Roughness", &waterRoughness, 0.001, 1);
-			ImGui::SliderFloat("Water Metallic Amount", &waterMetallic, 0.001, 1);
-			ImGui::SliderFloat("Water Base Reflectivity", &waterBaseReflectivity, 0.001, 1);
+			ImGui::SliderFloat("Water Roughness", &waterMaterial.materialRoughness, 0.001, 1);
+			ImGui::SliderFloat("Water Metallic Amount", &waterMaterial.metallicFactor, 0.001, 1);
+			ImGui::SliderFloat("Water Base Reflectivity", &waterMaterial.baseReflectivity, 0.001, 1);
 			ImGui::Dummy(ImVec2(0.0f, 10.0f));
 			ImGui::TreePop();
 		}

@@ -134,9 +134,7 @@ private:
 	XMFLOAT3 waterDirection3 = XMFLOAT3(2.0f, 0.0f, -2.889f);
 
 	//Water lighting values
-	float waterRoughness = 0.088f;
-	float waterMetallic = 0.039f;
-	float waterBaseReflectivity = 0.681f;
+	PBRMaterialValues waterMaterial;
 
 	int sceneWidth = 1200;
 	int sceneHeight = 1200;

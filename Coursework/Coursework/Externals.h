@@ -33,9 +33,9 @@ struct LightValues {
 };
 
 struct PBRMaterialValues {
-	float materialRoughness;
-	float metallicFactor;
-	float baseReflectivity;
+	float materialRoughness = 0.088f;
+	float metallicFactor = 0.039f;
+	float baseReflectivity = 0.681f;
 };
 
 struct GUISettings {
