@@ -5,16 +5,16 @@ enum class RenderSettings {
 };
 
 struct SPHSimulationValues {
-	int numParticles;
-	int numParticlesPerAxis;
-	int particleResolution;
-	float particleSpacing;
-	int particleScale;
+	int numParticlesPerAxis = 3;
+	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
+	int particleResolution = 10;
+	float particleSpacing = 10.f;
+	int particleScale = 1;
 
 	float gravity = -10.f;
 	float collisionDamping = 0.05f;
 	float smoothingRadius = 0.2f;
-	float targetDensity;
+	float targetDensity = 0.0f;
 	float pressureMultiplier;
 	float nearPressureMultiplier;
 	float viscosityStrength;

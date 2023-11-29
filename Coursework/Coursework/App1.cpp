@@ -17,7 +17,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	renderSettings[1] = "World Position";
 	renderSettings[2] = "Normals";
 
-	currentNumParticles = numParticles;
+	currentNumParticles = simulationSettings.numParticles;
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
 	// Create Mesh objects
@@ -152,14 +152,14 @@ void App1::rebuildSPHParticles()
 void App1::initialiseSPHParticles()
 {
 	if (currentNumParticles!=0) {
-		particlesPerRow = (int)sqrt(numParticles);
-		particlesPerColumn = (numParticles - 1) / particlesPerRow + 1;
-		float particleSpacing = spacing;
+		simulationSettings.numParticlesPerAxis = (int)sqrt(simulationSettings.numParticles);
+		simulationSettings.numParticlesPerAxis = (simulationSettings.numParticles - 1) / simulationSettings.numParticlesPerAxis + 1;
+		float particleSpacing = simulationSettings.particleSpacing;
 
 		for (int i = 0; i < currentNumParticles; i++) {
-			sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), sphParticleResolution, sphParticleResolution, 0.f, 0.f);
-			float x = (i % particlesPerRow - particlesPerRow / 2.f + 0.5f) * particleSpacing;
-			float y = (i / particlesPerRow - particlesPerColumn / 2.f + 0.5f) * particleSpacing;
+			sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution, simulationSettings.particleResolution, 0.f, 0.f);
+			float x = (i % simulationSettings.numParticlesPerAxis - simulationSettings.numParticlesPerAxis / 2.f + 0.5f) * particleSpacing;
+			float y = (i / simulationSettings.numParticlesPerAxis - simulationSettings.numParticlesPerAxis / 2.f + 0.5f) * particleSpacing;
 
 			sphParticle->setStartPosition(XMFLOAT3(x, y, 0));
 			simulationParticles.push_back(sphParticle);
@@ -225,7 +225,7 @@ void App1::renderSceneShaders()
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
-	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(particleScale, particleScale, particleScale);
+	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
 
 	//WATER PLANE-----------------------------------------------------------------------------
 	if (guiSettings.displayWaterSurface) {
@@ -380,23 +380,26 @@ void App1::gui()
 
 		//Changing the number of particles in the simulation
 		ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
-		ImGui::SliderInt("Number of Particles", &numParticles, 1, 3000);
+		ImGui::SliderInt("Number of Particles per Axis", &simulationSettings.numParticlesPerAxis, 1, 100);
+		simulationSettings.numParticles = simulationSettings.numParticlesPerAxis * simulationSettings.numParticlesPerAxis * simulationSettings.numParticlesPerAxis;
+		ImGui::Text("Total Number of Particles: %i", simulationSettings.numParticles);
+
 
 		//Spacing between particles and resolution
-		ImGui::SliderFloat("Particle Spacing", &spacing, 0, 20);
-		ImGui::SliderInt("Particle Resolution",&sphParticleResolution ,4, 10);
-		ImGui::SliderInt("Particle Size", &particleScale, 1, 100);
+		ImGui::SliderFloat("Particle Spacing", &simulationSettings.particleSpacing, 0, 20);
+		ImGui::SliderInt("Particle Resolution",&simulationSettings.particleResolution,4, 10);
+		ImGui::SliderInt("Particle Size", &simulationSettings.particleScale, 1, 100);
 
 
 		//Boudning box for the simulation
 		if (ImGui::Button("Rebuild SPH Simulation")) {
-			currentNumParticles = numParticles;
+			currentNumParticles = simulationSettings.numParticles;
 			rebuildSPHParticles();
 		}
 
 		ImGui::Dummy(ImVec2(0.0f,10.0f));
-		ImGui::SliderFloat("Gravity", &gravity, 0, 10);
-		ImGui::SliderFloat("Bounce Damping", &dampingFactor, 0, 10);
+		ImGui::SliderFloat("Gravity", &simulationSettings.gravity, 0, 10);
+		ImGui::SliderFloat("Bounce Damping", &simulationSettings.collisionDamping, 0, 10);
 
 		if (ImGui::TreeNode("Bounding Box for the Simulation")) {
 			//Limits in Y-axis
