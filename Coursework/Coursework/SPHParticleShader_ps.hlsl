@@ -12,6 +12,7 @@ float4 main(InputType input) : SV_TARGET
 {
     float4 finalColour;
 
+    //TODO: Implement PBR or another lighting technique so that you can actually tell whats going on with the particles
     
     finalColour = float4(0.46f, 0.89f, 1.0f, 0.8f);
 
