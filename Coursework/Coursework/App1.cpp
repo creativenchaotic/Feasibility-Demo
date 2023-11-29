@@ -152,19 +152,28 @@ void App1::rebuildSPHParticles()
 void App1::initialiseSPHParticles()
 {
 	if (currentNumParticles!=0) {
-		simulationSettings.numParticlesPerAxis = (int)sqrt(simulationSettings.numParticles);
-		simulationSettings.numParticlesPerAxis = (simulationSettings.numParticles - 1) / simulationSettings.numParticlesPerAxis + 1;
+		
 		float particleSpacing = simulationSettings.particleSpacing;
 
-		for (int i = 0; i < currentNumParticles; i++) {
-			sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution, simulationSettings.particleResolution, 0.f, 0.f);
-			float x = (i % simulationSettings.numParticlesPerAxis - simulationSettings.numParticlesPerAxis / 2.f + 0.5f) * particleSpacing;
-			float y = (i / simulationSettings.numParticlesPerAxis - simulationSettings.numParticlesPerAxis / 2.f + 0.5f) * particleSpacing;
+		for (int x = 0; x < simulationSettings.numParticlesPerAxis; x++) {
+			for (int y = 0; y < simulationSettings.numParticlesPerAxis; y++) {
+				for (int z = 0; z < simulationSettings.numParticlesPerAxis; z++) {
 
-			sphParticle->setStartPosition(XMFLOAT3(x, y, 0));
-			simulationParticles.push_back(sphParticle);
-			simulationParticlesData.push_back(sphParticle->particleData);
+					sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution, simulationSettings.particleResolution, 0.f, 0.f);
 
+					float tx = x / (simulationSettings.numParticlesPerAxis - 1.f);
+					float ty = y / (simulationSettings.numParticlesPerAxis - 1.f);
+					float tz = z / (simulationSettings.numParticlesPerAxis - 1.f);
+
+					float px = (tx - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.x;
+					float py = (ty - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.y;
+					float pz = (tz - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.z;
+
+					sphParticle->setStartPosition(XMFLOAT3(px, py, pz));
+					simulationParticles.push_back(sphParticle);
+					simulationParticlesData.push_back(sphParticle->particleData);
+				}
+			}
 		}
 	}
 
@@ -389,6 +398,8 @@ void App1::gui()
 		ImGui::SliderFloat("Particle Spacing", &simulationSettings.particleSpacing, 0, 20);
 		ImGui::SliderInt("Particle Resolution",&simulationSettings.particleResolution,4, 10);
 		ImGui::SliderInt("Particle Size", &simulationSettings.particleScale, 1, 100);
+		ImGui::SliderFloat3("Particles Spawnpoint Centre", (float*) & simulationSettings.particlesSpawnCenter, -10,10);
+		ImGui::SliderFloat("Spawnpoint Size", &simulationSettings.sizeOfSpawner, 2, 100);
 
 
 		//Boudning box for the simulation
