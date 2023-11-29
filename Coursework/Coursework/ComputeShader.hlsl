@@ -1,5 +1,7 @@
 //compute shader used for SPH simulation
 
+static const int NumThreads = 64;
+
 struct Particle
 {
     int size;
@@ -38,7 +40,7 @@ cbuffer cb_simConstants : register(b0)
     float2 padding2;
 };
  
-[numthreads(1, 1, 1)]
+[numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
     
