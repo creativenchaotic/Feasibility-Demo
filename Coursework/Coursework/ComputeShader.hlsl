@@ -46,6 +46,11 @@ float PressureFromDensity(float density)
 
 }
 
+float NearPressureFromDensity(float nearDensity)
+{
+    return nearDensity * nearPressureMultiplier;
+}
+
 
 
 [numthreads(NumThreads, 1, 1)]
