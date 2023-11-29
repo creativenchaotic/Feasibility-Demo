@@ -51,6 +51,8 @@ float NearPressureFromDensity(float nearDensity)
     return nearDensity * nearPressureMultiplier;
 }
 
+//TODO: Add resolve collisions function
+
 
 
 [numthreads(NumThreads, 1, 1)]

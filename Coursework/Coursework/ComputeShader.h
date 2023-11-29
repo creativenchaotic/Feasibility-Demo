@@ -45,17 +45,47 @@ private:
 
 	void initShader(const wchar_t* cfile, const wchar_t* blank);
 
+	//Buffer to input data into the compute shader------------------------
 	ID3D11Buffer* particlesComputeShaderInput;
 	ID3D11ShaderResourceView* particlesComputeShaderInputSRV;
 
+	//RW Structured Buffers-----------------------------------------------
 	ID3D11Buffer* particlesComputeShaderOutput;
 	ID3D11ShaderResourceView* particlesOutputReadable;
 	ID3D11UnorderedAccessView* particlesOutputWritable;
 
-	ID3D11Buffer* simulationConstantsBuffer;
+	//Particle Positions
+	ID3D11Buffer* particlePositionBuffer;
+	ID3D11ShaderResourceView* pariclePositionBufferSRV;
+	ID3D11UnorderedAccessView* pariclePositionBufferUAV;
 
-	float bounceDampingFactor;
-	float gravity = 9.8f;
+	//Particle Predicted Positions
+	ID3D11Buffer* particlePredictedPositionBuffer;
+	ID3D11ShaderResourceView* pariclePredictedPositionBufferSRV;
+	ID3D11UnorderedAccessView* pariclePredictedPositionBufferUAV;
+
+	//Particle Velocities
+	ID3D11Buffer* particleVelocityBuffer;
+	ID3D11ShaderResourceView* particleVelocityBufferSRV;
+	ID3D11UnorderedAccessView* particleVelocityBufferUAV;
+
+	//Particle Densities
+	ID3D11Buffer* particleDensityBuffer;
+	ID3D11ShaderResourceView* particleDensityBufferSRV;
+	ID3D11UnorderedAccessView* particleDensityBufferUAV;
+
+	//Particle Spatial Indices
+	ID3D11Buffer* spatialIndicesBuffer;
+	ID3D11ShaderResourceView* spatialIndicesBufferSRV;
+	ID3D11UnorderedAccessView* spatialIndicesBufferUAV;
+
+	//Particle Spatial Offsets
+	ID3D11Buffer* spatialOffsetsBuffer;
+	ID3D11ShaderResourceView* spatialOffsetsBufferSRV;
+	ID3D11UnorderedAccessView* spatialOffsetsBufferUAV;
+
+	//Constant Buffer-----------------------------------------------------
+	ID3D11Buffer* simulationConstantsBuffer;
 
 };
 
