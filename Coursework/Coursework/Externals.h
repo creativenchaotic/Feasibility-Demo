@@ -39,8 +39,8 @@ struct PBRMaterialValues {
 };
 
 struct GUISettings {
-	bool hideInstructions;
-	bool displaySPHSimulationParticles;
-	bool displayWaterSurface;
-	bool isLightOn;
+	bool hideInstructions = true;
+	bool displaySPHSimulationParticles = true;
+	bool displayWaterSurface = false;
+	bool isLightOn = true;
 };

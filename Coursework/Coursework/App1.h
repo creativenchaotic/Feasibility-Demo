@@ -86,7 +86,6 @@ private:
 	XMFLOAT4 directionalLightAmbientColour = XMFLOAT4(0.59, 0.49, 0.33, 1.0f);
 	XMFLOAT3 directionalLightPosition = XMFLOAT3(24.359, 11.538, 50.000);
 	XMFLOAT3 directionalLightDirection = XMFLOAT3(0.538f, -0.385f, -1.f);
-	bool isDirectionalLightOn = true;
 	float isDirectionalLightOnParam = 1.0f;
 	
 	//Spotlight
@@ -153,13 +152,13 @@ private:
 	const char* currentRenderSetting = "Render Colours";
 	RenderSettings currentRenderSettingForShader;
 
-	bool hideInstructions = false;
-	bool displaySPHSimulation = true;
-	bool displayWaterPlane = false;
+
 	int currentNumParticles = numParticles;
 	int particleScale = 1;
 	int particlesPerRow;
 	int particlesPerColumn;
+
+	GUISettings guiSettings;
 };
 
 #endif

@@ -203,7 +203,7 @@ void App1::renderSceneShaders()
 
 
 	//Setting lights on and off
-	if (isDirectionalLightOn) {
+	if (guiSettings.isLightOn) {
 		directionalLight->setDiffuseColour(directionalLightColour.x, directionalLightColour.y, directionalLightColour.z, 1);
 	}
 	else {
@@ -228,7 +228,7 @@ void App1::renderSceneShaders()
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(particleScale, particleScale, particleScale);
 
 	//WATER PLANE-----------------------------------------------------------------------------
-	if (displayWaterPlane) {
+	if (guiSettings.displayWaterSurface) {
 		renderer->setAlphaBlending(true);
 		water->sendData(renderer->getDeviceContext());
 		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateWaterPlane, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
@@ -241,7 +241,7 @@ void App1::renderSceneShaders()
 	}
 
 	//SPH PARTICLES---------------------------------------------------------------------------
-	if (displaySPHSimulation) {
+	if (guiSettings.displaySPHSimulationParticles) {
 		renderer->setAlphaBlending(true);
 
 		//TODO: SET NEW POSITIONS POST-COMPUTE SHADER TO PARTICLES
@@ -261,7 +261,7 @@ void App1::renderSceneShaders()
 
 
 	//LIGHTING DEBUG SPHERES-------------------------------------------------------------------
-	if (isDirectionalLightOn) {
+	if (guiSettings.isLightOn) {
 		sun->sendData(renderer->getDeviceContext());
 		sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSun * scaleSun, viewMatrix, projectionMatrix);
 		sunShader->render(renderer->getDeviceContext(), sun->getIndexCount());
@@ -303,9 +303,9 @@ void App1::gui()
 	// Build UI
 
 	ImGui::TextWrapped("Student Name: Melina Garcia Ayala\nStudent Number:2003132");
-	ImGui::Checkbox("Hide Instructions", &hideInstructions);
+	ImGui::Checkbox("Hide Instructions", &guiSettings.hideInstructions);
 
-	if (!hideInstructions) {
+	if (!guiSettings.hideInstructions) {
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));//Adds spacing
 		ImGui::TextWrapped("This is a code sample for the Feasibility Demo of my project 'Evaluating Realistic Water Surface Creation in 3D Water Simulations for Video Games using Smoothed Particle Hydrodynamics (SPH)'");
 		ImGui::Dummy(ImVec2(0.0f, 5.0f));
@@ -329,7 +329,7 @@ void App1::gui()
 
 	//------------------------------------------------------------------------
 	//RENDER SETTINGS
-	if (!hideInstructions) {
+	if (!guiSettings.hideInstructions) {
 		ImGui::TextWrapped("Render Settings used to display different aspects of the scene in different ways. For example: showing the normals of the objects' surfaces or showing where objects are placed in the world.");
 	}
 	//Selecting a render method in the ImGui window
@@ -374,12 +374,12 @@ void App1::gui()
 	//------------------------------------------------------------------------
 	//SPH
 	if (ImGui::TreeNode("Smoothed Particle Hydrodynamics")) {
-		if (!hideInstructions) {
+		if (!guiSettings.hideInstructions) {
 			ImGui::TextWrapped("In the final project the SPH simulation should not be visible since the main focus of the project is the generation of the surface. For this reason there is a toggle to turn the SPH simulation rendering on or off. I added the possibility of still rendering it so that the user can ensure that the simulation is working correctly.");
 		}
 
 		//Changing the number of particles in the simulation
-		ImGui::Checkbox("Display SPH simulation", &displaySPHSimulation);
+		ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
 		ImGui::SliderInt("Number of Particles", &numParticles, 1, 3000);
 
 		//Spacing between particles and resolution
@@ -417,9 +417,9 @@ void App1::gui()
 	//------------------------------------------------------------------------
 	//WAVES
 	if (ImGui::TreeNode("Water")) {
-		ImGui::Checkbox("Display Water Plane", &displayWaterPlane);
+		ImGui::Checkbox("Display Water Plane", &guiSettings.displayWaterSurface);
 		if (ImGui::TreeNode("Water Manipulation")) {
-			if (!hideInstructions) {
+			if (!guiSettings.hideInstructions) {
 				ImGui::TextWrapped("Currently the water plane is used to visualise what the final water surface might look like once the surface generation is implemented for the SPH. Currently, there is a 2D water simulation using Gerstner Waves. In the final project the plane will adapt to the surface of the SPH, for now it is just implemented with Gerstner Waves to help aid visually.");
 			}
 			//To manipulate terrain with waves
@@ -452,7 +452,7 @@ void App1::gui()
 		}
 
 		if (ImGui::TreeNode("Water Material")) {
-			if (!hideInstructions) {
+			if (!guiSettings.hideInstructions) {
 				ImGui::TextWrapped("The water lighting is done using Physically Based Rendering. The values for rendering the material can be changed ");
 			}
 			ImGui::SliderFloat("Water Roughness", &waterRoughness, 0.001, 1);
@@ -475,7 +475,7 @@ void App1::gui()
 		/*ImGui::ColorEdit4("Directional Light Ambient Colour", (float*)&directionalLightAmbientColour);*/
 		ImGui::SliderFloat3("Directional Light Position", (float*)&directionalLightPosition, -50,50);
 		ImGui::SliderFloat3("Directional Light Direction", (float*)&directionalLightDirection, -1.f, 1.f);
-		ImGui::Checkbox("Turn on directional light", &isDirectionalLightOn);
+		ImGui::Checkbox("Turn on directional light", &guiSettings.isLightOn);
 
 		ImGui::Spacing();
 		ImGui::Text("SPOTLIGHT");
