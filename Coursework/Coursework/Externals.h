@@ -20,6 +20,8 @@ struct SPHSimulationValues {
 	float pressureMultiplier;
 	float nearPressureMultiplier;
 	float viscosityStrength;
+	float edgeForce;
+	float edgeForceDst;
 
 	float timeScale = 1.f;
 	bool fixedTimeStep;

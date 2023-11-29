@@ -17,14 +17,25 @@ RWStructuredBuffer<Particle> particleOutput : register(u0); //Data we pass to an
 
 cbuffer cb_simConstants : register(b0)
 {
-    float bounceDampingFactor;
+    int numParticles;
     float gravity;
-    float numParticles;
-    float restDensity;
     float deltaTime;
+    float collisionsDamping;
+
+    float smoothingRadius;
+    float targetDensity;
+    float pressureMultiplier;
+    float nearPressureMultiplier;
+
+    float viscosityStrength;
+    float edgeForce;
+    float edgeForceDst;
+    float padding;
+
     float2 boundingBoxTopAndBottom;
-    float2 boundingBoxFrontAndBack;
-    float2 boudningBoxSides;
+    float2 boudningBoxFrontAndBack;
+    float2 boundingBoxSides;
+    float2 padding2;
 };
  
 [numthreads(1, 1, 1)]

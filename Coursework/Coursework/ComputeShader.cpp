@@ -78,7 +78,7 @@ void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std
     pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderInput, &srvDesc, &particlesComputeShaderInputSRV);
 }
 
-void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, float gravityVal, float bounceDamping, float numParticlesVal, float restDensityVal, float delta, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides)
+void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, int numParticlesVal, float gravityVal, float delta, float bounceDamping, float smoothingRadiusVal, float targetDensityVal, float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -86,11 +86,21 @@ void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, f
     deviceContext->Map(simulationConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
     simulationConstPtr = (SimulationConstantsBufferType*)mappedResource.pData;
-    simulationConstPtr->gravity = gravityVal;
-    simulationConstPtr->bounceDampingFactor = bounceDamping;
+
     simulationConstPtr->numParticles = numParticlesVal;
-    simulationConstPtr->restDensity = restDensityVal;
+    simulationConstPtr->gravity = gravityVal;
     simulationConstPtr->deltaTime = delta;
+    simulationConstPtr->collisionsDamping = bounceDamping;
+
+    simulationConstPtr->smoothingRadius = smoothingRadiusVal;
+    simulationConstPtr->targetDensity = targetDensityVal;
+    simulationConstPtr->pressureMultiplier = pressureMultiplierVal;
+    simulationConstPtr->nearPressureMultiplier = nearPressureMultVal;
+
+    simulationConstPtr->viscosityStrength = viscosity;
+    simulationConstPtr->edgeForce = edgeForceVal;
+    simulationConstPtr->edgeForceDst = edgeForceDistanceVal;
+
 
     simulationConstPtr->boundingBoxTopAndBottom = bb_TopBottom;
     simulationConstPtr->boudningBoxFrontAndBack = bb_FrontBack;
