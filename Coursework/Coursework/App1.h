@@ -82,10 +82,7 @@ private:
 
 	//Directional Light
 	Light* directionalLight;
-	XMFLOAT4 directionalLightColour = XMFLOAT4(0.9f, 0.77f, 0.41f, 1.0f);
-	XMFLOAT4 directionalLightAmbientColour = XMFLOAT4(0.59, 0.49, 0.33, 1.0f);
-	XMFLOAT3 directionalLightPosition = XMFLOAT3(24.359, 11.538, 50.000);
-	XMFLOAT3 directionalLightDirection = XMFLOAT3(0.538f, -0.385f, -1.f);
+	LightValues directionalLightValues;
 	float isDirectionalLightOnParam = 1.0f;
 	
 	//Spotlight
@@ -99,8 +96,6 @@ private:
 	float isSpotlightOnParam = 0.0f;
 	float PI = 3.14159265358979f;
 
-	//Specular
-	XMFLOAT4 waterSpecular = XMFLOAT4(1.0F,1.0F,1.0F,1.0F);
 
 
 	//----------------------------------------------------------------

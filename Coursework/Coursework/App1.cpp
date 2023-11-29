@@ -35,13 +35,13 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Confirgure directional light
 	directionalLight = new Light();
-	directionalLight->setDiffuseColour(directionalLightColour.x,directionalLightColour.y,directionalLightColour.z,directionalLightColour.w);
-	directionalLight->setAmbientColour(directionalLightAmbientColour.x, directionalLightAmbientColour.y, directionalLightAmbientColour.z, directionalLightAmbientColour.w);
-	directionalLight->setDirection(directionalLightDirection.x,directionalLightDirection.y,directionalLightDirection.z);
-	directionalLight->setSpecularColour(1.0f, 1.0f, 1.0f, 1.0f);
+	directionalLight->setDiffuseColour(directionalLightValues.lightColour.x, directionalLightValues.lightColour.y, directionalLightValues.lightColour.z, directionalLightValues.lightColour.w);
+	directionalLight->setAmbientColour(directionalLightValues.lightAmbientColour.x, directionalLightValues.lightAmbientColour.y, directionalLightValues.lightAmbientColour.z, directionalLightValues.lightAmbientColour.w);
+	directionalLight->setDirection(directionalLightValues.lightDirection.x, directionalLightValues.lightDirection.y, directionalLightValues.lightDirection.z);
+	directionalLight->setSpecularColour(directionalLightValues.lightSpecularColour.x, directionalLightValues.lightSpecularColour.y, directionalLightValues.lightSpecularColour.z, directionalLightValues.lightSpecularColour.w);
 	directionalLight -> setSpecularPower(30);
 	directionalLight->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 600.f);
-	directionalLight->setPosition(directionalLightPosition.x, directionalLightPosition.y, directionalLightPosition.z);
+	directionalLight->setPosition(directionalLightValues.lightPosition.x, directionalLightValues.lightPosition.y, directionalLightValues.lightPosition.z);
 
 	//Configure Spotlight
 	spotlight = new Light();
@@ -196,15 +196,15 @@ void App1::renderSceneShaders()
 
 
 	//Update light values
-	directionalLight->setDirection(directionalLightDirection.x, directionalLightDirection.y, directionalLightDirection.z);
-	directionalLight->setPosition(directionalLightPosition.x, directionalLightPosition.y, directionalLightPosition.z);
+	directionalLight->setDirection(directionalLightValues.lightDirection.x, directionalLightValues.lightDirection.y, directionalLightValues.lightDirection.z);
+	directionalLight->setPosition(directionalLightValues.lightPosition.x, directionalLightValues.lightPosition.y, directionalLightValues.lightPosition.z);
 	spotlight->setDirection(spotlightDirection.x, spotlightDirection.y, spotlightDirection.z);
 	spotlight->setPosition(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 
 
 	//Setting lights on and off
 	if (guiSettings.isLightOn) {
-		directionalLight->setDiffuseColour(directionalLightColour.x, directionalLightColour.y, directionalLightColour.z, 1);
+		directionalLight->setDiffuseColour(directionalLightValues.lightColour.x, directionalLightValues.lightColour.y, directionalLightValues.lightColour.z, directionalLightValues.lightColour.w);
 	}
 	else {
 		directionalLight->setDiffuseColour(0, 0, 0, 1);
@@ -220,7 +220,7 @@ void App1::renderSceneShaders()
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 	XMMATRIX viewMatrix = camera->getViewMatrix();
 	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
-	XMMATRIX translateSun = XMMatrixTranslation(directionalLightPosition.x, directionalLightPosition.y + 10.f, directionalLightPosition.z);
+	XMMATRIX translateSun = XMMatrixTranslation(directionalLightValues.lightPosition.x, directionalLightValues.lightPosition.y + 10.f, directionalLightValues.lightPosition.z);
 	XMMATRIX scaleSun = XMMatrixScaling(3.0f, 3.0f, 3.0f);
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
@@ -231,7 +231,7 @@ void App1::renderSceneShaders()
 	if (guiSettings.displayWaterSurface) {
 		renderer->setAlphaBlending(true);
 		water->sendData(renderer->getDeviceContext());
-		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateWaterPlane, viewMatrix, projectionMatrix, waterSpecular, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
+		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateWaterPlane, viewMatrix, projectionMatrix, directionalLightValues.lightSpecularColour, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
 		waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
 		waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
 		waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
@@ -471,10 +471,10 @@ void App1::gui()
 
 		ImGui::Text("DIRECTIONAL LIGHT");
 		//Directional Light
-		ImGui::ColorEdit4("Directional Light Diffuse Colour", (float*)&directionalLightColour);
+		ImGui::ColorEdit4("Directional Light Diffuse Colour", (float*)&directionalLightValues.lightColour);
 		/*ImGui::ColorEdit4("Directional Light Ambient Colour", (float*)&directionalLightAmbientColour);*/
-		ImGui::SliderFloat3("Directional Light Position", (float*)&directionalLightPosition, -50,50);
-		ImGui::SliderFloat3("Directional Light Direction", (float*)&directionalLightDirection, -1.f, 1.f);
+		ImGui::SliderFloat3("Directional Light Position", (float*)&directionalLightValues.lightPosition, -50,50);
+		ImGui::SliderFloat3("Directional Light Direction", (float*)&directionalLightValues.lightDirection, -1.f, 1.f);
 		ImGui::Checkbox("Turn on directional light", &guiSettings.isLightOn);
 
 		ImGui::Spacing();

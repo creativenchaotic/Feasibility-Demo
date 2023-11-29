@@ -25,11 +25,11 @@ struct SPHSimulationValues {
 };
 
 struct LightValues {
-	XMFLOAT4 lightColour;
-	XMFLOAT4 lightAmbientColour;
-	XMFLOAT3 lightPosition;
-	XMFLOAT3 lightDirection;
-	XMFLOAT4 lightSpecularColour;
+	XMFLOAT4 lightColour = XMFLOAT4(0.9f, 0.77f, 0.41f, 1.0f);
+	XMFLOAT4 lightAmbientColour = XMFLOAT4(0.59, 0.49, 0.33, 1.0f);
+	XMFLOAT3 lightPosition = XMFLOAT3(24.359, 11.538, 50.000);
+	XMFLOAT3 lightDirection = XMFLOAT3(0.538f, -0.385f, -1.f);
+	XMFLOAT4 lightSpecularColour = XMFLOAT4(1.0F, 1.0F, 1.0F, 1.0F);
 };
 
 struct PBRMaterialValues {
