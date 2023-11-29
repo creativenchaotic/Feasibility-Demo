@@ -53,13 +53,14 @@ void ComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles)
     uavDesc.Buffer.NumElements = numParticles;
     pd3dDevice->CreateUnorderedAccessView(*&particlesComputeShaderOutput, &uavDesc, &particlesOutputWritable);//Creates the unordered access view so you can write to the buffer
 
-    createPositionsBuffer(pd3dDevice, numParticles);
+  /*  createPositionsBuffer(pd3dDevice, numParticles);
     createPredictedPositionsBuffer(pd3dDevice, numParticles);
     createVelocityBuffer(pd3dDevice, numParticles);
     createDensityBuffer(pd3dDevice, numParticles);
     createSpatialIndicesBuffer(pd3dDevice, numParticles);
     createSpatialOffsetsBuffer(pd3dDevice, numParticles);
-    
+    */
+
 }
 
 void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles)//Pass in the particles Initial data is the initial contents of the buffer
@@ -122,12 +123,12 @@ void ComputeShader::setShaderParameters(ID3D11DeviceContext* dc)
 {
 	dc->CSSetShaderResources(0, 1, &particlesComputeShaderInputSRV);//same as SRVs  
 	dc->CSSetUnorderedAccessViews(0, 1, &particlesOutputWritable, 0);//Same as UAVs
-    dc->CSSetUnorderedAccessViews(0, 2, &particlePositionBufferUAV, 0);//Same as UAVs
+   /* dc->CSSetUnorderedAccessViews(0, 2, &particlePositionBufferUAV, 0);//Same as UAVs
     dc->CSSetUnorderedAccessViews(0, 3, &particlePredictedPositionBufferUAV, 0);//Same as UAVs
     dc->CSSetUnorderedAccessViews(0, 4, &particleVelocityBufferUAV, 0);//Same as UAVs
     dc->CSSetUnorderedAccessViews(0, 5, &particleDensityBufferUAV, 0);//Same as UAVs
     dc->CSSetUnorderedAccessViews(0, 6, &spatialIndicesBufferUAV, 0);//Same as UAVs
-    dc->CSSetUnorderedAccessViews(0, 7, &spatialOffsetsBufferUAV, 0);//Same as UAVs
+    dc->CSSetUnorderedAccessViews(0, 7, &spatialOffsetsBufferUAV, 0);//Same as UAVs*/
 }
 
 

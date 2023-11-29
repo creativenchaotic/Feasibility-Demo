@@ -23,7 +23,7 @@ class SPH_Particle :
     public SphereMesh
 {
 public:
-    SPH_Particle(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution, int lsize, float ldensity, float lmass);
+    SPH_Particle(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution, int lsize);
     ~SPH_Particle();
 
     void setStartPosition(XMFLOAT3 pos);

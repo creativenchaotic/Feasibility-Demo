@@ -159,7 +159,7 @@ void App1::initialiseSPHParticles()
 			for (int y = 0; y < simulationSettings.numParticlesPerAxis; y++) {
 				for (int z = 0; z < simulationSettings.numParticlesPerAxis; z++) {
 
-					sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution, simulationSettings.particleResolution, 0.f, 0.f);
+					sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution, simulationSettings.particleResolution);
 
 					float tx = x / (simulationSettings.numParticlesPerAxis - 1.f);
 					float ty = y / (simulationSettings.numParticlesPerAxis - 1.f);
