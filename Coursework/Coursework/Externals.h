@@ -26,6 +26,15 @@ struct SPHSimulationValues {
 	int iterationsPerFrame;
 };
 
+struct SimulationBoundingBox {
+	float Front;
+	float Back;
+	float LeftSide;
+	float RightSide;
+	float Top;
+	float Bottom;
+};
+
 struct LightValues {
 	XMFLOAT4 lightColour = XMFLOAT4(0.9f, 0.77f, 0.41f, 1.0f);
 	XMFLOAT4 lightAmbientColour = XMFLOAT4(0.59, 0.49, 0.33, 1.0f);
