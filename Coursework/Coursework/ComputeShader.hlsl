@@ -40,6 +40,14 @@ cbuffer cb_simConstants : register(b0)
     float2 padding2;
 };
  
+float PressureFromDensity(float density)
+{
+    return (density - targetDensity) * pressureMultiplier;
+
+}
+
+
+
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
