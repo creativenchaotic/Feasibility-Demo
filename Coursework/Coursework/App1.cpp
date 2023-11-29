@@ -178,7 +178,7 @@ void App1::initialiseSPHParticles()
 	}
 
 	sphSimulationComputeShader->createBuffer(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
-	sphSimulationComputeShader->createOutputUAV(renderer->getDevice(), currentNumParticles);
+	sphSimulationComputeShader->createOutputUAVs(renderer->getDevice(), currentNumParticles);
 }
 
 void App1::sphSimulationComputePass()

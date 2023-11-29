@@ -12,7 +12,7 @@ public:
 	~ComputeShader();
 
 	void setShaderParameters(ID3D11DeviceContext* dc);
-	void createOutputUAV(ID3D11Device* pd3dDevice, int numParticles);
+	void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles);
 	void createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles);
 	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping,float smoothingRadiusVal, float targetDensityVal,float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides);//Used to pass in constant variables such as gravity or damping values
 	void unbind(ID3D11DeviceContext* dc);
@@ -20,6 +20,13 @@ public:
 
 
 private:
+
+	void createPositionsBuffer(ID3D11Device* pd3dDevice, int numParticles);
+	void createPredictedPositionsBuffer(ID3D11Device* pd3dDevice, int numParticles);
+	void createVelocityBuffer(ID3D11Device* pd3dDevice, int numParticles);
+	void createDensityBuffer(ID3D11Device* pd3dDevice, int numParticles);
+	void createSpatialIndicesBuffer(ID3D11Device* pd3dDevice, int numParticles);
+	void createSpatialOffsetsBuffer(ID3D11Device* pd3dDevice, int numParticles);
 
 	struct SimulationConstantsBufferType {
 		int numParticles;
@@ -56,13 +63,13 @@ private:
 
 	//Particle Positions
 	ID3D11Buffer* particlePositionBuffer;
-	ID3D11ShaderResourceView* pariclePositionBufferSRV;
-	ID3D11UnorderedAccessView* pariclePositionBufferUAV;
+	ID3D11ShaderResourceView* particlePositionBufferSRV;
+	ID3D11UnorderedAccessView* particlePositionBufferUAV;
 
 	//Particle Predicted Positions
 	ID3D11Buffer* particlePredictedPositionBuffer;
-	ID3D11ShaderResourceView* pariclePredictedPositionBufferSRV;
-	ID3D11UnorderedAccessView* pariclePredictedPositionBufferUAV;
+	ID3D11ShaderResourceView* particlePredictedPositionBufferSRV;
+	ID3D11UnorderedAccessView* particlePredictedPositionBufferUAV;
 
 	//Particle Velocities
 	ID3D11Buffer* particleVelocityBuffer;
