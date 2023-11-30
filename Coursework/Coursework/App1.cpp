@@ -385,10 +385,21 @@ void App1::gui()
 	if (ImGui::TreeNode("Smoothed Particle Hydrodynamics")) {
 		if (!guiSettings.hideInstructions) {
 			ImGui::TextWrapped("In the final project the SPH simulation should not be visible since the main focus of the project is the generation of the surface. For this reason there is a toggle to turn the SPH simulation rendering on or off. I added the possibility of still rendering it so that the user can ensure that the simulation is working correctly.");
+			ImGui::Dummy(ImVec2(0.0f, 10.0f));
 		}
 
 		//Changing the number of particles in the simulation
 		ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
+		ImGui::Dummy(ImVec2(0.0f, 10.0f));
+		if (!guiSettings.hideInstructions) {
+			ImGui::TextWrapped("For changes to values in the simulation to be applied, press the Rebuild Simulation button");
+		}
+		//Boudning box for the simulation
+		if (ImGui::Button("Rebuild SPH Simulation")) {
+			currentNumParticles = simulationSettings.numParticles;
+			rebuildSPHParticles();
+		}
+		ImGui::Dummy(ImVec2(0.0f, 10.0f));
 		ImGui::SliderInt("Number of Particles per Axis", &simulationSettings.numParticlesPerAxis, 1, 100);
 		simulationSettings.numParticles = simulationSettings.numParticlesPerAxis * simulationSettings.numParticlesPerAxis * simulationSettings.numParticlesPerAxis;
 		ImGui::Text("Total Number of Particles: %i", simulationSettings.numParticles);
@@ -412,11 +423,7 @@ void App1::gui()
 		ImGui::SliderFloat("Edge Force Distance", &simulationSettings.edgeForceDst, 0, 10);
 
 
-		//Boudning box for the simulation
-		if (ImGui::Button("Rebuild SPH Simulation")) {
-			currentNumParticles = simulationSettings.numParticles;
-			rebuildSPHParticles();
-		}
+
 
 		ImGui::Dummy(ImVec2(0.0f,10.0f));
 		ImGui::SliderFloat("Gravity", &simulationSettings.gravity, 0, 10);
