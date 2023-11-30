@@ -63,11 +63,8 @@ private:
 
 	//UI Values for SPH
 	SPHSimulationValues simulationSettings;
-	XMFLOAT2 bb_topAndBottomOfSimulation;//bb refers to Bounding Box
-	XMFLOAT2 bb_frontAndBackOfSim;//front and back faces of the bounding box for the simulation
-	XMFLOAT2 bb_sidesOfSim;//sides of the bounding box for the simulation
 
-
+	SimulationBoundingBox boundingBox;
 
 	std::vector<SPH_Particle*> simulationParticles;
 	std::vector<ParticleData> simulationParticlesData;

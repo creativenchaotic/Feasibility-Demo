@@ -184,7 +184,7 @@ void App1::initialiseSPHParticles()
 void App1::sphSimulationComputePass()
 {
 	sphSimulationComputeShader->setShaderParameters(renderer->getDeviceContext());
-	//sphSimulationComputeShader->setSimulationConstants(renderer->getDeviceContext(), gravity, dampingFactor, currentNumParticles, restDensity, time);
+	sphSimulationComputeShader->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
 	sphSimulationComputeShader->compute(renderer->getDeviceContext(), 1, currentNumParticles, 1);//Y is the number of particles since the simulation currently only works in 2D
 	sphSimulationComputeShader->unbind(renderer->getDeviceContext());
 }
@@ -401,6 +401,16 @@ void App1::gui()
 		ImGui::SliderFloat3("Particles Spawnpoint Centre", (float*) & simulationSettings.particlesSpawnCenter, -10,10);
 		ImGui::SliderFloat("Spawnpoint Size", &simulationSettings.sizeOfSpawner, 2, 100);
 
+		ImGui::SliderFloat("Gravity", &simulationSettings.gravity, -10, 10);
+		ImGui::SliderFloat("Collision Damping", &simulationSettings.collisionDamping, 0, 1);
+		ImGui::SliderFloat("Smoothing Radius", &simulationSettings.smoothingRadius, 0, 1);
+		ImGui::SliderFloat("Target Density", &simulationSettings.targetDensity, 0, 20);
+		ImGui::SliderFloat("Pressure Multiplier", &simulationSettings.pressureMultiplier, 0, 10);
+		ImGui::SliderFloat("Near Pressure Multiplier", &simulationSettings.nearPressureMultiplier, 0, 20);
+		ImGui::SliderFloat("Viscosity Strength", &simulationSettings.viscosityStrength, 0, 10);
+		ImGui::SliderFloat("Edge Force", &simulationSettings.edgeForce, 0, 10);
+		ImGui::SliderFloat("Edge Force Distance", &simulationSettings.edgeForceDst, 0, 10);
+
 
 		//Boudning box for the simulation
 		if (ImGui::Button("Rebuild SPH Simulation")) {
@@ -414,14 +424,14 @@ void App1::gui()
 
 		if (ImGui::TreeNode("Bounding Box for the Simulation")) {
 			//Limits in Y-axis
-			ImGui::SliderFloat("Bottom of Bounding Box", &bb_topAndBottomOfSimulation.x, -100,100);
-			ImGui::SliderFloat("Top of Bounding Box", &bb_topAndBottomOfSimulation.y, -100, 100);
+			ImGui::SliderFloat("Bottom of Bounding Box", &boundingBox.Bottom, -100,100);
+			ImGui::SliderFloat("Top of Bounding Box", &boundingBox.Top, -100, 100);
 			//Limits on X-axis
-			ImGui::SliderFloat("Left Side of Bounding Box", &bb_sidesOfSim.x, -100, 100);
-			ImGui::SliderFloat("Right Side of Bounding Box", &bb_sidesOfSim.y, -100, 100);
+			ImGui::SliderFloat("Left Side of Bounding Box", &boundingBox.LeftSide, -100, 100);
+			ImGui::SliderFloat("Right Side of Bounding Box", &boundingBox.RightSide, -100, 100);
 			//Limits on Z-axis
-			ImGui::SliderFloat("Front of Bounding Box", &bb_frontAndBackOfSim.x, -100, 100);
-			ImGui::SliderFloat("Back of Bounding Box", &bb_frontAndBackOfSim.y, -100, 100);
+			ImGui::SliderFloat("Front of Bounding Box", &boundingBox.Front, -100, 100);
+			ImGui::SliderFloat("Back of Bounding Box", &boundingBox.Back, -100, 100);
 
 			ImGui::TreePop();
 		}

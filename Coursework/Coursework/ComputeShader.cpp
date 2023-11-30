@@ -101,7 +101,7 @@ void ComputeShader::createBuffer(ID3D11Device* pd3dDevice, int numParticles, std
     pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderInput, &srvDesc, &particlesComputeShaderInputSRV);
 }
 
-void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, int numParticlesVal, float gravityVal, float delta, float bounceDamping, float smoothingRadiusVal, float targetDensityVal, float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides)
+void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, int numParticlesVal, float gravityVal, float delta, float bounceDamping, float smoothingRadiusVal, float targetDensityVal, float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, float bb_Top, float bb_Bottom, float bb_LeftSide, float bb_rightSide, float bb_Back, float bb_front)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -125,9 +125,12 @@ void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, i
     simulationConstPtr->edgeForceDst = edgeForceDistanceVal;
 
 
-    simulationConstPtr->boundingBoxTopAndBottom = bb_TopBottom;
-    simulationConstPtr->boudningBoxFrontAndBack = bb_FrontBack;
-    simulationConstPtr->boundingBoxSides = bb_Sides;
+    simulationConstPtr->boundingBoxTop = bb_Top;
+    simulationConstPtr->boundingBoxBack = bb_Back;
+    simulationConstPtr->boundingBoxBottom = bb_Bottom;
+    simulationConstPtr->boundingBoxFront = bb_front;
+    simulationConstPtr->boundingBoxLeftSide = bb_LeftSide;
+    simulationConstPtr->boundingBoxRightSide = bb_rightSide;
 
     deviceContext->Unmap(simulationConstantsBuffer, 0);
     deviceContext->CSSetConstantBuffers(1, 1, &simulationConstantsBuffer);
