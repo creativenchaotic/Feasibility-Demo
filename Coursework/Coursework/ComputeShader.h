@@ -12,7 +12,7 @@ public:
 	~ComputeShader();
 
 	void setShaderParameters(ID3D11DeviceContext* dc);
-	void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles);
+	void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles);
 	void createBuffer(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles);
 	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping,float smoothingRadiusVal, float targetDensityVal,float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, XMFLOAT2 bb_TopBottom, XMFLOAT2 bb_FrontBack, XMFLOAT2 bb_Sides);//Used to pass in constant variables such as gravity or damping values
 	void setMatrixBuffer(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX local);
