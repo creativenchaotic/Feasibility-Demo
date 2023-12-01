@@ -50,6 +50,7 @@ void SPHShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 	D3D11_BUFFER_DESC lightBufferDesc;
 	D3D11_BUFFER_DESC cameraBufferDesc;
 	D3D11_BUFFER_DESC materialBufferDesc;
+	D3D11_BUFFER_DESC particleIndexBufferDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
@@ -92,6 +93,16 @@ void SPHShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 	materialBufferDesc.MiscFlags = 0;
 	materialBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&materialBufferDesc, NULL, &materialBuffer);
+
+
+	// Setup particle index buffer
+	particleIndexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	particleIndexBufferDesc.ByteWidth = sizeof(ParticleIndexBufferType);
+	particleIndexBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	particleIndexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	particleIndexBufferDesc.MiscFlags = 0;
+	particleIndexBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&particleIndexBufferDesc, NULL, &particleIndexBuffer);
 
 }
 
@@ -170,4 +181,22 @@ void SPHShader::setMaterialValues(ID3D11DeviceContext* deviceContext, float roug
 	materialPtr->padding = 0.f;
 	deviceContext->Unmap(materialBuffer, 0);
 	deviceContext->PSSetConstantBuffers(2, 1, &materialBuffer);
+}
+
+void SPHShader::setParticleIndex(ID3D11DeviceContext* deviceContext, int index)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	//Adding material values to PS
+	ParticleIndexBufferType* particleIndexPtr;
+	deviceContext->Map(particleIndexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	particleIndexPtr = (ParticleIndexBufferType*)mappedResource.pData;
+	particleIndexPtr->particleIndex = index;
+	deviceContext->Unmap(particleIndexBuffer, 0);
+	deviceContext->VSSetConstantBuffers(2, 1, &particleIndexBuffer);
+}
+
+void SPHShader::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV)
+{
+	deviceContext->VSSetShaderResources(1, 1, &computeShaderSRV);
 }

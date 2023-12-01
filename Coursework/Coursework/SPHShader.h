@@ -15,6 +15,7 @@ public:
     void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT4 cameraPos, RenderSettings renderSetting);
 	void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light);
 	void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
+	void setParticleIndex(ID3D11DeviceContext* deviceContext, int index);
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
 private:
     void initShader(const wchar_t* cs, const wchar_t* ps);
@@ -45,10 +46,17 @@ private:
 		float padding;
 	};
 
+	//Particle Index Buffer
+	struct ParticleIndexBufferType {
+		int particleIndex;
+		XMFLOAT3 particleIndexPadding = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	};
+
     ID3D11Buffer* matrixBuffer;
 	ID3D11Buffer* lightBuffer;
 	ID3D11Buffer* cameraBuffer;
 	ID3D11Buffer* materialBuffer;
+	ID3D11Buffer* particleIndexBuffer;
 
 };
 
