@@ -188,9 +188,6 @@ void App1::sphSimulationComputePass()
 	sphSimulationComputeShader->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);//Y is the number of particles since the simulation currently only works in 2D
 	sphSimulationComputeShader->unbind(renderer->getDeviceContext());
 
-	for (int i = 0; i < simulationSettings.numParticles; i++) {
-		simulationParticles[i]->particleData = simulationParticlesData[i];
-	}
 }
 
 void App1::renderSceneShaders()

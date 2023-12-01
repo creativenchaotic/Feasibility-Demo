@@ -15,7 +15,7 @@ public:
     void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT4 cameraPos, RenderSettings renderSetting);
 	void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light);
 	void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
-
+	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
 private:
     void initShader(const wchar_t* cs, const wchar_t* ps);
 
@@ -49,5 +49,6 @@ private:
 	ID3D11Buffer* lightBuffer;
 	ID3D11Buffer* cameraBuffer;
 	ID3D11Buffer* materialBuffer;
+
 };
 
