@@ -129,18 +129,23 @@ float4 main(InputType input) : SV_TARGET
     //PBR
     float4 finalLight = float4(0.f, 0.f, 0.f, 1.0f);
     
-    float3 lightVector = (lightPosition.xyz - input.worldPos); //Vector from the light to the pixel thats getting lit
-        
-    float4 combinedLightColour = float4(0.f, 0.f, 0.f, 0.f);
-        
-    if (!(diffuseColour.x == 0.f && diffuseColour.y == 0 && diffuseColour.z == 0))
+    if (renderSetting.x == -1.f)
     {
-            //directional light
-        combinedLightColour = saturate(float4(PBR(input, roughness, finalColour, cameraPos.xyz, lightDirection.xyz, baseReflectivity, metallic, diffuseColour, ambientColour), 1.0f));
-    }
+        float3 lightVector = (lightPosition.xyz - input.worldPos); //Vector from the light to the pixel thats getting lit
         
-    finalLight += combinedLightColour;
+        float4 combinedLightColour = float4(0.f, 0.f, 0.f, 0.f);
+        
+        if (!(diffuseColour.x == 0.f && diffuseColour.y == 0 && diffuseColour.z == 0))
+        {
+            //directional light
+            combinedLightColour = saturate(float4(PBR(input, roughness, finalColour, cameraPos.xyz, lightDirection.xyz, baseReflectivity, metallic, diffuseColour, ambientColour), 1.0f));
+        }
+        
+        finalLight += combinedLightColour;
+    }
+    
 
+    //RENDERING BASED ON RENDER SETTINGS
     if (renderSetting.x == -1.f)
     {
         return float4(finalLight.xyz, finalColour.a);

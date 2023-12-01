@@ -265,6 +265,8 @@ void App1::renderSceneShaders()
 
 			simulationParticles[i]->sendData(renderer->getDeviceContext());
 			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
+			sphParticleShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
+			sphParticleShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
 			sphParticleShader->render(renderer->getDeviceContext(), simulationParticles[i]->getIndexCount());
 
 		}

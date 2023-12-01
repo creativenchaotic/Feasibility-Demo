@@ -217,39 +217,43 @@ float4 main(InputType input) : SV_TARGET
     float4 shallowWaterColour = float4(0.26f, 0.83f, 0.9f, 0.5f);
     float4 deepWaterColour = float4(0.f,0.678f,0.819f,1.0f);
     
+    float4 finalLight = float4(0.f, 0.f, 0.f, 1.0f);
     
+    if (renderSetting.x == -1.f)
+    {
     //-------------------------------------------------------------------------------
     //No shadows on water because objects reflect off of water, they dont create shadows
     
-    float4 finalLight = float4(0.f, 0.f, 0.f, 1.0f);
-    
-    for (int i = 0; i < 2; i++)
-    {
-        float3 lightVector = (lightPosition[i].xyz - input.worldPos); //Vector from the light to the pixel thats getting lit
-        
-        float4 combinedLightColour = float4(0.f, 0.f, 0.f, 0.f);
-        
-        if (!(diffuseColour[i].x == 0.f && diffuseColour[i].y == 0 && diffuseColour[i].z == 0))
+        for (int i = 0; i < 2; i++)
         {
+            float3 lightVector = (lightPosition[i].xyz - input.worldPos); //Vector from the light to the pixel thats getting lit
+        
+            float4 combinedLightColour = float4(0.f, 0.f, 0.f, 0.f);
+        
+            if (!(diffuseColour[i].x == 0.f && diffuseColour[i].y == 0 && diffuseColour[i].z == 0))
+            {
             //Create a different type of light depending on the type chosen
             //directional light
-            if (lightType[i] == -1.0f)
-            {
-                combinedLightColour = saturate(float4(PBR(input, roughness, deepWaterColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]), 1.0f));
-            }
+                if (lightType[i] == -1.0f)
+                {
+                    combinedLightColour = saturate(float4(PBR(input, roughness, deepWaterColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]), 1.0f));
+                }
             //spotlight
-            if (lightType[i] == 0.0f)
-            {
-                combinedLightColour = saturate(spotlightLighting(input, lightVector, roughness, deepWaterColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]));
+                if (lightType[i] == 0.0f)
+                {
+                    combinedLightColour = saturate(spotlightLighting(input, lightVector, roughness, deepWaterColour, cameraPos.xyz, lightDirection[i].xyz, baseReflectivity, metallic, lightType[i], diffuseColour[i], ambientColour[i]));
 
-            }
+                }
             
+            }
+        
+            finalLight += combinedLightColour;
+        
         }
-        
-        finalLight += combinedLightColour;
-        
     }
     
+    
+    //RENDERING BASED ON RENDER SETTINGS
     if (renderSetting.x == -1.f)
     {
         return float4(finalLight.xyz, deepWaterColour.a);

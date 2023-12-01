@@ -169,5 +169,5 @@ void SPHShader::setMaterialValues(ID3D11DeviceContext* deviceContext, float roug
 	materialPtr->roughness = roughness;
 	materialPtr->padding = 0.f;
 	deviceContext->Unmap(materialBuffer, 0);
-	deviceContext->PSSetConstantBuffers(4, 1, &materialBuffer);
+	deviceContext->PSSetConstantBuffers(2, 1, &materialBuffer);
 }

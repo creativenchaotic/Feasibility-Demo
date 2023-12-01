@@ -13,11 +13,12 @@ public:
     ~SPHShader();
 
     void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT4 cameraPos, RenderSettings renderSetting);
+	void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light);
+	void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
 
 private:
     void initShader(const wchar_t* cs, const wchar_t* ps);
-	void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light);
-	void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
+
 
 
 	//Light values
