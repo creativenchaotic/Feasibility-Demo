@@ -185,8 +185,12 @@ void App1::sphSimulationComputePass()
 {
 	sphSimulationComputeShader->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShader->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
-	sphSimulationComputeShader->compute(renderer->getDeviceContext(), 1, currentNumParticles, 1);//Y is the number of particles since the simulation currently only works in 2D
+	sphSimulationComputeShader->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);//Y is the number of particles since the simulation currently only works in 2D
 	sphSimulationComputeShader->unbind(renderer->getDeviceContext());
+
+	for (int i = 0; i < simulationSettings.numParticles; i++) {
+		simulationParticles[i]->particleData = simulationParticlesData[i];
+	}
 }
 
 void App1::renderSceneShaders()
@@ -334,7 +338,7 @@ void App1::gui()
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));
-
+	ImGui::Text("PARTICLE VELOCITY: %f", &simulationParticlesData[0].velocity);
 
 	//------------------------------------------------------------------------
 	//RENDER SETTINGS
