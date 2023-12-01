@@ -119,7 +119,7 @@ void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	timeBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&timeBufferDesc, NULL, &timeBuffer);
 
-	// Setup time buffer
+	// Setup camera buffer
 	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
 	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -128,7 +128,7 @@ void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	cameraBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&cameraBufferDesc, NULL, &cameraBuffer);
 
-	// Setup time buffer
+	// Setup attenuation buffer
 	attenuationBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	attenuationBufferDesc.ByteWidth = sizeof(AttenuationBufferType);
 	attenuationBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -137,9 +137,9 @@ void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	attenuationBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&attenuationBufferDesc, NULL, &attenuationBuffer);
 
-	// Setup time buffer
+	// Setup material buffer
 	materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	materialBufferDesc.ByteWidth = sizeof(AttenuationBufferType);
+	materialBufferDesc.ByteWidth = sizeof(MaterialBufferType);
 	materialBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	materialBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	materialBufferDesc.MiscFlags = 0;
