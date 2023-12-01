@@ -16,7 +16,7 @@ struct Particle
     float padding;
 };
 
-StructuredBuffer<Particle> particleInput : register(t0);
+//StructuredBuffer<Particle> particleInput : register(t0);
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
 
 /*// Buffers
