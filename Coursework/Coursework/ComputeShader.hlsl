@@ -452,11 +452,11 @@ void UpdatePositions(int3 thread)
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
     ExternalForces(dispatchThreadID);
-    UpdateSpatialHash(dispatchThreadID);
+    //UpdateSpatialHash(dispatchThreadID);
     //TODO: Add GPU sort
-    CalculateDensities(dispatchThreadID);
-    CalculatePressureForce(dispatchThreadID);
-    CalculateViscosity(dispatchThreadID);
+    //CalculateDensities(dispatchThreadID);
+    //CalculatePressureForce(dispatchThreadID);
+    //CalculateViscosity(dispatchThreadID);
     UpdatePositions(dispatchThreadID);
 
 }

@@ -14,18 +14,18 @@ struct SPHSimulationValues {
 	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(0.f,0.f,0.f);
 
 	float gravity = -10.f;
-	float collisionDamping = 0.05f;
+	float collisionDamping = 0.95f;
 	float smoothingRadius = 0.2f;
-	float targetDensity = 0.0f;
-	float pressureMultiplier;
-	float nearPressureMultiplier;
-	float viscosityStrength;
+	float targetDensity = 630.f;
+	float pressureMultiplier = 288.f;
+	float nearPressureMultiplier = 2.25f;
+	float viscosityStrength = 0.001f;
 	float edgeForce;
 	float edgeForceDst;
 
 	float timeScale = 1.f;
 	bool fixedTimeStep;
-	int iterationsPerFrame;
+	int iterationsPerFrame = 3;
 };
 
 struct SimulationBoundingBox {
