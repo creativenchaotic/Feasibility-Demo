@@ -12,6 +12,7 @@
 #include "SPH_Particle.h"
 #include "SPHShader.h"
 #include "ComputeShader.h"
+#include "SPHSimulationComputeShaderSecondPass.h"
 
 class App1 : public BaseApplication
 {
@@ -59,7 +60,8 @@ private:
 	//----------------------------------------------
 	//SPH
 	SPHShader* sphParticleShader;
-	ComputeShader* sphSimulationComputeShader;
+	ComputeShader* sphSimulationComputeShaderFirstPass;
+	SPHSimulationComputeShaderSecondPass* sphSimulationComputeShaderSecondPass;
 
 	//UI Values for SPH
 	SPHSimulationValues simulationSettings;

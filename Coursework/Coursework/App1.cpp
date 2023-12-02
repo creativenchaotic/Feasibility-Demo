@@ -30,7 +30,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	sunShader = new SunShader(renderer->getDevice(), hwnd);
 	sphParticleShader = new SPHShader(renderer->getDevice(), hwnd);
-	sphSimulationComputeShader = new ComputeShader(renderer->getDevice(), hwnd);
+	sphSimulationComputeShaderFirstPass = new ComputeShader(renderer->getDevice(), hwnd);
+	sphSimulationComputeShaderSecondPass = new SPHSimulationComputeShaderSecondPass(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Confirgure directional light
@@ -105,9 +106,14 @@ App1::~App1()
 		sphParticleShader = 0;
 	}
 
-	if (sphSimulationComputeShader) {
-		delete sphSimulationComputeShader;
-		sphSimulationComputeShader = 0;
+	if (sphSimulationComputeShaderFirstPass) {
+		delete sphSimulationComputeShaderFirstPass;
+		sphSimulationComputeShaderFirstPass = 0;
+	}
+
+	if (sphSimulationComputeShaderSecondPass) {
+		delete sphSimulationComputeShaderSecondPass;
+		sphSimulationComputeShaderSecondPass = 0;
 	}
 }
 
@@ -178,16 +184,20 @@ void App1::initialiseSPHParticles()
 	}
 
 	//sphSimulationComputeShader->createBuffer(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
-	sphSimulationComputeShader->createOutputUAVs(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
+	sphSimulationComputeShaderFirstPass->createOutputUAVs(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
 }
 
 void App1::sphSimulationComputePass()
 {
-	sphSimulationComputeShader->setShaderParameters(renderer->getDeviceContext());
-	sphSimulationComputeShader->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
-	sphSimulationComputeShader->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);//Y is the number of particles since the simulation currently only works in 2D
-	sphSimulationComputeShader->unbind(renderer->getDeviceContext());
+	sphSimulationComputeShaderFirstPass->setShaderParameters(renderer->getDeviceContext());
+	sphSimulationComputeShaderFirstPass->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
+	sphSimulationComputeShaderFirstPass->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
+	sphSimulationComputeShaderFirstPass->unbind(renderer->getDeviceContext());
 
+	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
+	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
+	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
+	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());
 }
 
 void App1::renderSceneShaders()
@@ -264,7 +274,7 @@ void App1::renderSceneShaders()
 			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
 			sphParticleShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
 			sphParticleShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
-			sphParticleShader->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShader->getComputeShaderOutput());
+			sphParticleShader->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());
 			sphParticleShader->setParticleIndex(renderer->getDeviceContext(), i);
 			sphParticleShader->render(renderer->getDeviceContext(), simulationParticles[i]->getIndexCount());
 
