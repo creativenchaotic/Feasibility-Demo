@@ -215,7 +215,7 @@ void App1::sphSimulationComputePass()
 
 	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &particleSpatialIndices);
 
-	int numStages = (int)log(pow(2, ceil(log(simulationParticlesData.size()) / log(2))));
+	int numStages = (int)log(pow(2, ceil(log(simulationParticlesData.size()) / log(2))));//This is meant to be NextPowerOfTwo() from Unity as c++ code but Im not sure if it works
 
 	for (int stageIndex = 0; stageIndex < numStages; stageIndex++) {
 		for (int stepIndex = 0; stepIndex < stageIndex + 1; stepIndex++) {
