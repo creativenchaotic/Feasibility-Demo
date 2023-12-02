@@ -48,6 +48,9 @@
     <ClCompile Include="BitonicMergesort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OffsetCalculationComputeShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BitonicMergesort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OffsetCalculationComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
