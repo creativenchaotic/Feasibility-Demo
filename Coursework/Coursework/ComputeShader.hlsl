@@ -131,35 +131,6 @@ void UpdateSpatialHash(int3 thread)
 }
 
 
-
-
-/*// Sort the given entries by their keys (smallest to largest)
-// This is done using bitonic merge sort, and takes multiple iterations
-void BitonicMergesort(int3 thread)
-{
-    uint i = id.x;
-
-    uint hIndex = i & (groupWidth - 1);
-    uint indexLeft = hIndex + (groupHeight + 1) * (i / groupWidth);
-    uint rightStepSize = stepIndex == 0 ? groupHeight - 2 * hIndex : (groupHeight + 1) / 2;
-    uint indexRight = indexLeft + rightStepSize;
-
-	// Exit if out of bounds (for non-power of 2 input sizes)
-    if (indexRight >= numEntries)
-        return;
-
-    uint valueLeft = Entries[indexLeft].key;
-    uint valueRight = Entries[indexRight].key;
-
-	// Swap entries if value is descending
-    if (valueLeft > valueRight)
-    {
-        Entry temp = Entries[indexLeft];
-        Entries[indexLeft] = Entries[indexRight];
-        Entries[indexRight] = temp;
-    }
-}*/
-
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
