@@ -206,9 +206,11 @@ void App1::sphSimulationComputePass()
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
 
 	std::vector<XMFLOAT3> particleSpatialIndices;
+	std::vector<int>particleSpatialOffsets;
 
 	for (int i = 0; i < simulationSettings.numParticles; i++) {
 		particleSpatialIndices.push_back(simulationParticlesData[i].spatialIndices);
+		particleSpatialOffsets.push_back(simulationParticlesData[i].spatialOffsets);
 	}
 
 	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &particleSpatialIndices);
