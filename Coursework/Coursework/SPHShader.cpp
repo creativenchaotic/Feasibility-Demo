@@ -193,10 +193,10 @@ void SPHShader::setParticleIndex(ID3D11DeviceContext* deviceContext, int index)
 	particleIndexPtr = (ParticleIndexBufferType*)mappedResource.pData;
 	particleIndexPtr->particleIndex = index;
 	deviceContext->Unmap(particleIndexBuffer, 0);
-	deviceContext->VSSetConstantBuffers(2, 1, &particleIndexBuffer);
+	deviceContext->VSSetConstantBuffers(1, 1, &particleIndexBuffer);
 }
 
 void SPHShader::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV)
 {
-	deviceContext->VSSetShaderResources(1, 1, &computeShaderSRV);
+	deviceContext->VSSetShaderResources(0, 1, &computeShaderSRV);
 }
