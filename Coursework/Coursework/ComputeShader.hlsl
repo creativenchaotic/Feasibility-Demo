@@ -451,13 +451,21 @@ void UpdatePositions(int3 thread)
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
-    ExternalForces(dispatchThreadID);
+    //ExternalForces(dispatchThreadID);
     //UpdateSpatialHash(dispatchThreadID);
     //TODO: Add GPU sort
     //CalculateDensities(dispatchThreadID);
     //CalculatePressureForce(dispatchThreadID);
     //CalculateViscosity(dispatchThreadID);
-    UpdatePositions(dispatchThreadID);
+    //UpdatePositions(dispatchThreadID);
 
+    if (dispatchThreadID.x >= numParticles)
+        return;
+
+	// External forces (gravity)
+    particleData[dispatchThreadID.x].velocity += float3(0, gravity, 0) * deltaTime;
+
+	// Predict
+    particleData[dispatchThreadID.x].predictedPosition = particleData[dispatchThreadID.x].currentPosition + particleData[dispatchThreadID.x].velocity * 1 / 120.0;
 }
 

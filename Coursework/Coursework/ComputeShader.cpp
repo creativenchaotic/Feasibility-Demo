@@ -26,18 +26,6 @@ void ComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     simConstantsBufferDesc.MiscFlags = 0;
     simConstantsBufferDesc.StructureByteStride = 0;
     renderer->CreateBuffer(&simConstantsBufferDesc, NULL, &simulationConstantsBuffer);
-
-
-    D3D11_BUFFER_DESC matrixBufferDesc;
-
-    // Setup constant buffer
-    matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-    matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    matrixBufferDesc.MiscFlags = 0;
-    matrixBufferDesc.StructureByteStride = 0;
-    renderer->CreateBuffer(&matrixBufferDesc, NULL, &matrixBuffer);
 }
 
 void ComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles)//Called each time the number of particles is changed
@@ -134,22 +122,6 @@ void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, i
 
     deviceContext->Unmap(simulationConstantsBuffer, 0);
     deviceContext->CSSetConstantBuffers(1, 1, &simulationConstantsBuffer);
-}
-
-void ComputeShader::setMatrixBuffer(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX local)
-{
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-
-    MatrixBufferType* matrixBufferPtr;
-    deviceContext->Map(matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-    matrixBufferPtr = (MatrixBufferType*)mappedResource.pData;
-
-    matrixBufferPtr->localToWorld = local;
-    matrixBufferPtr->worldToLocal = world;
-
-    deviceContext->Unmap(matrixBuffer, 0);
-    deviceContext->CSSetConstantBuffers(2, 1, &matrixBuffer);
 }
 
 void ComputeShader::setShaderParameters(ID3D11DeviceContext* dc)
