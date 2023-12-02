@@ -20,6 +20,7 @@ public:
 
 
 private:
+	void initShader(const wchar_t* cfile, const wchar_t* blank);
 
 	void createPositionsBuffer(ID3D11Device* pd3dDevice, int numParticles);
 	void createPredictedPositionsBuffer(ID3D11Device* pd3dDevice, int numParticles);
@@ -54,7 +55,7 @@ private:
 		XMFLOAT2 padding2 = XMFLOAT2(0.0f,0.0f);
 	};
 
-	void initShader(const wchar_t* cfile, const wchar_t* blank);
+
 
 	//Buffer to input data into the compute shader------------------------
 	ID3D11Buffer* particlesComputeShaderInput;

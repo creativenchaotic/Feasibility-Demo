@@ -165,8 +165,5 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
 {
     ExternalForces(dispatchThreadID);
     UpdateSpatialHash(dispatchThreadID);
-    //BitonicMergesort(dispatchThreadID);
-
-
 }
 
