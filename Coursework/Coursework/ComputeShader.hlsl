@@ -55,13 +55,6 @@ cbuffer cb_simConstants : register(b0)
     float2 padding2;
 };
 
-cbuffer cb_matrices : register(b1)
-{
-    float4x4 localToWorld;
-    float4x4 worldToLocal;
-}
-
-
 //SPATIAL 3D HASH----------------------------------------------------------------
 int3 offsets3D[27] =
 {
