@@ -121,7 +121,7 @@ void ComputeShader::setSimulationConstants(ID3D11DeviceContext* deviceContext, i
     simulationConstPtr->boundingBoxRightSide = bb_rightSide;
 
     deviceContext->Unmap(simulationConstantsBuffer, 0);
-    deviceContext->CSSetConstantBuffers(1, 1, &simulationConstantsBuffer);
+    deviceContext->CSSetConstantBuffers(0, 1, &simulationConstantsBuffer);
 }
 
 void ComputeShader::setShaderParameters(ID3D11DeviceContext* dc)
