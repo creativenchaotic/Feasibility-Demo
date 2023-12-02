@@ -13,6 +13,7 @@
 #include "SPHShader.h"
 #include "ComputeShader.h"
 #include "SPHSimulationComputeShaderSecondPass.h"
+#include "BitonicMergesort.h"
 
 class App1 : public BaseApplication
 {
@@ -62,6 +63,7 @@ private:
 	SPHShader* sphParticleShader;
 	ComputeShader* sphSimulationComputeShaderFirstPass;
 	SPHSimulationComputeShaderSecondPass* sphSimulationComputeShaderSecondPass;
+	BitonicMergesort* bitonicMergesort;
 
 	//UI Values for SPH
 	SPHSimulationValues simulationSettings;

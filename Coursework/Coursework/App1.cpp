@@ -32,6 +32,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	sphParticleShader = new SPHShader(renderer->getDevice(), hwnd);
 	sphSimulationComputeShaderFirstPass = new ComputeShader(renderer->getDevice(), hwnd);
 	sphSimulationComputeShaderSecondPass = new SPHSimulationComputeShaderSecondPass(renderer->getDevice(), hwnd);
+	bitonicMergesort = new BitonicMergesort(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Confirgure directional light
@@ -115,6 +116,11 @@ App1::~App1()
 		delete sphSimulationComputeShaderSecondPass;
 		sphSimulationComputeShaderSecondPass = 0;
 	}
+
+	if (bitonicMergesort) {
+		delete bitonicMergesort;
+		bitonicMergesort = 0;
+	}
 }
 
 
@@ -189,11 +195,33 @@ void App1::initialiseSPHParticles()
 
 void App1::sphSimulationComputePass()
 {
+	//SPH SIMULATION FIRST PASS
 	sphSimulationComputeShaderFirstPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderFirstPass->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
 	sphSimulationComputeShaderFirstPass->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
 	sphSimulationComputeShaderFirstPass->unbind(renderer->getDeviceContext());
 
+
+	//BITONIC MERGESORT
+	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
+	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
+
+	int numStages = (int)log(pow(2, ceil(log(simulationParticlesData.size()) / log(2))));
+
+	for (int stageIndex = 0; stageIndex < numStages; stageIndex++) {
+		for (int stepIndex = 0; stepIndex < stageIndex + 1; stepIndex++) {
+
+			int groupWidth = 1 << (stageIndex - stepIndex);
+			int groupHeight = 2 * groupWidth - 1;
+
+			bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), simulationSettings.numParticles, groupWidth, groupHeight, stepIndex);
+		}
+	}
+	bitonicMergesort->compute(renderer->getDeviceContext(), pow(2, ceil(log(simulationParticlesData.size()) / log(2)))/2, 1, 1);
+	bitonicMergesort->unbind(renderer->getDeviceContext());
+
+
+	//SPH SIMULATION SECOND PASS
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
 	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
