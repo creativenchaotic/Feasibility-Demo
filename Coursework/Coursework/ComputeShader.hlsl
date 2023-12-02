@@ -44,7 +44,6 @@ cbuffer cb_simConstants : register(b0)
     float edgeForceDst;
     float padding;
 
-    
     float boundingBoxTop;
     float boundingBoxBottom;
     float boundingBoxLeftSide;
