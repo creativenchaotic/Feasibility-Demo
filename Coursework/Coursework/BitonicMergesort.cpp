@@ -30,18 +30,19 @@ void BitonicMergesort::setShaderParameters(ID3D11DeviceContext* dc)
 	dc->CSSetUnorderedAccessViews(0, 1, &bitonicMergesortOutputWritable, 0);//Same as UAVs
 }
 
-void BitonicMergesort::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles)
+void BitonicMergesort::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<XMFLOAT3>* particleIndices)
 {
+
     //Creating a buffer to output the data from the compute shader
     D3D11_BUFFER_DESC bufferDesc = {};//Creating a buffer description to create the buffer from
-    bufferDesc.ByteWidth = numParticles * sizeof(ParticleData);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
+    bufferDesc.ByteWidth = numParticles * sizeof(XMFLOAT3);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;//Setting how the buffer works
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     bufferDesc.StructureByteStride = sizeof(ParticleData);//make this the size of particle data//Setting the stride that the buffer needs to take when reading each element from memory
     D3D11_SUBRESOURCE_DATA bufferInitData;
-    bufferInitData.pSysMem = particles->data();//Initial data that is getting passed into the buffer
-    pd3dDevice->CreateBuffer(&bufferDesc, (particles) ? &bufferInitData : nullptr, &bitonicMergesortOutput);//Creates the buffer
+    bufferInitData.pSysMem = particleIndices->data();//Initial data that is getting passed into the buffer
+    pd3dDevice->CreateBuffer(&bufferDesc, (particleIndices) ? &bufferInitData : nullptr, &bitonicMergesortOutput);//Creates the buffer
 
     // Create SRV - Lets you read from the Buffer created
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -61,6 +62,7 @@ void BitonicMergesort::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticl
 
 void BitonicMergesort::setBitonicMergesortSettings(ID3D11DeviceContext* deviceContext, int numParticlesVal, int groupWidthVal, int groupHeightVal, int stepIndexVal)
 {
+
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
     BitonicMergesortSettingsBufferType* bitonicMergesortConstPtr;

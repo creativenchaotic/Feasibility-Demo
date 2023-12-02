@@ -204,7 +204,14 @@ void App1::sphSimulationComputePass()
 
 	//BITONIC MERGESORT
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
-	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
+
+	std::vector<XMFLOAT3> particleSpatialIndices;
+
+	for (int i = 0; i < simulationSettings.numParticles; i++) {
+		particleSpatialIndices.push_back(simulationParticlesData[i].spatialIndices);
+	}
+
+	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &particleSpatialIndices);
 
 	int numStages = (int)log(pow(2, ceil(log(simulationParticlesData.size()) / log(2))));
 
@@ -217,9 +224,9 @@ void App1::sphSimulationComputePass()
 			bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), simulationSettings.numParticles, groupWidth, groupHeight, stepIndex);
 		}
 	}
+
 	bitonicMergesort->compute(renderer->getDeviceContext(), pow(2, ceil(log(simulationParticlesData.size()) / log(2)))/2, 1, 1);
 	bitonicMergesort->unbind(renderer->getDeviceContext());
-
 
 	//SPH SIMULATION SECOND PASS
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());

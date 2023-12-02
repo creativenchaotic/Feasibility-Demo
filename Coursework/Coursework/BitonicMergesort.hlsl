@@ -1,20 +1,16 @@
 static const int NumThreads = 128;
 
-struct Particle
+struct Entry
 {
-    int size;
-    float3 startPosition;
-    float3 currentPosition;
-    float density;
-    float3 predictedPosition;
-    float nearDensity;
-    float3 velocity;
-    int spatialOffsets;
-    float3 spatialIndices;
-    float padding;
+    float originalIndex;
+    float hash;
+    float key;
 };
 
-RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
+RWStructuredBuffer<float3> particleIndices : register(u0); //Data we pass to and from the compute shader
+//x is the original index
+//y is the hash
+//z is the key
 
 cbuffer cb_bitonicMergesortConstants : register(b0)
 {
@@ -40,14 +36,14 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     if (indexRight >= numParticles)
         return;
 
-    uint valueLeft = Entries[indexLeft].key;
-    uint valueRight = Entries[indexRight].key;
+    uint valueLeft = particleIndices[indexLeft].z;
+    uint valueRight = particleIndices[indexRight].z;
 
 	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
-        Entry temp = Entries[indexLeft];
-        Entries[indexLeft] = Entries[indexRight];
-        Entries[indexRight] = temp;
+        Entry temp = particleIndices[indexLeft];
+        particleIndices[indexLeft] = particleIndices[indexRight];
+        particleIndices[indexRight] = temp;
     }
 }
