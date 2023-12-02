@@ -2,7 +2,7 @@
 
 BitonicMergesort::BitonicMergesort(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"ComputeShader.cso", NULL);
+	initShader(L"BitonicMergesort.cso", NULL);
 }
 
 BitonicMergesort::~BitonicMergesort()
