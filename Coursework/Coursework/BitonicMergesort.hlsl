@@ -16,6 +16,14 @@ struct Particle
 
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
 
+cbuffer cb_bitonicMergesortConstants : register(b0)
+{
+    int numParticles;
+    int groupWidth;
+    int groupHeight;
+    int stepIndex;
+}
+
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -29,7 +37,7 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     uint indexRight = indexLeft + rightStepSize;
 
 	// Exit if out of bounds (for non-power of 2 input sizes)
-    if (indexRight >= numEntries)
+    if (indexRight >= numParticles)
         return;
 
     uint valueLeft = Entries[indexLeft].key;
