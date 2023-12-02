@@ -12,6 +12,17 @@ BitonicMergesort::~BitonicMergesort()
 void BitonicMergesort::initShader(const wchar_t* cfile, const wchar_t* blank)
 {
     loadComputeShader(cfile); //load + compile shader files
+
+    D3D11_BUFFER_DESC bitonicMergesortBufferDesc;
+
+    // Setup constant buffer
+    bitonicMergesortBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    bitonicMergesortBufferDesc.ByteWidth = sizeof(BitonicMergesortSettingsBufferType);
+    bitonicMergesortBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    bitonicMergesortBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    bitonicMergesortBufferDesc.MiscFlags = 0;
+    bitonicMergesortBufferDesc.StructureByteStride = 0;
+    renderer->CreateBuffer(&bitonicMergesortBufferDesc, NULL, &bitonicMergesortSettingsBuffer);
 }
 
 void BitonicMergesort::setShaderParameters(ID3D11DeviceContext* dc)
@@ -45,6 +56,25 @@ void BitonicMergesort::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticl
     uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
     uavDesc.Buffer.NumElements = numParticles;
     pd3dDevice->CreateUnorderedAccessView(*&bitonicMergesortOutput, &uavDesc, &bitonicMergesortOutputWritable);//Creates the unordered access view so you can write to the buffer
+
+}
+
+void BitonicMergesort::setBitonicMergesortSettings(ID3D11DeviceContext* deviceContext, int numParticlesVal, int groupWidthVal, int groupHeightVal, int stepIndexVal)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+    BitonicMergesortSettingsBufferType* bitonicMergesortConstPtr;
+    deviceContext->Map(bitonicMergesortSettingsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+    bitonicMergesortConstPtr = (BitonicMergesortSettingsBufferType*)mappedResource.pData;
+
+    bitonicMergesortConstPtr->numParticles = numParticlesVal;
+    bitonicMergesortConstPtr->groupWidth = groupWidthVal;
+    bitonicMergesortConstPtr->groupHeight = groupHeightVal;
+    bitonicMergesortConstPtr->stepIndex = stepIndexVal;
+
+    deviceContext->Unmap(bitonicMergesortSettingsBuffer, 0);
+    deviceContext->CSSetConstantBuffers(0, 1, &bitonicMergesortSettingsBuffer);
 
 }
 
