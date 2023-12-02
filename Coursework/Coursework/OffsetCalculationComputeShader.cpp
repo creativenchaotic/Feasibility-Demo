@@ -12,6 +12,17 @@ OffsetCalculationComputeShader::~OffsetCalculationComputeShader()
 void OffsetCalculationComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
 {
 	loadComputeShader(cfile); //load + compile shader files
+
+    D3D11_BUFFER_DESC offsetCalculationsBufferDesc;
+
+    // Setup constant buffer
+    offsetCalculationsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    offsetCalculationsBufferDesc.ByteWidth = sizeof(OffsetCalculationsSettingsBufferType);
+    offsetCalculationsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    offsetCalculationsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    offsetCalculationsBufferDesc.MiscFlags = 0;
+    offsetCalculationsBufferDesc.StructureByteStride = 0;
+    renderer->CreateBuffer(&offsetCalculationsBufferDesc, NULL, &offsetCalculationsSettingsBuffer);
 }
 
 void OffsetCalculationComputeShader::setShaderParameters(ID3D11DeviceContext* dc)
@@ -46,6 +57,21 @@ void OffsetCalculationComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, 
     uavDesc.Buffer.NumElements = numParticles;
     pd3dDevice->CreateUnorderedAccessView(*&offsetCalculationsOutput, &uavDesc, &offsetCalculationsOutputWritable);//Creates the unordered access view so you can write to the buffer
 
+}
+
+void OffsetCalculationComputeShader::setOffsetCalculationsSettings(ID3D11DeviceContext* deviceContext, int numParticlesVal)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+    OffsetCalculationsSettingsBufferType* bitonicMergesortConstPtr;
+    deviceContext->Map(offsetCalculationsSettingsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+    bitonicMergesortConstPtr = (OffsetCalculationsSettingsBufferType*)mappedResource.pData;
+
+    bitonicMergesortConstPtr->numParticles = numParticlesVal;
+
+    deviceContext->Unmap(offsetCalculationsSettingsBuffer, 0);
+    deviceContext->CSSetConstantBuffers(0, 1, &offsetCalculationsSettingsBuffer);
 }
 
 void OffsetCalculationComputeShader::unbind(ID3D11DeviceContext* dc)

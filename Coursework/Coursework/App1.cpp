@@ -240,6 +240,7 @@ void App1::sphSimulationComputePass()
 	//SPATIAL OFFSET CALCULATION
 	spatialOffsetCalculationComputeShader->setShaderParameters(renderer->getDeviceContext());
 	spatialOffsetCalculationComputeShader->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &particleSpatialOffsets);
+	spatialOffsetCalculationComputeShader->setOffsetCalculationsSettings(renderer->getDeviceContext(), simulationSettings.numParticles);
 	spatialOffsetCalculationComputeShader->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
 	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
 

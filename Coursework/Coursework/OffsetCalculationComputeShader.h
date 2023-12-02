@@ -11,16 +11,25 @@ public:
     ~OffsetCalculationComputeShader();
     void setShaderParameters(ID3D11DeviceContext* dc);
     void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<int>* particles);
+    void setOffsetCalculationsSettings(ID3D11DeviceContext* dc, int numParticlesVal);
     void unbind(ID3D11DeviceContext* dc);
     ID3D11ShaderResourceView* getComputeShaderOutput() { return offsetCalculationsOutputReadable; };
 
 private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
 
+    struct OffsetCalculationsSettingsBufferType {
+        int numParticles;
+        XMFLOAT3 padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    };
 
     //RW Structured Buffers-----------------------------------------------
     ID3D11Buffer* offsetCalculationsOutput;
     ID3D11ShaderResourceView* offsetCalculationsOutputReadable;
     ID3D11UnorderedAccessView* offsetCalculationsOutputWritable;
+
+
+    //Constant Buffer-----------------------------------------------------
+    ID3D11Buffer* offsetCalculationsSettingsBuffer;
 };
 
