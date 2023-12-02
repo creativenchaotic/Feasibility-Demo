@@ -135,34 +135,42 @@ float NearPressureFromDensity(float nearDensity)
 
 void ResolveCollisions(int particleIndex)
 {
-	// Transform position/velocity to the local space of the bounding box (scale not included)
-    float3 posLocal = mul(worldToLocal, float4(particleData[particleIndex].currentPosition, 1)).xyz;
-    float3 velocityLocal = mul(worldToLocal, float4(particleData[particleIndex].velocity, 0)).xyz;
-
-	// Calculate distance from box on each axis (negative values are inside box)
-    const float3 halfSize = 0.5;
-    const float3 edgeDst = halfSize - abs(posLocal);
-
 	// Resolve collisions
-    if (edgeDst.x <= 0)
+    //Resolving collisions in X-axis
+    if (particleData[particleIndex].currentPosition.x <= boundingBoxLeftSide)
     {
-        posLocal.x = halfSize.x * sign(posLocal.x);
-        velocityLocal.x *= -1 * collisionsDamping;
+        particleData[particleIndex].currentPosition.x = boundingBoxLeftSide;
+        particleData[particleIndex].velocity.x *= -1 * collisionsDamping;
     }
-    if (edgeDst.y <= 0)
+    if (particleData[particleIndex].currentPosition.x >= boundingBoxRightSide)
     {
-        posLocal.y = halfSize.y * sign(posLocal.y);
-        velocityLocal.y *= -1 * collisionsDamping;
+        particleData[particleIndex].currentPosition.x = boundingBoxRightSide;
+        particleData[particleIndex].velocity.x *= -1 * collisionsDamping;
     }
-    if (edgeDst.z <= 0)
+    
+    //Resolving collisions in Y-axis
+    if (particleData[particleIndex].currentPosition.y <= boundingBoxBottom)
     {
-        posLocal.z = halfSize.z * sign(posLocal.z);
-        velocityLocal.z *= -1 * collisionsDamping;
+        particleData[particleIndex].currentPosition.y = boundingBoxBottom;
+        particleData[particleIndex].velocity.y *= -1 * collisionsDamping;
     }
-
-	// Transform resolved position/velocity back to world space
-    particleData[particleIndex].currentPosition = mul(localToWorld, float4(posLocal, 1)).xyz;
-    particleData[particleIndex].velocity = mul(localToWorld, float4(velocityLocal, 0)).xyz;
+    if (particleData[particleIndex].currentPosition.y >= boundingBoxTop)
+    {
+        particleData[particleIndex].currentPosition.y = boundingBoxTop;
+        particleData[particleIndex].velocity.y *= -1 * collisionsDamping;
+    }
+    
+    //Resolving collisions in Z-axis
+    if (particleData[particleIndex].currentPosition.z <= boundingBoxFront)
+    {
+        particleData[particleIndex].currentPosition.z = boundingBoxFront;
+        particleData[particleIndex].velocity.z *= -1 * collisionsDamping;
+    }
+    if (particleData[particleIndex].currentPosition.z >= boundingBoxBack)
+    {
+        particleData[particleIndex].currentPosition.z = boundingBoxBack;
+        particleData[particleIndex].velocity.z *= -1 * collisionsDamping;
+    }
 
 }
 
@@ -448,8 +456,9 @@ void UpdatePositions(int3 thread)
 {
     if (thread.x >= numParticles)
         return;
-
-    particleData[thread.x].currentPosition += particleData[thread.x].velocity * deltaTime;
+    
+    //    particleData[thread.x].currentPosition += particleData[thread.x].velocity * deltaTime;
+    particleData[thread.x].currentPosition += particleData[thread.x].velocity * 1/1000;
     ResolveCollisions(thread.x);
 }
 
@@ -457,12 +466,12 @@ void UpdatePositions(int3 thread)
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
     ExternalForces(dispatchThreadID);
-    //UpdateSpatialHash(dispatchThreadID);
+    UpdateSpatialHash(dispatchThreadID);
     //TODO: Add GPU sort
     //CalculateDensities(dispatchThreadID);
     //CalculatePressureForce(dispatchThreadID);
     //CalculateViscosity(dispatchThreadID);
-    //UpdatePositions(dispatchThreadID);
+    UpdatePositions(dispatchThreadID);
 
 }
 

@@ -49,7 +49,7 @@ OutputType main(InputType input)
 {
     OutputType output;
 	
-    input.position += float4(particleData[particleIndex].predictedPosition, 0.0f);
+    input.position += float4(particleData[particleIndex].currentPosition, 0.0f);
 	
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
