@@ -339,7 +339,6 @@ void App1::gui()
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));
-	ImGui::Text("PARTICLE VELOCITY: %f", &simulationParticlesData[0].velocity);
 
 	//------------------------------------------------------------------------
 	//RENDER SETTINGS
