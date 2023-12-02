@@ -16,16 +16,8 @@ struct Particle
     float padding;
 };
 
-//StructuredBuffer<Particle> particleInput : register(t0);
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
 
-/*// Buffers
-RWStructuredBuffer<float3> Positions : register(u1);
-RWStructuredBuffer<float3> PredictedPositions : register(u2);
-RWStructuredBuffer<float3> Velocities : register(u3);
-RWStructuredBuffer<float2> Densities : register(u4); // Density, Near Density
-RWStructuredBuffer<float3> SpatialIndices : register(u5); // used for spatial hashing
-RWStructuredBuffer<int> SpatialOffsets : register(u6); // used for spatial hashing*/
 
 cbuffer cb_simConstants : register(b0)
 {
