@@ -224,10 +224,10 @@ void App1::sphSimulationComputePass()
 			int groupHeight = 2 * groupWidth - 1;
 
 			bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), simulationSettings.numParticles, groupWidth, groupHeight, stepIndex);
+			bitonicMergesort->compute(renderer->getDeviceContext(), pow(2, ceil(log(simulationParticlesData.size()) / log(2))) / 2, 1, 1);
 		}
 	}
-
-	bitonicMergesort->compute(renderer->getDeviceContext(), pow(2, ceil(log(simulationParticlesData.size()) / log(2)))/2, 1, 1);
+	
 	bitonicMergesort->unbind(renderer->getDeviceContext());
 
 	//SPH SIMULATION SECOND PASS
