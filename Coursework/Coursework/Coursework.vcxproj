@@ -172,6 +172,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PlaneMeshTessellated.cpp" />
     <ClCompile Include="SPHShader.cpp" />
+    <ClCompile Include="SPHSimulationComputeShaderSecondPass.cpp" />
     <ClCompile Include="SPH_Particle.cpp" />
     <ClCompile Include="SunShader.cpp" />
     <ClCompile Include="WaterShader.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="PlaneMeshTessellated.h" />
     <ClInclude Include="Externals.h" />
     <ClInclude Include="SPHShader.h" />
+    <ClInclude Include="SPHSimulationComputeShaderSecondPass.h" />
     <ClInclude Include="SPH_Particle.h" />
     <ClInclude Include="SunShader.h" />
     <ClInclude Include="TerrainManipulation.h" />
@@ -239,6 +241,16 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="SPHSimulationSecondPass_CS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="SunShader_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

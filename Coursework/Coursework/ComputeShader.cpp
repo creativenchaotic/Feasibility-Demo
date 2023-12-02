@@ -1,6 +1,5 @@
 #include "ComputeShader.h"
 
-//struct ParticleData; FIX ME
 
 ComputeShader::ComputeShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
