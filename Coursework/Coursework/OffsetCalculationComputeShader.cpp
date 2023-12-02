@@ -2,7 +2,7 @@
 
 OffsetCalculationComputeShader::OffsetCalculationComputeShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"ComputeShader.cso", NULL);
+	initShader(L"OffsetCalculationComputeShader.cso", NULL);
 }
 
 OffsetCalculationComputeShader::~OffsetCalculationComputeShader()

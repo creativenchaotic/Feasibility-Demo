@@ -33,6 +33,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	sphSimulationComputeShaderFirstPass = new ComputeShader(renderer->getDevice(), hwnd);
 	sphSimulationComputeShaderSecondPass = new SPHSimulationComputeShaderSecondPass(renderer->getDevice(), hwnd);
 	bitonicMergesort = new BitonicMergesort(renderer->getDevice(), hwnd);
+	spatialOffsetCalculationComputeShader = new OffsetCalculationComputeShader(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Confirgure directional light
@@ -121,6 +122,12 @@ App1::~App1()
 		delete bitonicMergesort;
 		bitonicMergesort = 0;
 	}
+
+	if (spatialOffsetCalculationComputeShader) {
+		delete spatialOffsetCalculationComputeShader;
+		spatialOffsetCalculationComputeShader = 0;
+	}
+
 }
 
 
@@ -229,6 +236,12 @@ void App1::sphSimulationComputePass()
 	}
 	
 	bitonicMergesort->unbind(renderer->getDeviceContext());
+
+	//SPATIAL OFFSET CALCULATION
+	spatialOffsetCalculationComputeShader->setShaderParameters(renderer->getDeviceContext());
+	spatialOffsetCalculationComputeShader->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &particleSpatialOffsets);
+	spatialOffsetCalculationComputeShader->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
+	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
 
 	//SPH SIMULATION SECOND PASS
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());

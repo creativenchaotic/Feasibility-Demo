@@ -139,5 +139,8 @@
     <FxCompile Include="BitonicMergesort.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+    <FxCompile Include="OffsetCalculationComputeShader.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

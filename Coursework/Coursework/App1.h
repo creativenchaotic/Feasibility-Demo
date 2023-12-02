@@ -14,6 +14,7 @@
 #include "ComputeShader.h"
 #include "SPHSimulationComputeShaderSecondPass.h"
 #include "BitonicMergesort.h"
+#include "OffsetCalculationComputeShader.h"
 
 class App1 : public BaseApplication
 {
@@ -64,6 +65,7 @@ private:
 	ComputeShader* sphSimulationComputeShaderFirstPass;
 	SPHSimulationComputeShaderSecondPass* sphSimulationComputeShaderSecondPass;
 	BitonicMergesort* bitonicMergesort;
+	OffsetCalculationComputeShader* spatialOffsetCalculationComputeShader;
 
 	//UI Values for SPH
 	SPHSimulationValues simulationSettings;
