@@ -2,6 +2,44 @@
 
 static const int NumThreads = 64;
 
+//SPATIAL 3D HASH----------------------------------------------------------------
+static const int3 offsets3D[27] =
+{
+    int3(-1, -1, -1),
+	int3(-1, -1, 0),
+	int3(-1, -1, 1),
+	int3(-1, 0, -1),
+	int3(-1, 0, 0),
+	int3(-1, 0, 1),
+	int3(-1, 1, -1),
+	int3(-1, 1, 0),
+	int3(-1, 1, 1),
+	int3(0, -1, -1),
+	int3(0, -1, 0),
+	int3(0, -1, 1),
+	int3(0, 0, -1),
+	int3(0, 0, 0),
+	int3(0, 0, 1),
+	int3(0, 1, -1),
+	int3(0, 1, 0),
+	int3(0, 1, 1),
+	int3(1, -1, -1),
+	int3(1, -1, 0),
+	int3(1, -1, 1),
+	int3(1, 0, -1),
+	int3(1, 0, 0),
+	int3(1, 0, 1),
+	int3(1, 1, -1),
+	int3(1, 1, 0),
+	int3(1, 1, 1)
+};
+
+// Constants used for hashing
+static const int hashK1 = 15823;
+static const int hashK2 = 9737333;
+static const int hashK3 = 440817757;
+
+
 struct Particle
 {
     int size;
@@ -12,7 +50,7 @@ struct Particle
     float nearDensity;
     float3 velocity;
     int spatialOffsets;
-    float3 spatialIndices;
+    int3 spatialIndices;
     float padding;
 };
 
@@ -46,52 +84,23 @@ cbuffer cb_simConstants : register(b0)
     float2 padding2;
 };
 
-//SPATIAL 3D HASH----------------------------------------------------------------
-int3 offsets3D[27] =
-{
-    int3(-1, -1, -1),
-	int3(-1, -1, 0),
-	int3(-1, -1, 1),
-	int3(-1, 0, -1),
-	int3(-1, 0, 0),
-	int3(-1, 0, 1),
-	int3(-1, 1, -1),
-	int3(-1, 1, 0),
-	int3(-1, 1, 1),
-	int3(0, -1, -1),
-	int3(0, -1, 0),
-	int3(0, -1, 1),
-	int3(0, 0, -1),
-	int3(0, 0, 0),
-	int3(0, 0, 1),
-	int3(0, 1, -1),
-	int3(0, 1, 0),
-	int3(0, 1, 1),
-	int3(1, -1, -1),
-	int3(1, -1, 0),
-	int3(1, -1, 1),
-	int3(1, 0, -1),
-	int3(1, 0, 0),
-	int3(1, 0, 1),
-	int3(1, 1, -1),
-	int3(1, 1, 0),
-	int3(1, 1, 1)
-};
-
-// Constants used for hashing
-uint hashK1 = 15823;
-uint hashK2 = 9737333;
-uint hashK3 = 440817757;
 
 // Convert floating point position into an integer cell coordinate
-int3 GetCell3D(float3 position, float radius)
+int3 GetCell3D(float3 position, float radius)//CHANGED THIS FUNCTION BC THERES AN ERROR SOMEWHERE
 {
+    /*int x = floor(position.x/radius);
+    int y = floor(position.y/ radius);
+    int z = floor(position.z/radius);
+    
+    return (int3(x,y,z));*/
+    
     return (int3) floor(position / radius);
 }
 
 // Hash cell coordinate to a single unsigned integer
 uint HashCell3D(int3 cell)
 {
+    //return ((abs(cell.x) * hashK1) + (abs(cell.y) * hashK2) + (abs(cell.z) * hashK3));
     cell = (uint3) cell;
     return (cell.x * hashK1) + (cell.y * hashK2) + (cell.z * hashK3);
 }
@@ -125,9 +134,11 @@ void UpdateSpatialHash(int3 thread)
 	// Update index buffer
     uint index = thread.x;
     int3 cell = GetCell3D(particleData[index].predictedPosition, smoothingRadius);
-    uint hash = HashCell3D(cell);
-    uint key = KeyFromHash(hash, numParticles);
-    particleData[thread.x].spatialIndices = uint3(index, hash, key);
+    int hash = HashCell3D(cell);
+    int key = KeyFromHash(hash, numParticles);
+    particleData[thread.x].spatialIndices.x = index;
+    particleData[thread.x].spatialIndices.y = hash;
+    particleData[thread.x].spatialIndices.z = key;
 }
 
 

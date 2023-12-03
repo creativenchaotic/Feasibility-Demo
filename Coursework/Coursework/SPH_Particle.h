@@ -1,6 +1,12 @@
 #pragma once
 #include "SphereMesh.h"
 
+struct int3 {
+    int index = 0;
+    int hash = 0;
+    int key = 0;
+};
+
 struct ParticleData {
     int size;
     XMFLOAT3 startPosition = XMFLOAT3(0.0f,0.0f,0.0f);
@@ -14,7 +20,7 @@ struct ParticleData {
     XMFLOAT3 velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
     int spatialOffsets = 0;
 
-    XMFLOAT3 spatialIndices = XMFLOAT3(0.0f,0.0f,0.0f);
+    int3 spatialIndices;
     float padding = 0.0f;
 
 };
