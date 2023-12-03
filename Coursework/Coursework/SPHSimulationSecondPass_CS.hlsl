@@ -19,6 +19,16 @@ struct Particle
 
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
 
+struct Entry
+{
+    float originalIndex;
+    float hash;
+    float key;
+};
+
+StructuredBuffer<Entry> particleIndices : register(t0);
+StructuredBuffer<int> particleOffsets : register(t1);
+
 
 cbuffer cb_simConstants : register(b0)
 {
@@ -422,11 +432,16 @@ void UpdatePositions(int3 thread)
     ResolveCollisions(thread.x);
 }
 
-
+void SetParticleDataOffsetsAndIndices(int3 thread)
+{
+    particleData[thread.x].spatialIndices = particleIndices[thread.x];
+    particleData[thread.x].spatialOffsets = particleOffsets[thread.x];
+}
 
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
+    SetParticleDataOffsetsAndIndices(dispatchThreadID);
     CalculateDensities(dispatchThreadID);
     CalculatePressureForce(dispatchThreadID);
     CalculateViscosity(dispatchThreadID);
