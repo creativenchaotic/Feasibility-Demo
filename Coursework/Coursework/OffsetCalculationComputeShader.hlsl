@@ -24,6 +24,18 @@ cbuffer cb_offsetCalculationsConstants : register(b0)
     float3 padding;
 }
 
+void settingParticleDataForNextComputeShader(int3 thread)
+{
+    particleData[thread.x].currentPosition = particleDataOutputFromBitonicMergesort[thread.x].currentPosition;
+    particleData[thread.x].density = particleDataOutputFromBitonicMergesort[thread.x].density;
+    particleData[thread.x].nearDensity = particleDataOutputFromBitonicMergesort[thread.x].nearDensity;
+    particleData[thread.x].padding = particleDataOutputFromBitonicMergesort[thread.x].padding;
+    particleData[thread.x].predictedPosition = particleDataOutputFromBitonicMergesort[thread.x].predictedPosition;
+    particleData[thread.x].size = particleDataOutputFromBitonicMergesort[thread.x].size;
+    particleData[thread.x].spatialIndices = particleDataOutputFromBitonicMergesort[thread.x].spatialIndices;
+    particleData[thread.x].startPosition = particleDataOutputFromBitonicMergesort[thread.x].startPosition;
+    particleData[thread.x].velocity = particleDataOutputFromBitonicMergesort[thread.x].velocity;
+}
 
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
@@ -40,4 +52,7 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     {
         particleData[key].spatialOffsets = i;
     }
+    
+    settingParticleDataForNextComputeShader(dispatchThreadID);
+
 }
