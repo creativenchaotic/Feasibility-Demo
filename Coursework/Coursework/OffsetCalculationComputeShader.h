@@ -1,5 +1,6 @@
 #pragma once
 #include "DXF.h"
+#include "SPH_Particle.h"
 
 using namespace DirectX;
 
@@ -10,7 +11,7 @@ public:
     OffsetCalculationComputeShader(ID3D11Device* device, HWND hwnd);
     ~OffsetCalculationComputeShader();
     void setShaderParameters(ID3D11DeviceContext* dc);
-    void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<int>* particles);
+    void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles);
     void setOffsetCalculationsSettings(ID3D11DeviceContext* dc, int numParticlesVal);
     void unbind(ID3D11DeviceContext* dc);
     ID3D11ShaderResourceView* getComputeShaderOutput() { return offsetCalculationsOutputReadable; };
