@@ -212,6 +212,7 @@ void App1::sphSimulationComputePass()
 	//BITONIC MERGESORT
 	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
+	bitonicMergesort->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());
 
 	int numStages = (int)log(pow(2, ceil(log(simulationParticlesData.size()) / log(2))));//This is meant to be NextPowerOfTwo() from Unity as c++ code but Im not sure if it works
 
@@ -240,7 +241,7 @@ void App1::sphSimulationComputePass()
 	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
-	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(), bitonicMergesort->getComputeShaderOutput(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
+	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
 	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
 	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());
 }
