@@ -110,7 +110,9 @@ void SPHSimulationComputeShaderSecondPass::unbind(ID3D11DeviceContext* dc)
     dc->CSSetShader(nullptr, nullptr, 0);
 }
 
-void SPHSimulationComputeShaderSecondPass::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRVOffsetsCalculationOutput)
+void SPHSimulationComputeShaderSecondPass::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimulationFirstPassOutput, ID3D11ShaderResourceView* computeShaderSRVBitonicMergesortParticleIndices, ID3D11ShaderResourceView* computeShaderSRVOffsetsCalculationOutput)
 {
-    deviceContext->CSSetShaderResources(0, 1, &computeShaderSRVOffsetsCalculationOutput);
+    deviceContext->CSSetShaderResources(0, 1, &sphSimulationFirstPassOutput);
+    deviceContext->CSSetShaderResources(1, 1, &computeShaderSRVBitonicMergesortParticleIndices);
+    deviceContext->CSSetShaderResources(2, 1, &computeShaderSRVOffsetsCalculationOutput);
 }
