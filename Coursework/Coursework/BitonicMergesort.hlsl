@@ -25,7 +25,7 @@ struct Entry
 };
 
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
-
+StructuredBuffer<Particle> particleDataOutputFromSPHSimFirstPass : register(t0);
 
 cbuffer cb_bitonicMergesortConstants : register(b0)
 {
@@ -51,18 +51,18 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     if (indexRight >= numParticles)
         return;
 
-    uint valueLeft = particleData[indexLeft].spatialIndices.z;
-    uint valueRight = particleData[indexRight].spatialIndices.z;
+    uint valueLeft = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.z;
+    uint valueRight = particleDataOutputFromSPHSimFirstPass[indexRight].spatialIndices.z;
 
 	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
         Entry temp;
-        temp.originalIndex = particleData[indexLeft].spatialIndices.x;
-        temp.hash = particleData[indexLeft].spatialIndices.y;
-        temp.key = particleData[indexLeft].spatialIndices.z;
+        temp.originalIndex = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.x;
+        temp.hash = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.y;
+        temp.key = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.z;
         
-        particleData[indexLeft].spatialIndices = particleData[indexRight].spatialIndices;
+        particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices = particleDataOutputFromSPHSimFirstPass[indexRight].spatialIndices;
         particleData[indexRight].spatialIndices.x = temp.originalIndex;
         particleData[indexRight].spatialIndices.y = temp.hash;
         particleData[indexRight].spatialIndices.z = temp.key;
