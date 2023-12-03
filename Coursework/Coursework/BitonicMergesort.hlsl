@@ -37,10 +37,8 @@ cbuffer cb_bitonicMergesortConstants : register(b0)
 
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
-{
-    Entry initialIndicesData[];
-    initialIndicesData[dispatchThreadID.x] = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x];
-    
+{   
+    particleData[dispatchThreadID.x] = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices;
     
     // Sort the given entries by their keys (smallest to largest)
     // This is done using bitonic merge sort, and takes multiple iterations
@@ -55,22 +53,28 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     if (indexRight >= numParticles)
         return;
 
-    uint valueLeft = initialIndicesData[indexLeft].key;
-    uint valueRight = initialIndicesData[indexRight].key;
+    uint valueLeft = particleData[indexLeft].z;
+    uint valueRight = particleData[indexRight].z;
 
 	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
-        Entry temp;
-        temp.originalIndex = initialIndicesData[indexLeft].originalIndex;
-        temp.hash = initialIndicesData[indexLeft].hash;
-        temp.key = initialIndicesData[indexLeft].key;
         
-        initialIndicesData[indexLeft] = initialIndicesData[indexRight];
+        //Entry temp = Entries[indexLeft];
+        //Entries[indexLeft] = Entries[indexRight];
+        //Entries[indexRight] = temp;
+        
+        Entry temp;
+        temp.originalIndex = particleData[indexLeft].x;
+        temp.hash = particleData[indexLeft].y;
+        temp.key = particleData[indexLeft].z;
+        
+        particleData[indexLeft] = particleData[indexRight];
         particleData[indexRight].x = temp.originalIndex;
         particleData[indexRight].y = temp.hash;
         particleData[indexRight].z = temp.key;
     }
+   
     
 
 }

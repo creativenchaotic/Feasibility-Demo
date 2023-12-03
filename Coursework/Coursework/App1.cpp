@@ -210,7 +210,7 @@ void App1::sphSimulationComputePass()
 
 	
 	//BITONIC MERGESORT
-	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
+	bitonicMergesort->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles);
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
 	bitonicMergesort->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());
 
