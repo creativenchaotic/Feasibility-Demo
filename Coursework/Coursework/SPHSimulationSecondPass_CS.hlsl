@@ -427,14 +427,16 @@ void UpdatePositions(int3 thread)
     if (thread.x >= numParticles)
         return;
     
-    //particleData[thread.x].currentPosition += particleData[thread.x].velocity * deltaTime;
-    particleData[thread.x].currentPosition += particleData[thread.x].velocity * 1 / 1000;
+    particleData[thread.x].currentPosition += particleData[thread.x].velocity * deltaTime;
     ResolveCollisions(thread.x);
 }
 
 void SetParticleDataOffsetsAndIndices(int3 thread)
 {
-    particleData[thread.x].spatialIndices = particleIndices[thread.x];
+    particleData[thread.x].spatialIndices.x = particleIndices[thread.x].originalIndex;
+    particleData[thread.x].spatialIndices.y = particleIndices[thread.x].hash;
+    particleData[thread.x].spatialIndices.z = particleIndices[thread.x].key;
+    
     particleData[thread.x].spatialOffsets = particleOffsets[thread.x];
 }
 

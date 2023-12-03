@@ -42,8 +42,14 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
 	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
-        Entry temp = particleIndices[indexLeft];
+        Entry temp;
+        temp.originalIndex= particleIndices[indexLeft].x;
+        temp.hash = particleIndices[indexLeft].y;
+        temp.key = particleIndices[indexLeft].z;
+        
         particleIndices[indexLeft] = particleIndices[indexRight];
-        particleIndices[indexRight] = temp;
+        particleIndices[indexRight].x = temp.originalIndex;
+        particleIndices[indexRight].y = temp.hash;
+        particleIndices[indexRight].z = temp.key;
     }
 }
