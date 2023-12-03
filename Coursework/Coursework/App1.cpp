@@ -228,22 +228,22 @@ void App1::sphSimulationComputePass()
 	}
 	
 	bitonicMergesort->unbind(renderer->getDeviceContext());
-
+	
 	//SPATIAL OFFSET CALCULATION
-	spatialOffsetCalculationComputeShader->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
+	spatialOffsetCalculationComputeShader->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles);
 	spatialOffsetCalculationComputeShader->setShaderParameters(renderer->getDeviceContext());
 	spatialOffsetCalculationComputeShader->setSimulationDataSRV(renderer->getDeviceContext(), bitonicMergesort->getComputeShaderOutput());//Passing otuput from bitonic mergesort to calculating offsets compute shader to do calculations
 	spatialOffsetCalculationComputeShader->setOffsetCalculationsSettings(renderer->getDeviceContext(), simulationSettings.numParticles);
 	spatialOffsetCalculationComputeShader->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
 	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
-
+	/*
 	//SPH SIMULATION SECOND PASS
 	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
 	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
 	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
-	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());
+	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());*/
 }
 
 void App1::renderSceneShaders()
