@@ -247,6 +247,7 @@ void App1::sphSimulationComputePass()
 	//SPH SIMULATION SECOND PASS
 	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
+	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
 	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(), bitonicMergesort->getComputeShaderOutput(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
 	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), simulationSettings.numParticles, 1, 1);
 	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());
