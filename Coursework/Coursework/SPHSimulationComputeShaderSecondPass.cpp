@@ -27,7 +27,7 @@ void SPHSimulationComputeShaderSecondPass::initShader(const wchar_t* cfile, cons
     renderer->CreateBuffer(&simConstantsBufferDesc, NULL, &simulationConstantsBuffer);
 }
 
-void SPHSimulationComputeShaderSecondPass::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles)//Called each time the number of particles is changed
+void SPHSimulationComputeShaderSecondPass::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles)//Called each time the number of particles is changed
 {
     //Creating a buffer to output the data from the compute shader
     D3D11_BUFFER_DESC bufferDesc = {};//Creating a buffer description to create the buffer from
@@ -36,9 +36,7 @@ void SPHSimulationComputeShaderSecondPass::createOutputUAVs(ID3D11Device* pd3dDe
     bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;//Setting how the buffer works
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     bufferDesc.StructureByteStride = sizeof(ParticleData);//make this the size of particle data//Setting the stride that the buffer needs to take when reading each element from memory
-    D3D11_SUBRESOURCE_DATA bufferInitData;
-    bufferInitData.pSysMem = particles->data();//Initial data that is getting passed into the buffer
-    pd3dDevice->CreateBuffer(&bufferDesc, (particles) ? &bufferInitData : nullptr, &particlesComputeShaderOutput);//Creates the buffer
+    pd3dDevice->CreateBuffer(&bufferDesc, nullptr, &particlesComputeShaderOutput);//Creates the buffer
 
     // Create SRV - Lets you read from the Buffer created
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
