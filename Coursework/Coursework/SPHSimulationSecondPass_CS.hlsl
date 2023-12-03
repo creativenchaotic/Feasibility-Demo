@@ -18,16 +18,7 @@ struct Particle
 };
 
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
-
-struct Entry
-{
-    float originalIndex;
-    float hash;
-    float key;
-};
-
-StructuredBuffer<Entry> particleIndices : register(t0);
-StructuredBuffer<int> particleOffsets : register(t1);
+StructuredBuffer<Particle> particleDataOutputFromOffsetCalculationShader : register(t0);
 
 
 cbuffer cb_simConstants : register(b0)
@@ -433,11 +424,8 @@ void UpdatePositions(int3 thread)
 
 void SetParticleDataOffsetsAndIndices(int3 thread)
 {
-    particleData[thread.x].spatialIndices.x = particleIndices[thread.x].originalIndex;
-    particleData[thread.x].spatialIndices.y = particleIndices[thread.x].hash;
-    particleData[thread.x].spatialIndices.z = particleIndices[thread.x].key;
-    
-    particleData[thread.x].spatialOffsets = particleOffsets[thread.x];
+    particleData[thread.x].spatialIndices = particleDataOutputFromOffsetCalculationShader[thread.x].spatialIndices;
+    particleData[thread.x].spatialOffsets = particleDataOutputFromOffsetCalculationShader[thread.x].spatialOffsets;
 }
 
 [numthreads(NumThreads, 1, 1)]
