@@ -14,6 +14,7 @@ public:
 	void setShaderParameters(ID3D11DeviceContext* dc);
 	void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<XMFLOAT3>* particles);
 	void setBitonicMergesortSettings(ID3D11DeviceContext* dc, int numParticlesVal, int groupWidthVal, int groupHeightVal, int stepIndexVal);
+	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return bitonicMergesortOutputReadable; };
 

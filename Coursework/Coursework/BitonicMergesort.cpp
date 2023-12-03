@@ -80,6 +80,12 @@ void BitonicMergesort::setBitonicMergesortSettings(ID3D11DeviceContext* deviceCo
 
 }
 
+void BitonicMergesort::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV)
+{
+    deviceContext->CSSetShaderResources(0, 1, &computeShaderSRV);
+
+}
+
 void BitonicMergesort::unbind(ID3D11DeviceContext* dc)
 {
 	// Unbind output from compute shader
