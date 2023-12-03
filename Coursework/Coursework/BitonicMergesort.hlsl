@@ -1,16 +1,31 @@
 static const int NumThreads = 128;
 
+struct Particle
+{
+    int size;
+    float3 startPosition;
+    float3 currentPosition;
+    float density;
+    float3 predictedPosition;
+    float nearDensity;
+    float3 velocity;
+    int spatialOffsets;
+    int3 spatialIndices; //x is the original index //y is the hash //z is the key
+    float padding;
+};
+
 struct Entry
 {
+    //x is the original index
+    //y is the hash
+    //z is the key
     float originalIndex;
     float hash;
     float key;
 };
 
-RWStructuredBuffer<float3> particleIndices : register(u0); //Data we pass to and from the compute shader
-//x is the original index
-//y is the hash
-//z is the key
+RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
+
 
 cbuffer cb_bitonicMergesortConstants : register(b0)
 {
@@ -36,20 +51,20 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     if (indexRight >= numParticles)
         return;
 
-    uint valueLeft = particleIndices[indexLeft].z;
-    uint valueRight = particleIndices[indexRight].z;
+    uint valueLeft = particleData[indexLeft].spatialIndices.z;
+    uint valueRight = particleData[indexRight].spatialIndices.z;
 
 	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
         Entry temp;
-        temp.originalIndex= particleIndices[indexLeft].x;
-        temp.hash = particleIndices[indexLeft].y;
-        temp.key = particleIndices[indexLeft].z;
+        temp.originalIndex = particleData[indexLeft].spatialIndices.x;
+        temp.hash = particleData[indexLeft].spatialIndices.y;
+        temp.key = particleData[indexLeft].spatialIndices.z;
         
-        particleIndices[indexLeft] = particleIndices[indexRight];
-        particleIndices[indexRight].x = temp.originalIndex;
-        particleIndices[indexRight].y = temp.hash;
-        particleIndices[indexRight].z = temp.key;
+        particleData[indexLeft].spatialIndices = particleData[indexRight].spatialIndices;
+        particleData[indexRight].spatialIndices.x = temp.originalIndex;
+        particleData[indexRight].spatialIndices.y = temp.hash;
+        particleData[indexRight].spatialIndices.z = temp.key;
     }
 }
