@@ -24,7 +24,7 @@ struct Entry
     float key;
 };
 
-RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
+RWStructuredBuffer<int3> particleData : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<Particle> particleDataOutputFromSPHSimFirstPass : register(t0);
 
 cbuffer cb_bitonicMergesortConstants : register(b0)
@@ -35,22 +35,13 @@ cbuffer cb_bitonicMergesortConstants : register(b0)
     int stepIndex;
 }
 
-void settingParticleDataForNextComputeShader(int3 thread)
-{
-    particleData[thread.x].currentPosition = particleDataOutputFromSPHSimFirstPass[thread.x].currentPosition;
-    particleData[thread.x].density = particleDataOutputFromSPHSimFirstPass[thread.x].density;
-    particleData[thread.x].nearDensity = particleDataOutputFromSPHSimFirstPass[thread.x].nearDensity;
-    particleData[thread.x].padding = particleDataOutputFromSPHSimFirstPass[thread.x].padding;
-    particleData[thread.x].predictedPosition = particleDataOutputFromSPHSimFirstPass[thread.x].predictedPosition;
-    particleData[thread.x].size = particleDataOutputFromSPHSimFirstPass[thread.x].size;
-    particleData[thread.x].spatialOffsets = particleDataOutputFromSPHSimFirstPass[thread.x].spatialOffsets;
-    particleData[thread.x].startPosition = particleDataOutputFromSPHSimFirstPass[thread.x].startPosition;
-    particleData[thread.x].velocity = particleDataOutputFromSPHSimFirstPass[thread.x].velocity;
-}
-
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
+    Entry initialIndicesData[];
+    initialIndicesData[dispatchThreadID.x] = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x];
+    
+    
     // Sort the given entries by their keys (smallest to largest)
     // This is done using bitonic merge sort, and takes multiple iterations
     uint i = dispatchThreadID.x;
@@ -64,23 +55,22 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     if (indexRight >= numParticles)
         return;
 
-    uint valueLeft = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.z;
-    uint valueRight = particleDataOutputFromSPHSimFirstPass[indexRight].spatialIndices.z;
+    uint valueLeft = initialIndicesData[indexLeft].key;
+    uint valueRight = initialIndicesData[indexRight].key;
 
 	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
         Entry temp;
-        temp.originalIndex = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.x;
-        temp.hash = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.y;
-        temp.key = particleDataOutputFromSPHSimFirstPass[indexLeft].spatialIndices.z;
+        temp.originalIndex = initialIndicesData[indexLeft].originalIndex;
+        temp.hash = initialIndicesData[indexLeft].hash;
+        temp.key = initialIndicesData[indexLeft].key;
         
-        particleData[indexLeft].spatialIndices = particleData[indexRight].spatialIndices;
-        particleData[indexRight].spatialIndices.x = temp.originalIndex;
-        particleData[indexRight].spatialIndices.y = temp.hash;
-        particleData[indexRight].spatialIndices.z = temp.key;
+        initialIndicesData[indexLeft] = initialIndicesData[indexRight];
+        particleData[indexRight].x = temp.originalIndex;
+        particleData[indexRight].y = temp.hash;
+        particleData[indexRight].z = temp.key;
     }
     
-    settingParticleDataForNextComputeShader(dispatchThreadID);
 
 }
