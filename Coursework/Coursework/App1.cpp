@@ -238,7 +238,7 @@ void App1::sphSimulationComputePass()
 	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
 	
 	//SPH SIMULATION SECOND PASS
-	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles, &simulationParticlesData);
+	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), simulationSettings.numParticles);
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), simulationSettings.numParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
 	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(),sphSimulationComputeShaderFirstPass->getComputeShaderOutput(), bitonicMergesort->getComputeShaderOutput(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
