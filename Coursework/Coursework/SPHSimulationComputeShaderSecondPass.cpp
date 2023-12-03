@@ -109,3 +109,9 @@ void SPHSimulationComputeShaderSecondPass::unbind(ID3D11DeviceContext* dc)
     // Disable Compute Shader
     dc->CSSetShader(nullptr, nullptr, 0);
 }
+
+void SPHSimulationComputeShaderSecondPass::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRVspatialIndices, ID3D11ShaderResourceView* computeShaderSRVspatialOffsets)
+{
+    deviceContext->CSSetShaderResources(0, 1, &computeShaderSRVspatialIndices);
+    deviceContext->CSSetShaderResources(1, 1, &computeShaderSRVspatialOffsets);
+}
