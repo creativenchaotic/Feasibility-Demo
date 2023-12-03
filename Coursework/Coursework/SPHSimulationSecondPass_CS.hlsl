@@ -59,7 +59,7 @@ cbuffer cb_simConstants : register(b0)
 
 
 //SPATIAL 3D HASH----------------------------------------------------------------
-int3 offsets3D[27] =
+static const int3 offsets3D[27] =
 {
     int3(-1, -1, -1),
 	int3(-1, -1, 0),
@@ -91,9 +91,9 @@ int3 offsets3D[27] =
 };
 
 // Constants used for hashing
-uint hashK1 = 15823;
-uint hashK2 = 9737333;
-uint hashK3 = 440817757;
+static const uint hashK1 = 15823;
+static const uint hashK2 = 9737333;
+static const uint hashK3 = 440817757;
 
 // Convert floating point position into an integer cell coordinate
 int3 GetCell3D(float3 position, float radius)
@@ -115,7 +115,7 @@ uint KeyFromHash(uint hash, uint tableSize)
 
 //----------------------------------------------------------------------------
 
-float PI = 3.1415926;
+static const float PI = 3.1415926f;
 
  //HELPER FUNCTIONS-----------------------------------------------------------
 void ResolveCollisions(int particleIndex)
