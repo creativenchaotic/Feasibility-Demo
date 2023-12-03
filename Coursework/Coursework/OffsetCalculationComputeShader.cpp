@@ -84,3 +84,8 @@ void OffsetCalculationComputeShader::unbind(ID3D11DeviceContext* dc)
     dc->CSSetShader(nullptr, nullptr, 0);
 }
 
+void OffsetCalculationComputeShader::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV)
+{
+    deviceContext->CSSetShaderResources(0, 1, &computeShaderSRV);
+}
+

@@ -14,6 +14,7 @@ public:
     void setOffsetCalculationsSettings(ID3D11DeviceContext* dc, int numParticlesVal);
     void unbind(ID3D11DeviceContext* dc);
     ID3D11ShaderResourceView* getComputeShaderOutput() { return offsetCalculationsOutputReadable; };
+    void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
 
 private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
