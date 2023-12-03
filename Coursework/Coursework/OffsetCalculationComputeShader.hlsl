@@ -1,15 +1,22 @@
 static const int NumThreads = 128;
 
-RWStructuredBuffer<int> particleOffsets : register(u0); //Data we pass to and from the compute shader
-
-struct Entry
+struct Particle
 {
-    float originalIndex;
-    float hash;
-    float key;
+    int size;
+    float3 startPosition;
+    float3 currentPosition;
+    float density;
+    float3 predictedPosition;
+    float nearDensity;
+    float3 velocity;
+    int spatialOffsets;
+    int3 spatialIndices; //x is the original index //y is the hash //z is the key
+    float padding;
 };
 
-StructuredBuffer<Entry> particleIndices : register(t0);
+RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
+StructuredBuffer<Particle> particleDataOutputFromBitonicMergesort : register(t0);
+
 
 cbuffer cb_offsetCalculationsConstants : register(b0)
 {
@@ -27,10 +34,10 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     }
     uint i = dispatchThreadID.x;
 
-    uint key = particleIndices[i].key;
-    uint keyPrev = i == 0 ? 9999999 : particleIndices[i - 1].key;
+    uint key = particleDataOutputFromBitonicMergesort[i].spatialIndices.z;
+    uint keyPrev = i == 0 ? 9999999 : particleDataOutputFromBitonicMergesort[i - 1].spatialIndices.z;
     if (key != keyPrev)
     {
-        particleOffsets[key] = i;
+        particleData[key].spatialOffsets = i;
     }
 }
