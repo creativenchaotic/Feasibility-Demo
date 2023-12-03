@@ -29,7 +29,7 @@ public:
 	void initialiseSPHParticles();
 	void sphSimulationComputePass();
 	void renderSceneShaders();
-
+	int NextPowerOfTwo(int value);
 
 protected:
 	bool render();

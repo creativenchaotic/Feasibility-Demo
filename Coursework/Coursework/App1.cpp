@@ -200,6 +200,17 @@ void App1::initialiseSPHParticles()
 	sphSimulationComputeShaderFirstPass->createOutputUAVs(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
 }
 
+int App1::NextPowerOfTwo(int value)
+{
+	value -= 1;
+	value |= value >> 16;
+	value |= value >> 8;
+	value |= value >> 4;
+	value |= value >> 2;
+	value |= value >> 1;
+	return value + 1;
+}
+
 void App1::sphSimulationComputePass()
 {
 	//SPH SIMULATION FIRST PASS
@@ -214,7 +225,7 @@ void App1::sphSimulationComputePass()
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
 	bitonicMergesort->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());
 
-	int numStages = (int)log(pow(2, ceil(log(simulationParticlesData.size()) / log(2))));//This is meant to be NextPowerOfTwo() from Unity as c++ code but Im not sure if it works
+	int numStages = (int)log(NextPowerOfTwo(simulationSettings.numParticles));//This is meant to be NextPowerOfTwo() from Unity as c++ code but Im not sure if it works
 
 	for (int stageIndex = 0; stageIndex < numStages; stageIndex++) {
 		for (int stepIndex = 0; stepIndex < stageIndex + 1; stepIndex++) {
@@ -349,6 +360,8 @@ void App1::renderSceneShaders()
 	// Present the rendered scene to the screen.
 	renderer->endScene();
 }
+
+
 
 //Final scene render
 bool App1::render()
