@@ -13,7 +13,7 @@ struct Particle
     float nearDensity;
     float3 velocity;
     int spatialOffsets;
-    float3 spatialIndices;
+    uint3 spatialIndices;
     float padding;
 };
 
@@ -90,6 +90,18 @@ static const uint hashK3 = 440817757;
 // Convert floating point position into an integer cell coordinate
 int3 GetCell3D(float3 position, float radius)
 {
+    //position = abs(position);
+    //float x = floor(position.x / radius);
+    //float y = floor(position.y / radius);
+    //float z = floor(position.z / radius);
+    
+    //int ix = (int) x;
+    //int iy = (int) y;
+    //int iz = (int) z;
+    
+    //return int3(x, y, z);
+        
+    //original
     return (int3) floor(position / radius);
 }
 
@@ -419,7 +431,12 @@ void UpdatePositions(int3 thread)
     if (thread.x >= numParticles)
         return;
     
-    particleData[thread.x].currentPosition += particleData[thread.x].velocity * deltaTime;
+    float3 CurrentParticle = particleData[thread.x].currentPosition;
+    float3 DeltaPosition = particleData[thread.x].velocity * deltaTime;
+    
+    particleData[thread.x].currentPosition = CurrentParticle + DeltaPosition;
+    
+    //particleData[thread.x].currentPosition += particleData[thread.x].velocity * deltaTime;
     ResolveCollisions(thread.x);
 }
 
@@ -433,7 +450,10 @@ void SetParticleDataOffsetsAndIndices(int3 thread)
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
 {
+
+  
     SetParticleDataOffsetsAndIndices(dispatchThreadID);
+   
     CalculateDensities(dispatchThreadID);
     CalculatePressureForce(dispatchThreadID);
     CalculateViscosity(dispatchThreadID);

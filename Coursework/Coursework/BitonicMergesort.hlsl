@@ -25,6 +25,8 @@ struct Entry
 };
 
 RWStructuredBuffer<int3> particleData : register(u0); //Data we pass to and from the compute shader
+//RWStructuredBuffer<int> debugData : register(u0);
+
 StructuredBuffer<Particle> particleDataOutputFromSPHSimFirstPass : register(t0);
 
 cbuffer cb_bitonicMergesortConstants : register(b0)
@@ -35,10 +37,10 @@ cbuffer cb_bitonicMergesortConstants : register(b0)
     int stepIndex;
 }
 
-[numthreads(NumThreads, 1, 1)]
-void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
-{   
+void bitonicMergesort(int3 dispatchThreadID)
+{
     particleData[dispatchThreadID.x] = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices;
+    
     
     // Sort the given entries by their keys (smallest to largest)
     // This is done using bitonic merge sort, and takes multiple iterations
@@ -53,6 +55,7 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     if (indexRight >= numParticles)
         return;
 
+    
     uint valueLeft = particleData[indexLeft].z;
     uint valueRight = particleData[indexRight].z;
 
@@ -75,6 +78,30 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
         particleData[indexRight].z = temp.key;
     }
    
-    
+    /*
+    uint valueLeft = debugData[indexLeft];
+    uint valueRight = debugData[indexRight];
+
+	// Swap entries if value is descending
+    if (valueLeft > valueRight)
+    {
+        
+        //Entry temp = Entries[indexLeft];
+        //Entries[indexLeft] = Entries[indexRight];
+        //Entries[indexRight] = temp;
+        
+        int temp;
+        temp = debugData[indexLeft];
+
+        debugData[indexLeft] = debugData[indexRight];
+        debugData[indexRight] = temp;
+    }*/
+
+}
+
+[numthreads(NumThreads, 1, 1)]
+void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
+{   
+    bitonicMergesort(dispatchThreadID);
 
 }

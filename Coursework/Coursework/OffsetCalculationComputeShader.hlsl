@@ -17,7 +17,6 @@ struct Particle
 RWStructuredBuffer<int> particleOffsets : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<int3> particleIndicesOutputFromBitonicMergesort : register(t0);
 
-
 cbuffer cb_offsetCalculationsConstants : register(b0)
 {
     int numParticles;
@@ -34,7 +33,7 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     uint i = dispatchThreadID.x;
 
     uint key = particleIndicesOutputFromBitonicMergesort[i].z;
-    uint keyPrev = i == 0 ? 9999999 : particleIndicesOutputFromBitonicMergesort[i - 1].z;
+    uint keyPrev = (i == 0) ? 9999999 : particleIndicesOutputFromBitonicMergesort[i - 1].z;
     if (key != keyPrev)
     {
         particleOffsets[key] = i;

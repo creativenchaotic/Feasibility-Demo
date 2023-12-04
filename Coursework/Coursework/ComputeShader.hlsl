@@ -35,9 +35,9 @@ static const int3 offsets3D[27] =
 };
 
 // Constants used for hashing
-static const int hashK1 = 15823;
-static const int hashK2 = 9737333;
-static const int hashK3 = 440817757;
+static const uint hashK1 = 15823;
+static const uint hashK2 = 9737333;
+static const uint hashK3 = 440817757;
 
 
 struct Particle
@@ -49,13 +49,13 @@ struct Particle
     float3 predictedPosition;
     float nearDensity;
     float3 velocity;
-    int spatialOffsets;
-    int3 spatialIndices;
+    uint spatialOffsets;
+    uint3 spatialIndices;
     float padding;
 };
 
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
-
+StructuredBuffer<Particle> sphSimulationSecondPassOutput : register(t0);
 
 cbuffer cb_simConstants : register(b0)
 {
@@ -81,26 +81,32 @@ cbuffer cb_simConstants : register(b0)
 
     float boundingBoxFront;
     float boundingBoxBack;
-    float2 padding2;
+    float isFirstIteration;
+    float padding2;
 };
 
 
 // Convert floating point position into an integer cell coordinate
 int3 GetCell3D(float3 position, float radius)//CHANGED THIS FUNCTION BC THERES AN ERROR SOMEWHERE
-{
-    /*int x = floor(position.x/radius);
-    int y = floor(position.y/ radius);
-    int z = floor(position.z/radius);
+{    
+   // position = abs(position);
+   // float x = floor(position.x / radius);
+   // float y = floor(position.y / radius);
+   // float z = floor(position.z / radius);
     
-    return (int3(x,y,z));*/
+    //int ix = (int) x;
+    //int iy = (int) y;
+    //int iz = (int) z;
     
+    //original
     return (int3) floor(position / radius);
+    
+    //return int3(x,y,z);
 }
 
 // Hash cell coordinate to a single unsigned integer
 uint HashCell3D(int3 cell)
 {
-    //return ((abs(cell.x) * hashK1) + (abs(cell.y) * hashK2) + (abs(cell.z) * hashK3));
     cell = (uint3) cell;
     return (cell.x * hashK1) + (cell.y * hashK2) + (cell.z * hashK3);
 }
@@ -124,8 +130,8 @@ void ExternalForces(int3 thread)
 }
 
 
-void UpdateSpatialHash(int3 thread)
-{
+void UpdateSpatialHash(uint3 thread)
+{   
     if (thread.x >= numParticles)
         return;
 
@@ -136,15 +142,23 @@ void UpdateSpatialHash(int3 thread)
     int3 cell = GetCell3D(particleData[index].predictedPosition, smoothingRadius);
     int hash = HashCell3D(cell);
     int key = KeyFromHash(hash, numParticles);
-    particleData[thread.x].spatialIndices.x = index;
-    particleData[thread.x].spatialIndices.y = hash;
-    particleData[thread.x].spatialIndices.z = key;
+    particleData[thread.x].spatialIndices = uint3(index, hash, key);
 }
 
+void setValuesFromPreviousIterationToCurrentIteration(int3 thread)
+{
+    particleData[thread.x] = (Particle)sphSimulationSecondPassOutput[thread.x];
+}
 
 [numthreads(NumThreads, 1, 1)]
-void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
+void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
+    //TODO: Check if the buffer from the previous iteration of the simulation is empty
+    if (isFirstIteration == 0)
+    {
+        setValuesFromPreviousIterationToCurrentIteration(dispatchThreadID);
+    }
+        
     ExternalForces(dispatchThreadID);
     UpdateSpatialHash(dispatchThreadID);
 }

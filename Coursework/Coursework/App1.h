@@ -30,6 +30,8 @@ public:
 	void sphSimulationComputePass();
 	void renderSceneShaders();
 	int NextPowerOfTwo(int value);
+	float logarithm(int x, int base);
+	void runSimulationStep(float frameTime);
 
 protected:
 	bool render();
@@ -150,6 +152,7 @@ private:
 
 
 	GUISettings guiSettings;
+	float isFirstIteration = 1.0f;
 };
 
 #endif

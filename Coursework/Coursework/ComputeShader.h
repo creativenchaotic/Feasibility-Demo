@@ -13,7 +13,8 @@ public:
 
 	void setShaderParameters(ID3D11DeviceContext* dc);
 	void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles, std::vector<ParticleData>* particles);
-	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping,float smoothingRadiusVal, float targetDensityVal,float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, float bb_Top,float bb_Bottom,float bb_LeftSide, float bb_rightSide, float bb_Back, float bb_front);//Used to pass in constant variables such as gravity or damping values
+	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
+	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping,float smoothingRadiusVal, float targetDensityVal,float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, float bb_Top,float bb_Bottom,float bb_LeftSide, float bb_rightSide, float bb_Back, float bb_front, int isFirstIterationVal);//Used to pass in constant variables such as gravity or damping values
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return particlesOutputReadable; };
 
@@ -44,7 +45,8 @@ private:
 
 		float boundingBoxFront;
 		float boundingBoxBack;
-		XMFLOAT2 padding2 = XMFLOAT2(0.0f,0.0f);
+		float isFirstIteration;
+		float padding2 = 0.0f;
 	};
 
 	//RW Structured Buffers-----------------------------------------------

@@ -20,12 +20,12 @@ struct SPHSimulationValues {
 	float pressureMultiplier = 288.f;
 	float nearPressureMultiplier = 2.25f;
 	float viscosityStrength = 0.001f;
-	float edgeForce;
-	float edgeForceDst;
+	float edgeForce = 0.0f;
+	float edgeForceDst = 0.0f;
 
 	float timeScale = 1.f;
-	bool fixedTimeStep;
 	int iterationsPerFrame = 3;
+	float deltaTime;
 };
 
 struct SimulationBoundingBox {

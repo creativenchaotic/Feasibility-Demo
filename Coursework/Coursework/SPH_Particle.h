@@ -1,10 +1,10 @@
 #pragma once
 #include "SphereMesh.h"
 
-struct int3 {
-    int index = 0;
-    int hash = 0;
-    int key = 0;
+struct uint3 {
+    unsigned int index = 0;
+    unsigned int hash = 0;
+    unsigned int key = 0;
 };
 
 struct ParticleData {
@@ -18,9 +18,9 @@ struct ParticleData {
     float nearDensity = 0.0f;
 
     XMFLOAT3 velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    int spatialOffsets = 0;
+    unsigned int spatialOffsets = 0;
 
-    int3 spatialIndices;
+    uint3 spatialIndices;
     float padding = 0.0f;
 
 };

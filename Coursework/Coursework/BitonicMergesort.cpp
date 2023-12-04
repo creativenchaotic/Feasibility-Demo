@@ -28,6 +28,7 @@ void BitonicMergesort::initShader(const wchar_t* cfile, const wchar_t* blank)
 void BitonicMergesort::setShaderParameters(ID3D11DeviceContext* dc)
 {
 	dc->CSSetUnorderedAccessViews(0, 1, &bitonicMergesortOutputWritable, 0);//Same as UAVs
+    //dc->CSSetUnorderedAccessViews(0, 1, &debugBufferWritable, 0);//Same as UAVs
 }
 
 void BitonicMergesort::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles)
@@ -35,11 +36,11 @@ void BitonicMergesort::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticl
 
     //Creating a buffer to output the data from the compute shader
     D3D11_BUFFER_DESC bufferDesc = {};//Creating a buffer description to create the buffer from
-    bufferDesc.ByteWidth = numParticles * sizeof(int3);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
+    bufferDesc.ByteWidth = numParticles * sizeof(uint3);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;//Setting how the buffer works
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-    bufferDesc.StructureByteStride = sizeof(int3);//make this the size of particle data//Setting the stride that the buffer needs to take when reading each element from memory
+    bufferDesc.StructureByteStride = sizeof(uint3);//make this the size of particle data//Setting the stride that the buffer needs to take when reading each element from memory
     pd3dDevice->CreateBuffer(&bufferDesc, nullptr, &bitonicMergesortOutput);//Creates the buffer
 
     // Create SRV - Lets you read from the Buffer created
@@ -55,6 +56,37 @@ void BitonicMergesort::createOutputUAVs(ID3D11Device* pd3dDevice, int numParticl
     uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
     uavDesc.Buffer.NumElements = numParticles;
     pd3dDevice->CreateUnorderedAccessView(*&bitonicMergesortOutput, &uavDesc, &bitonicMergesortOutputWritable);//Creates the unordered access view so you can write to the buffer
+
+}
+
+void BitonicMergesort::createDebugUAV(ID3D11Device* pd3dDevice)
+{
+    int testArray[8] = {0, 12, 3, 8, 2 , 7, 9, 1};
+
+    //Creating a buffer to output the data from the compute shader
+    D3D11_BUFFER_DESC bufferDesc = {};//Creating a buffer description to create the buffer from
+    bufferDesc.ByteWidth = 8 * sizeof(int);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;//Setting how the buffer works
+    bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    bufferDesc.StructureByteStride = sizeof(int);//make this the size of particle data//Setting the stride that the buffer needs to take when reading each element from memory
+    D3D11_SUBRESOURCE_DATA bufferInitData;
+    bufferInitData.pSysMem = testArray;//Initial data that is getting passed into the buffer
+    pd3dDevice->CreateBuffer(&bufferDesc, &bufferInitData, &debugBuffer);//Creates the buffer
+
+    // Create SRV - Lets you read from the Buffer created
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    srvDesc.Buffer.ElementWidth = 8;
+    pd3dDevice->CreateShaderResourceView(*&debugBuffer, &srvDesc, &debugBufferReadable);//Creates the shader resource view from the buffer so you can read values
+
+    // Create UAV - Lets you write from the compute shader
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+    uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+    uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    uavDesc.Buffer.NumElements = 8;
+    pd3dDevice->CreateUnorderedAccessView(*&debugBuffer, &uavDesc, &debugBufferWritable);//Creates the unordered access view so you can write to the buffer
 
 }
 
