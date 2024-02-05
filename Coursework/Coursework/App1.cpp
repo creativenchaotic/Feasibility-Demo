@@ -36,7 +36,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	spatialOffsetCalculationComputeShader = new OffsetCalculationComputeShader(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
-	// Confirgure directional light
+	// Configure directional light
 	directionalLight = new Light();
 	directionalLight->setDiffuseColour(directionalLightValues.lightColour.x, directionalLightValues.lightColour.y, directionalLightValues.lightColour.z, directionalLightValues.lightColour.w);
 	directionalLight->setAmbientColour(directionalLightValues.lightAmbientColour.x, directionalLightValues.lightAmbientColour.y, directionalLightValues.lightAmbientColour.z, directionalLightValues.lightAmbientColour.w);
@@ -56,7 +56,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	spotlight->generateProjectionMatrix(0.1f, 600.f);
 	spotlight->setPosition(spotlightPosition.x,spotlightPosition.y,spotlightPosition.z);
 
-	initialiseSPHParticles();//DO THIS LAST
+	initialiseSPHParticles();//DO THIS LAST. It initialises the SPH particles and places them in the scene
 }
 
 
@@ -152,14 +152,14 @@ bool App1::frame()
 }
 
 
-void App1::rebuildWaterPlane()
+void App1::rebuildWaterPlane()//Feasibility Demo water plane that is used just to see what it might look like in the end
 {
 	delete water;
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 }
 
 
-void App1::rebuildSPHParticles()
+void App1::rebuildSPHParticles()//Used for when the number of particles is changed
 {
 	simulationParticles.clear();
 
@@ -168,8 +168,10 @@ void App1::rebuildSPHParticles()
 }
 
 
-void App1::initialiseSPHParticles()
+void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles when initialising them
 {
+
+	//Placing the SPH particles as a grid based on how many particles there should be per axis
 	if (currentNumParticles!=0) {
 		
 		float particleSpacing = simulationSettings.particleSpacing;
@@ -184,18 +186,22 @@ void App1::initialiseSPHParticles()
 					float ty = y / (simulationSettings.numParticlesPerAxis - 1.f);
 					float tz = z / (simulationSettings.numParticlesPerAxis - 1.f);
 
+					//sizeOfSpawner is the size of the spawn bow that the particles get spawned in
 					float px = (tx - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.x;
 					float py = (ty - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.y;
 					float pz = (tz - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.z;
 
-					sphParticle->setStartPosition(XMFLOAT3(px+20, py+20, pz+20));
-					simulationParticles.push_back(sphParticle);
-					simulationParticlesData.push_back(sphParticle->particleData);
+					sphParticle->setStartPosition(XMFLOAT3(px+20, py+20, pz+20));//Setting the start position of the particles
+					simulationParticles.push_back(sphParticle);//Adding the particle created to a vector of SPH particles
+					simulationParticlesData.push_back(sphParticle->particleData);//Adding the SPH particle data to a vector of SPH particle datas
 				}
 			}
 		}
 	}
 
+	//----------------------------------------------------------
+	//CREATING OUTPUT UAVs FOR THE COMPUTE SHADERS
+	// 
 	//sphSimulationComputeShader->createBuffer(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
 	sphSimulationComputeShaderFirstPass->createOutputUAVs(renderer->getDevice(), currentNumParticles, &simulationParticlesData);
 	bitonicMergesort->createOutputUAVs(renderer->getDevice(), currentNumParticles);
@@ -204,7 +210,7 @@ void App1::initialiseSPHParticles()
 
 }
 
-void App1::runSimulationStep(float frameTime)
+void App1::runSimulationStep(float frameTime)//Used to run the simulation multiple times per frame since Sebastian Lague does it in his simulation
 {
 	float timeStep = frameTime / simulationSettings.iterationsPerFrame * simulationSettings.timeScale;
 
@@ -216,7 +222,8 @@ void App1::runSimulationStep(float frameTime)
 	}
 }
 
-
+//-------------------------------------------
+//Used for the bitonic mergesort
 int App1::NextPowerOfTwo(int value)
 {
 	value -= 1;
@@ -234,26 +241,32 @@ float App1::logarithm(int x, int base)
 	answer = log10(x) / log10(base);
 	return answer;
 }
+//-------------------------------------------
 
 
-void App1::sphSimulationComputePass()
+
+void App1::sphSimulationComputePass()//Runs all the compute shaders needed to run the SPH simulation
 {
-	//SPH SIMULATION FIRST PASS
+	//SPH SIMULATION FIRST PASS----------------------------------------
+	//Sets the output UAV for the compute shader
 	sphSimulationComputeShaderFirstPass->setShaderParameters(renderer->getDeviceContext());
-	sphSimulationComputeShaderFirstPass->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderSecondPass->getComputeShaderOutput());
+	//Sets the SRV for the compute shader
+	sphSimulationComputeShaderFirstPass->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderSecondPass->getComputeShaderOutput());//Output data from the final compute pass of the SPH simulation gets fed back into the start of the simulation
+	//Passes simulation values into compute shader buffer
 	sphSimulationComputeShaderFirstPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, isFirstIteration);
+	//Dispatches the shader
 	sphSimulationComputeShaderFirstPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
 	sphSimulationComputeShaderFirstPass->unbind(renderer->getDeviceContext());
 
 	
-	//BITONIC MERGESORT
-	
+	//BITONIC MERGESORT------------------------------------------------
+	//Sets the SRV for the compute shader
 	bitonicMergesort->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());
-	//bitonicMergesort->createDebugUAV(renderer->getDevice());
+	//Sets the output UAV for the compute shader
+	//bitonicMergesort->createDebugUAV(renderer->getDevice()); // UAV used for debugging. Contains a small number of unordered numbers to make sure the bitonic mergesort works 
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
-
-	//bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), currentNumParticles, 0, 0, 0);
-	//bitonicMergesort->compute(renderer->getDeviceContext(),currentNumParticles, 1, 1);
+	//bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), currentNumParticles, 0, 0, 0);//Used for debugging to make sure the bitonic mergesort works
+	//bitonicMergesort->compute(renderer->getDeviceContext(),currentNumParticles, 1, 1);//Used with line above to make sure that the bitonic mergesort works
 
 	
 	// Launch each step of the sorting algorithm (once the previous step is complete)
@@ -268,6 +281,7 @@ void App1::sphSimulationComputePass()
 			int groupWidth = 1 << (stageIndex - stepIndex);
 			int groupHeight = 2 * groupWidth - 1;
 
+			//Set the size of the groups and steps in the bitonic mergesort compute shader
 			bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), currentNumParticles, groupWidth, groupHeight, stepIndex);
 
 			//Run the pair-wise sorting step
@@ -277,14 +291,14 @@ void App1::sphSimulationComputePass()
 	
 	bitonicMergesort->unbind(renderer->getDeviceContext());
 	
-	//SPATIAL OFFSET CALCULATION
+	//SPATIAL OFFSET CALCULATION-----------------
 	spatialOffsetCalculationComputeShader->setShaderParameters(renderer->getDeviceContext());
 	spatialOffsetCalculationComputeShader->setSimulationDataSRV(renderer->getDeviceContext(), bitonicMergesort->getComputeShaderOutput());//Passing otuput from bitonic mergesort to calculating offsets compute shader to do calculations
 	spatialOffsetCalculationComputeShader->setOffsetCalculationsSettings(renderer->getDeviceContext(), currentNumParticles);
 	spatialOffsetCalculationComputeShader->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
 	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
 	
-	//SPH SIMULATION SECOND PASS
+	//SPH SIMULATION SECOND PASS-----------------
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
 	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(),sphSimulationComputeShaderFirstPass->getComputeShaderOutput(), bitonicMergesort->getComputeShaderOutput(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
@@ -342,6 +356,7 @@ void App1::renderSceneShaders()
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
 
 	//WATER PLANE-----------------------------------------------------------------------------
+	//Currently only used for the feasibility demo to show what a water plane might look like once in the scene and simulating
 	if (guiSettings.displayWaterSurface) {
 		renderer->setAlphaBlending(true);
 		water->sendData(renderer->getDeviceContext());
@@ -357,8 +372,6 @@ void App1::renderSceneShaders()
 	//SPH PARTICLES---------------------------------------------------------------------------
 	if (guiSettings.displaySPHSimulationParticles) {
 		renderer->setAlphaBlending(true);
-
-		//TODO: SET NEW POSITIONS POST-COMPUTE SHADER TO PARTICLES
 
 		for (int i = 0; i < currentNumParticles; i++) {
 
@@ -399,16 +412,15 @@ void App1::renderSceneShaders()
 }
 
 
-
 //Final scene render
 bool App1::render()
 {
 	//Add delta time
 	time += timer->getTime();
 
-	sphSimulationComputePass();
+	sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
-	renderSceneShaders();
+	renderSceneShaders();//Renders the actual water simulation in the scene
 
 	return true;
 }

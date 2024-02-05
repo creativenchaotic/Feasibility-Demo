@@ -10,12 +10,12 @@ struct Particle
     float nearDensity;
     float3 velocity;
     int spatialOffsets;
-    int3 spatialIndices; //x is the original index //y is the hash //z is the key
+    uint3 spatialIndices; //x is the original index //y is the hash //z is the key
     float padding;
 };
 
 RWStructuredBuffer<int> particleOffsets : register(u0); //Data we pass to and from the compute shader
-StructuredBuffer<int3> particleIndicesOutputFromBitonicMergesort : register(t0);
+StructuredBuffer<uint3> particleIndicesOutputFromBitonicMergesort : register(t0);
 
 cbuffer cb_offsetCalculationsConstants : register(b0)
 {

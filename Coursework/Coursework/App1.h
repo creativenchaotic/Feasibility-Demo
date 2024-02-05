@@ -22,20 +22,26 @@ public:
 
 	App1();
 	~App1();
+
 	void init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input* in, bool VSYNC, bool FULL_SCREEN);
 	bool frame();
-	void rebuildWaterPlane();
-	void rebuildSPHParticles();
-	void initialiseSPHParticles();
-	void sphSimulationComputePass();
-	void renderSceneShaders();
-	int NextPowerOfTwo(int value);
-	float logarithm(int x, int base);
-	void runSimulationStep(float frameTime);
-
+	
 protected:
 	bool render();
 	void gui();
+
+	void rebuildWaterPlane();//Used to rebuild the water plane on top of the particles
+	void rebuildSPHParticles();//Used to rebuild the SPH particles when the number of particles changes
+	void initialiseSPHParticles();//Used to initialise the SPH particles: lays them out in a grid
+	void sphSimulationComputePass();//Runs compute shaders used in the SPH sim
+
+	void renderSceneShaders();//Used to render the particles and the plane in the scene
+
+	int NextPowerOfTwo(int value);//Used for bitonic mergesort
+	float logarithm(int x, int base);//Used for bitonic mergesort
+
+	void runSimulationStep(float frameTime);//Sebastian Lague runs his simulation multiple times per frame so I included the function to have it just in case
+
 
 private:
 
@@ -63,9 +69,9 @@ private:
 
 	//----------------------------------------------
 	//SPH
-	SPHShader* sphParticleShader;
-	ComputeShader* sphSimulationComputeShaderFirstPass;
-	SPHSimulationComputeShaderSecondPass* sphSimulationComputeShaderSecondPass;
+	SPHShader* sphParticleShader;//Used to render the particles in the scene
+	ComputeShader* sphSimulationComputeShaderFirstPass;//Initial SPH sim compute shader pass
+	SPHSimulationComputeShaderSecondPass* sphSimulationComputeShaderSecondPass;//Second SPH sim compute shader pass
 	BitonicMergesort* bitonicMergesort;
 	OffsetCalculationComputeShader* spatialOffsetCalculationComputeShader;
 
@@ -112,6 +118,7 @@ private:
 	//----------------------------------------------------------------
 	//WATER MANIPULATION----------------------------------------------
 	//to manipulate water with waves
+	//Only used on the plane for the feasibility demo. Not to be used for the final water surface
 	float steepness = 2.f;
 	float waterHeight = 3.291f;
 

@@ -19,7 +19,7 @@ struct Particle
 
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<Particle> sphSimulationFirstPassOutput : register(t0);
-StructuredBuffer<int3> bitonicMergesortParticleIndicesOutput : register(t1);
+StructuredBuffer<uint3> bitonicMergesortParticleIndicesOutput : register(t1);
 StructuredBuffer<int> particleOffsetCalculationsOutput : register(t2);
 
 cbuffer cb_simConstants : register(b0)

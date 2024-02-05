@@ -10,7 +10,7 @@ struct Particle
     float nearDensity;
     float3 velocity;
     int spatialOffsets;
-    int3 spatialIndices; //x is the original index //y is the hash //z is the key
+    uint3 spatialIndices; //x is the original index //y is the hash //z is the key
     float padding;
 };
 
@@ -24,7 +24,7 @@ struct Entry
     float key;
 };
 
-RWStructuredBuffer<int3> particleData : register(u0); //Data we pass to and from the compute shader
+RWStructuredBuffer<uint3> particleData : register(u0); //Data we pass to and from the compute shader
 //RWStructuredBuffer<int> debugData : register(u0);
 
 StructuredBuffer<Particle> particleDataOutputFromSPHSimFirstPass : register(t0);
@@ -62,11 +62,6 @@ void bitonicMergesort(int3 dispatchThreadID)
 	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
-        
-        //Entry temp = Entries[indexLeft];
-        //Entries[indexLeft] = Entries[indexRight];
-        //Entries[indexRight] = temp;
-        
         Entry temp;
         temp.originalIndex = particleData[indexLeft].x;
         temp.hash = particleData[indexLeft].y;
