@@ -88,7 +88,8 @@ cbuffer cb_simConstants : register(b0)
 
 // Convert floating point position into an integer cell coordinate
 int3 GetCell3D(float3 position, float radius)//CHANGED THIS FUNCTION BC THERES AN ERROR SOMEWHERE
-{    
+{
+    //This is how I was trying to calculate it and it doesnt work
    // position = abs(position);
    // float x = floor(position.x / radius);
    // float y = floor(position.y / radius);
@@ -98,7 +99,7 @@ int3 GetCell3D(float3 position, float radius)//CHANGED THIS FUNCTION BC THERES A
     //int iy = (int) y;
     //int iz = (int) z;
     
-    //original
+    //original from Sebastian Lague
     return (int3) floor(position / radius);
     
     //return int3(x,y,z);
