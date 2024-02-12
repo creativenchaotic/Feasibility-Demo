@@ -56,7 +56,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	spotlight->generateProjectionMatrix(0.1f, 600.f);
 	spotlight->setPosition(spotlightPosition.x,spotlightPosition.y,spotlightPosition.z);
 
-	initialiseSPHParticles();//DO THIS LAST. It initialises the SPH particles and places them in the scene
+	//initialiseSPHParticles();//DO THIS LAST. It initialises the SPH particles and places them in the scene
 }
 
 
@@ -355,6 +355,7 @@ void App1::renderSceneShaders()
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
 
+	/*
 	//WATER PLANE-----------------------------------------------------------------------------
 	//Currently only used for the feasibility demo to show what a water plane might look like once in the scene and simulating
 	if (guiSettings.displayWaterSurface) {
@@ -388,7 +389,7 @@ void App1::renderSceneShaders()
 		}
 
 		renderer->setAlphaBlending(false);
-	}
+	}*/
 
 
 	//LIGHTING DEBUG SPHERES-------------------------------------------------------------------
@@ -418,7 +419,7 @@ bool App1::render()
 	//Add delta time
 	time += timer->getTime();
 
-	sphSimulationComputePass();//Runs the SPH simulation compute shaders
+	//sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
 	renderSceneShaders();//Renders the actual water simulation in the scene
 
