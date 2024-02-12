@@ -7,7 +7,6 @@
 #include "WaterShader.h"
 #include "SunShader.h"
 #include "PlaneMeshTessellated.h"
-#include "DepthShader.h"
 #include "Externals.h"
 #include "SPH_Particle.h"
 #include "SPHShader.h"
@@ -15,6 +14,7 @@
 #include "SPHSimulationComputeShaderSecondPass.h"
 #include "BitonicMergesort.h"
 #include "OffsetCalculationComputeShader.h"
+#include "SDFTestShader.h"
 
 class App1 : public BaseApplication
 {
@@ -44,6 +44,9 @@ protected:
 
 
 private:
+
+	SDFTestShader* sdfShader;
+	SphereMesh* sdfTestSphere;
 
 	//----------------------------------------------------------------
 	//CAMERA----------------------------------------------------------

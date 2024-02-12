@@ -25,6 +25,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
+	sdfTestSphere = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 
 
 	//Creating shaders
@@ -35,6 +36,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	sphSimulationComputeShaderSecondPass = new SPHSimulationComputeShaderSecondPass(renderer->getDevice(), hwnd);
 	bitonicMergesort = new BitonicMergesort(renderer->getDevice(), hwnd);
 	spatialOffsetCalculationComputeShader = new OffsetCalculationComputeShader(renderer->getDevice(), hwnd);
+	sdfShader = new SDFTestShader(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Configure directional light
@@ -312,7 +314,13 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 void App1::renderSceneShaders()
 {
 	// Clear the scene. (default orange colour)
-	renderer->beginScene(skyColour.x, skyColour.y, skyColour.z, skyColour.w);
+	if (currentRenderSettingForShader != RenderSettings::SignedDistanceField) {
+		renderer->beginScene(skyColour.x, skyColour.y, skyColour.z, skyColour.w);
+	}
+	else
+	{
+		renderer->beginScene(0, 0, 0, skyColour.w);
+	}
 
 	// Generate the view matrix based on the camera's position.
 	camera->update();
@@ -355,7 +363,7 @@ void App1::renderSceneShaders()
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
-
+	XMMATRIX translateSDFTestSphere = XMMatrixTranslation(-12, -10, -300);
 	/*
 	//WATER PLANE-----------------------------------------------------------------------------
 	//Currently only used for the feasibility demo to show what a water plane might look like once in the scene and simulating
@@ -407,6 +415,12 @@ void App1::renderSceneShaders()
 			sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
 		}
 	}
+
+	//SDF TEST----------------------------------------------------------------------------------
+	sdfTestSphere->sendData(renderer->getDeviceContext());
+	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSDFTestSphere, viewMatrix, projectionMatrix);
+	sdfShader->render(renderer->getDeviceContext(), sdfTestSphere->getIndexCount());
+
 
 	// Render GUI
 	gui();
