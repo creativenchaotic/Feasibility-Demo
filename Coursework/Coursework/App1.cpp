@@ -394,16 +394,18 @@ void App1::renderSceneShaders()
 
 
 	//LIGHTING DEBUG SPHERES-------------------------------------------------------------------
-	if (guiSettings.isLightOn) {
-		sun->sendData(renderer->getDeviceContext());
-		sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSun * scaleSun, viewMatrix, projectionMatrix);
-		sunShader->render(renderer->getDeviceContext(), sun->getIndexCount());
-	}
+	if (currentRenderSettingForShader!=RenderSettings::SignedDistanceField) {
+		if (guiSettings.isLightOn) {
+			sun->sendData(renderer->getDeviceContext());
+			sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSun * scaleSun, viewMatrix, projectionMatrix);
+			sunShader->render(renderer->getDeviceContext(), sun->getIndexCount());
+		}
 
-	if (isSpotlightOn) {
-		spotlightMesh->sendData(renderer->getDeviceContext());
-		sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSpotlight, viewMatrix, projectionMatrix);
-		sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
+		if (isSpotlightOn) {
+			spotlightMesh->sendData(renderer->getDeviceContext());
+			sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSpotlight, viewMatrix, projectionMatrix);
+			sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
+		}
 	}
 
 	// Render GUI
