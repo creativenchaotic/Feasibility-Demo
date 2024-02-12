@@ -29,6 +29,7 @@ SDFTestShader::~SDFTestShader()
 void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC cameraBufferDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
@@ -42,9 +43,18 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&matrixBufferDesc, NULL, &matrixBuffer);
+
+	//Camera Buffer
+	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
+	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cameraBufferDesc.MiscFlags = 0;
+	cameraBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&cameraBufferDesc, NULL, &cameraBuffer);
 }
 
-void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix)
+void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT4 cameraVector)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -64,6 +74,13 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+
+	CameraBufferType* cameraDataPtr;
+	deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	cameraDataPtr = (CameraBufferType*)mappedResource.pData;
+	cameraDataPtr->cameraForward = XMFLOAT4(cameraVector.x, cameraVector.y, cameraVector.z, 0.f);
+	deviceContext->Unmap(cameraBuffer, 0);
+	deviceContext->PSSetConstantBuffers(0, 1, &cameraBuffer);
 }
 
 
