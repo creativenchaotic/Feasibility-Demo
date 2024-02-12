@@ -1,7 +1,7 @@
 #pragma once
 
 enum class RenderSettings {
-	RenderColours, WorldPosition, Normals
+	RenderColours, WorldPosition, Normals, SignedDistanceField
 };
 
 struct SPHSimulationValues {

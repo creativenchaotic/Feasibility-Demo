@@ -150,7 +150,7 @@ private:
 	//----------------------------------------------------------------
 	//DISPLAYING DIFFERENT RENDERING SETTINGS
 
-	const char* renderSettings[3];
+	const char* renderSettings[4];
 	const char* currentRenderSetting = "Render Colours";
 	RenderSettings currentRenderSettingForShader;
 

@@ -16,6 +16,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	renderSettings[0] = "Render Colours";
 	renderSettings[1] = "World Position";
 	renderSettings[2] = "Normals";
+	renderSettings[3] = "Signed Distance Fields";
 
 	currentNumParticles = simulationSettings.numParticles;
 
@@ -490,6 +491,10 @@ void App1::gui()
 	}
 	else if(currentRenderSetting == "Normals") {
 		currentRenderSettingForShader = RenderSettings::Normals;
+	}
+	else if(currentRenderSetting == "Signed Distance Fields")
+	{
+		currentRenderSettingForShader = RenderSettings::SignedDistanceField;
 	}
 
 
