@@ -418,7 +418,7 @@ void App1::renderSceneShaders()
 
 	//SDF TEST----------------------------------------------------------------------------------
 	sdfTestSphere->sendData(renderer->getDeviceContext());
-	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSDFTestSphere, viewMatrix, projectionMatrix);
+	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSDFTestSphere, viewMatrix, projectionMatrix, camera->getPosition());
 	sdfShader->render(renderer->getDeviceContext(), sdfTestSphere->getIndexCount());
 
 
