@@ -46,7 +46,7 @@ protected:
 private:
 
 	SDFTestShader* sdfShader;
-	CubeMesh* sdfSurface;
+	PlaneMeshTessellated* sdfSurface;
 
 	//----------------------------------------------------------------
 	//CAMERA----------------------------------------------------------
@@ -163,6 +163,9 @@ private:
 
 	GUISettings guiSettings;
 	float isFirstIteration = 1.0f;
+
+	int windowWidth;
+	int windowHeight;
 };
 
 #endif

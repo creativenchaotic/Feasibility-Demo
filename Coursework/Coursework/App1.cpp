@@ -12,6 +12,9 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
+	windowWidth = screenWidth;
+	windowHeight = screenHeight;
+
 	// Initalise scene variables.
 	renderSettings[0] = "Render Colours";
 	renderSettings[1] = "World Position";
@@ -25,7 +28,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	sdfSurface = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 2);
 
 
 	//Creating shaders
@@ -363,8 +366,11 @@ void App1::renderSceneShaders()
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
-	XMMATRIX translateSDFCube = XMMatrixTranslation(-13, -10, -300);
-	XMMATRIX scaleSDFCube = XMMatrixScaling(2.5f,2.5f,2.5f);
+
+	XMMATRIX translateSDFPlane = XMMatrixTranslation(0, 0, 0);
+	XMMATRIX scaleSDFPlane = XMMatrixScaling(windowWidth/4.f,1.0f,windowHeight/4.f);
+	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
+	
 	/*
 	//WATER PLANE-----------------------------------------------------------------------------
 	//Currently only used for the feasibility demo to show what a water plane might look like once in the scene and simulating
@@ -419,7 +425,7 @@ void App1::renderSceneShaders()
 
 	//SDF TEST----------------------------------------------------------------------------------
 	sdfSurface->sendData(renderer->getDeviceContext());
-	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFCube * translateSDFCube, viewMatrix, projectionMatrix, camera->getPosition());
+	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFPlane * rotateSDFPlane * translateSDFPlane, viewMatrix, projectionMatrix, camera->getPosition());
 	sdfShader->render(renderer->getDeviceContext(), sdfSurface->getIndexCount());
 
 
