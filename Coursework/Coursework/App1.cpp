@@ -28,7 +28,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 2);
+	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 100);
 
 
 	//Creating shaders
@@ -368,7 +368,7 @@ void App1::renderSceneShaders()
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
 
 	XMMATRIX translateSDFPlane = XMMatrixTranslation(0, 0, 0);
-	XMMATRIX scaleSDFPlane = XMMatrixScaling(windowWidth/4.f,1.0f,windowHeight/4.f);
+	XMMATRIX scaleSDFPlane = XMMatrixScaling(1,1.0f,1);
 	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
 	
 	/*

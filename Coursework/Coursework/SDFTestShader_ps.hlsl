@@ -20,12 +20,25 @@ float sdfSphere(float3 position, float radius)
     return length(position) - radius;//Got this from Inigo Quilez
 }
 
+
+float smoothUnion(float shapeA, float shapeB, float blendingAmount)
+{
+    float h = max(blendingAmount - abs(shapeA - shapeB), 0.0f) / blendingAmount;
+    return min(shapeA, shapeB) - h * h * h * blendingAmount * (1.0f / 6.0f);
+}
+
 float sdfCalculations(float3 position)
 {
-    float3 spherePosition = float3(1,1,5);//Position of the sphere in SDF Object World
-    float sphere = sdfSphere(position - spherePosition, 1.f); //Sphere SDF
-    return sphere;
+    float3 spherePosition1 = float3(5,5,5);//Position of the sphere in SDF Object World
+    float sphere1 = sdfSphere(position - spherePosition1, 5.f); //Sphere SDF
+
+    float3 spherePosition2 = float3(0, 5, 5); //Position of the sphere in SDF Object World
+    float sphere2 = sdfSphere(position - spherePosition2, 5.f); //Sphere SDF
+
+
+    return smoothUnion(sphere1, sphere2, 2.0f);
 }
+
 
 float4 main(InputType input) : SV_TARGET
 {
@@ -42,7 +55,7 @@ float4 main(InputType input) : SV_TARGET
 
     //Raymarching (Sphere tracing)
 
-    for (int i = 0; i < 60; i++)//The number of steps affects the quality of the results and the performance
+    for (int i = 0; i < 80; i++)//The number of steps affects the quality of the results and the performance
     {
         float3 positionInRay = rayOrigin + rayDirection * totalDistanceTravelled; //Current position along the ray based on the distance from the rays origin
 
@@ -51,7 +64,7 @@ float4 main(InputType input) : SV_TARGET
         totalDistanceTravelled += distanceToScene;
 
          //Colouring
-        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 60;
+        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) /80;
 
         if (distanceToScene < 0.001f || totalDistanceTravelled > 100.f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
         {
