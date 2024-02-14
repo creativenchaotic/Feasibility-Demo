@@ -46,7 +46,7 @@ protected:
 private:
 
 	SDFTestShader* sdfShader;
-	SphereMesh* sdfTestSphere;
+	CubeMesh* sdfSurface;
 
 	//----------------------------------------------------------------
 	//CAMERA----------------------------------------------------------
