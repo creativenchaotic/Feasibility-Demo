@@ -9,13 +9,14 @@ class SDFTestShader :
 {
     struct CameraBufferType {
         XMFLOAT4 cameraPosition;
+        XMFLOAT4 timer;
     };
 
 public:
     SDFTestShader(ID3D11Device* device, HWND hwnd);
     ~SDFTestShader();
 
-    void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT3 cameraPos);
+    void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT3 cameraPos, float delta);
 
 private:
     void initShader(const wchar_t* cs, const wchar_t* ps);

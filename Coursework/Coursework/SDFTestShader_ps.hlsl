@@ -2,6 +2,7 @@
 
 cbuffer CameraBuffer : register(b0){
     float4 cameraPos;
+    float4 timer;
 }
 
 
@@ -29,7 +30,7 @@ float smoothUnion(float shapeA, float shapeB, float blendingAmount)
 
 float sdfCalculations(float3 position)
 {
-    float3 spherePosition1 = float3(5,5,5);//Position of the sphere in SDF Object World
+    float3 spherePosition1 = float3((sin(timer) * 5.f), 5, 5); //Position of the sphere in SDF Object World
     float sphere1 = sdfSphere(position - spherePosition1, 5.f); //Sphere SDF
 
     float3 spherePosition2 = float3(0, 5, 5); //Position of the sphere in SDF Object World

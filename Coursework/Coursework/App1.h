@@ -35,7 +35,7 @@ protected:
 	void initialiseSPHParticles();//Used to initialise the SPH particles: lays them out in a grid
 	void sphSimulationComputePass();//Runs compute shaders used in the SPH sim
 
-	void renderSceneShaders();//Used to render the particles and the plane in the scene
+	void renderSceneShaders(float time);//Used to render the particles and the plane in the scene
 
 	int NextPowerOfTwo(int value);//Used for bitonic mergesort
 	float logarithm(int x, int base);//Used for bitonic mergesort

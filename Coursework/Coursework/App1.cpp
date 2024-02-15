@@ -314,7 +314,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	isFirstIteration = 0.0f;
 }
 
-void App1::renderSceneShaders()
+void App1::renderSceneShaders(float time)
 {
 	// Clear the scene. (default orange colour)
 	if (currentRenderSettingForShader != RenderSettings::SignedDistanceField) {
@@ -425,7 +425,7 @@ void App1::renderSceneShaders()
 
 	//SDF TEST----------------------------------------------------------------------------------
 	sdfSurface->sendData(renderer->getDeviceContext());
-	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFPlane * rotateSDFPlane * translateSDFPlane, viewMatrix, projectionMatrix, camera->getPosition());
+	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFPlane * rotateSDFPlane * translateSDFPlane, viewMatrix, projectionMatrix, camera->getPosition(), time);
 	sdfShader->render(renderer->getDeviceContext(), sdfSurface->getIndexCount());
 
 
@@ -445,7 +445,7 @@ bool App1::render()
 
 	//sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
-	renderSceneShaders();//Renders the actual water simulation in the scene
+	renderSceneShaders(time);//Renders the actual water simulation in the scene
 
 	return true;
 }
