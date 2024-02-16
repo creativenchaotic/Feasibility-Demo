@@ -47,6 +47,7 @@ private:
 
 	SDFTestShader* sdfShader;
 	PlaneMeshTessellated* sdfSurface;
+	SDFValues sdfVal;
 
 	//----------------------------------------------------------------
 	//CAMERA----------------------------------------------------------

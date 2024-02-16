@@ -57,3 +57,8 @@ struct GUISettings {
 	bool displayWaterSurface = false;
 	bool isLightOn = true;
 };
+
+struct SDFValues
+{
+	float blendAmount = 2.0f;
+};

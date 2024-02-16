@@ -30,6 +30,7 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC cameraBufferDesc;
+	D3D11_BUFFER_DESC sdfBufferDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
@@ -52,6 +53,15 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	cameraBufferDesc.MiscFlags = 0;
 	cameraBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&cameraBufferDesc, NULL, &cameraBuffer);
+
+	//SDF Values Buffer
+	sdfBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	sdfBufferDesc.ByteWidth = sizeof(SDFValuesBufferType);
+	sdfBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	sdfBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	sdfBufferDesc.MiscFlags = 0;
+	sdfBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&sdfBufferDesc, NULL, &sdfBuffer);
 }
 
 void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT3 cameraVector, float delta)
@@ -82,6 +92,18 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	cameraDataPtr->timer = XMFLOAT4(delta, 0.f,0.f,0.f);
 	deviceContext->Unmap(cameraBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &cameraBuffer);
+}
+
+void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	SDFValuesBufferType* dataPtr;
+	deviceContext->Map(sdfBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	dataPtr = (SDFValuesBufferType*)mappedResource.pData;
+	dataPtr->blendingAmount = XMFLOAT4(blendVal, 0.f,0.f,0.f);
+	deviceContext->Unmap(sdfBuffer, 0);
+	deviceContext->PSSetConstantBuffers(1, 1, &sdfBuffer);
+
 }
 
 

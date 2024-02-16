@@ -28,7 +28,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 100);
+	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 2);
 
 
 	//Creating shaders
@@ -368,7 +368,7 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
 
 	XMMATRIX translateSDFPlane = XMMatrixTranslation(0, 0, 0);
-	XMMATRIX scaleSDFPlane = XMMatrixScaling(1,1.0f,1);
+	XMMATRIX scaleSDFPlane = XMMatrixScaling(120,120.0f,120);
 	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
 	
 	/*
@@ -426,6 +426,7 @@ void App1::renderSceneShaders(float time)
 	//SDF TEST----------------------------------------------------------------------------------
 	sdfSurface->sendData(renderer->getDeviceContext());
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFPlane * rotateSDFPlane * translateSDFPlane, viewMatrix, projectionMatrix, camera->getPosition(), time);
+	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
 	sdfShader->render(renderer->getDeviceContext(), sdfSurface->getIndexCount());
 
 
@@ -531,6 +532,13 @@ void App1::gui()
 		ImGui::TreePop();
 	}
 
+	//SDF---------------------------------------------------------------------
+	if(ImGui::TreeNode("Signed Distance Fields"))
+	{
+		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0, 20);
+
+		ImGui::TreePop();
+	}
 	//------------------------------------------------------------------------
 	//SPH
 	if (ImGui::TreeNode("Smoothed Particle Hydrodynamics")) {
