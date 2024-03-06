@@ -21,6 +21,25 @@ SDFTestShader::~SDFTestShader()
 		layout = 0;
 	}
 
+	if(sdfBuffer)
+	{
+		sdfBuffer->Release();
+		sdfBuffer = 0;
+
+	}
+
+	if(cameraBuffer)
+	{
+		cameraBuffer->Release();
+		cameraBuffer = 0;
+	}
+
+	if(sampleState)
+	{
+		sampleState->Release();
+		sampleState = 0;
+	}
+
 
 	//Release base shader components
 	BaseShader::~BaseShader();
@@ -31,6 +50,7 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC cameraBufferDesc;
 	D3D11_BUFFER_DESC sdfBufferDesc;
+	D3D11_SAMPLER_DESC samplerDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
@@ -62,9 +82,23 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	sdfBufferDesc.MiscFlags = 0;
 	sdfBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&sdfBufferDesc, NULL, &sdfBuffer);
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	renderer->CreateSamplerState(&samplerDesc, &sampleState);
 }
 
-void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT3 cameraVector, float delta)
+void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT3 cameraVector, float delta, ID3D11ShaderResourceView* renderTexture)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -92,6 +126,10 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	cameraDataPtr->timer = XMFLOAT4(delta, 0.f,0.f,0.f);
 	deviceContext->Unmap(cameraBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &cameraBuffer);
+
+	// Set shader texture and sampler resource in the pixel shader.
+	deviceContext->PSSetShaderResources(0, 1, &renderTexture);
+	deviceContext->PSSetSamplers(0, 1, &sampleState);
 }
 
 void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal)

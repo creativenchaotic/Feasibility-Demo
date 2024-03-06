@@ -1,4 +1,7 @@
 
+// Texture and sampler registers
+Texture2D texture0 : register(t0);
+SamplerState Sampler0 : register(s0);
 
 cbuffer CameraBuffer : register(b0){
     float4 cameraPos;
@@ -40,33 +43,25 @@ float sdfCalculations(float3 position)
     float cosine2 = cos(timer) * 20.0f;
 
     
+    /*
     //1st BIT TO SHOW------------------------------------------------------------------------------
-    float3 spherePosition1 = float3(0, 5, 40); //Position of the sphere in SDF Object World
+    float3 spherePosition1 = float3(10, 10, 70); //Position of the sphere in SDF Object World
+    float sphere1 = sdfSphere(position - spherePosition1, 7.f); //Sphere SDF
+
+
+    return sphere1;
+    //---------------------------------------------------------------------------------------------
+    */
+    /*
+    //2nd BIT TO SHOW------------------------------------------------------------------------------
+    float3 spherePosition1 = float3(10, 10, 60); //Position of the sphere in SDF Object World
     float sphere1 = sdfSphere(position - spherePosition1, 5.f); //Sphere SDF
 
-    float3 spherePosition2 = float3(10, 10, 40); //Position of the sphere in SDF Object World
+    float3 spherePosition2 = float3(20, 15, 60); //Position of the sphere in SDF Object World
     float sphere2 = sdfSphere(position - spherePosition2, 5.f); //Sphere SDF
 
 
     return smoothUnion(sphere1, sphere2);
-    //---------------------------------------------------------------------------------------------
-
-    /*
-    //2nd BIT TO SHOW------------------------------------------------------------------------------
-    float3 spherePosition1 = float3(30, 45, 70); //Position of the sphere in SDF Object World
-    float sphere1 = sdfSphere(position - spherePosition1, 5.f); //Sphere SDF
-
-    float3 spherePosition2 = float3(sine2 + 20.f, 10, 70); //Position of the sphere in SDF Object World
-    float sphere2 = sdfSphere(position - spherePosition2, 2.f); //Sphere SDF
-
-    float3 spherePosition3 = float3(5, cosine2 + 10, 70); //Position of the sphere in SDF Object World
-    float sphere3 = sdfSphere(position - spherePosition3, 10.f); //Sphere SDF
-
-    float3 spherePosition4 = float3(15, 20, 70); //Position of the sphere in SDF Object World
-    float sphere4 = sdfSphere(position - spherePosition4, 4.f); //Sphere SDF
-    
-
-    return smoothUnion(sphere4, smoothUnion(sphere3, smoothUnion(sphere1, sphere2)));
     //---------------------------------------------------------------------------------------------
     */
     /*
@@ -78,7 +73,7 @@ float sdfCalculations(float3 position)
     float sphere2 = sdfSphere(position - spherePosition2, 6.f); //Sphere SDF
 
     float3 spherePosition3 = float3(sine + 30.0f, cosine + 10, 60); //Position of the sphere in SDF Object World
-    float sphere3 = sdfSphere(position - spherePosition3, 6.f); //Sphere SDF
+    float sphere3 = sdfSphere(position - spherePosition3, 1.f); //Sphere SDF
 
     float3 spherePosition4 = float3(sine + 10.f, 20, 60); //Position of the sphere in SDF Object World
     float sphere4 = sdfSphere(position - spherePosition4, 6.f); //Sphere SDF
@@ -86,7 +81,7 @@ float sdfCalculations(float3 position)
     return smoothUnion(sphere4, smoothUnion(sphere3, smoothUnion(sphere1, sphere2)));
     //---------------------------------------------------------------------------------------------
     */
-    /*
+    
     //4th BIT TO SHOW------------------------------------------------------------------------------
     float3 spherePosition1 = float3(sine * 1.2 + 20, abs(cosine) + 7, 65); //Position of the sphere in SDF Object World
     float sphere1 = sdfSphere(position - spherePosition1, 5.f); //Sphere SDF
@@ -114,7 +109,7 @@ float sdfCalculations(float3 position)
 
     return smoothUnion(sphere8, smoothUnion(sphere7, smoothUnion(sphere6, smoothUnion(sphere5, smoothUnion(sphere4, smoothUnion(sphere3, smoothUnion(sphere1, sphere2)))))));
     //---------------------------------------------------------------------------------------------
-    */
+    
     
 }
 
@@ -155,7 +150,8 @@ float4 main(InputType input) : SV_TARGET
         
     }
 
-   
+   	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    float4 textureColor = texture0.Sample(Sampler0, input.tex);
 
 
     //float distanceToSphere = sdfSphere(cameraPos, input.position.xyz, 1);
@@ -166,5 +162,5 @@ float4 main(InputType input) : SV_TARGET
 
 	//return finalColour;
 
-    return float4(1-finalColour,1.0f);
+    return float4(1 - finalColour, 1.0f) * textureColor;
 }

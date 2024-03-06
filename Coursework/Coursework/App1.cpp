@@ -29,6 +29,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 2);
+	sdfRenderTexture = new RenderTexture(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
+	orthoMesh = new OrthoMesh(renderer->getDevice(), renderer->getDeviceContext(), screenWidth, screenHeight, 0, 0);
 
 
 	//Creating shaders
@@ -134,6 +136,23 @@ App1::~App1()
 		spatialOffsetCalculationComputeShader = 0;
 	}
 
+	if(sdfShader)
+	{
+		delete sdfShader;
+		sdfShader = 0;
+	}
+
+	if(sdfSurface)
+	{
+		delete sdfSurface;
+		sdfSurface = 0;
+	}
+
+	if(sdfRenderTexture)
+	{
+		delete sdfRenderTexture;
+		sdfRenderTexture = 0;
+	}
 }
 
 
@@ -424,11 +443,24 @@ void App1::renderSceneShaders(float time)
 	}
 
 	//SDF TEST----------------------------------------------------------------------------------
-	sdfSurface->sendData(renderer->getDeviceContext());
-	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFPlane * rotateSDFPlane * translateSDFPlane, viewMatrix, projectionMatrix, camera->getPosition(), time);
-	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
-	sdfShader->render(renderer->getDeviceContext(), sdfSurface->getIndexCount());
+	//Set the render target to be the RtT and clear it
+	sdfRenderTexture->setRenderTarget(renderer->getDeviceContext());
+	sdfRenderTexture->clearRenderTarget(renderer->getDeviceContext(), 1.0f, 1.0f, 1.0f, 1.0f);
+	//Setting camera
+	camera->update();
 
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	renderer->setBackBufferRenderTarget();
+
+	//RENDER TO TEXTURE----------------------------------------------------------------------------------
+	renderer->setZBuffer(false);
+	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
+	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
+
+	orthoMesh->sendData(renderer->getDeviceContext());
+	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFPlane * rotateSDFPlane * translateSDFPlane, viewMatrix, projectionMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
+	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
+	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
 
 	// Render GUI
 	gui();
