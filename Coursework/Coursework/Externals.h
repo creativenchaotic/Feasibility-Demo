@@ -5,7 +5,7 @@ enum class RenderSettings {
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 10;
+	int numParticlesPerAxis = 20;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	int particleResolution = 10;
 	float particleSpacing = 10.f;
@@ -29,12 +29,12 @@ struct SPHSimulationValues {
 };
 
 struct SimulationBoundingBox {
-	float Front = -100;
+	float Front = 0;
 	float Back = 100;
-	float LeftSide = -100;
+	float LeftSide = 0;
 	float RightSide = 100;
 	float Top = 100;
-	float Bottom = -100;
+	float Bottom = 0;
 };
 
 struct LightValues {

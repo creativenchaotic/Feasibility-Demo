@@ -216,7 +216,7 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 					float py = (ty - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.y;
 					float pz = (tz - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.z;
 
-					sphParticle->setStartPosition(XMFLOAT3(px+20, py+20, pz+20));//Setting the start position of the particles
+					sphParticle->setStartPosition(XMFLOAT3(px+50, py+50, pz+50));//Setting the start position of the particles
 					simulationParticles.push_back(sphParticle);//Adding the particle created to a vector of SPH particles
 					simulationParticlesData.push_back(sphParticle->particleData);//Adding the SPH particle data to a vector of SPH particle datas
 				}
