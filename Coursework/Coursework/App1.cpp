@@ -458,7 +458,7 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
 
 	orthoMesh->sendData(renderer->getDeviceContext());
-	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * scaleSDFPlane * rotateSDFPlane * translateSDFPlane, viewMatrix, projectionMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
+	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
 

@@ -122,9 +122,10 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	CameraBufferType* cameraDataPtr;
 	deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	cameraDataPtr = (CameraBufferType*)mappedResource.pData;
-	cameraDataPtr->cameraPosition = XMFLOAT4(cameraVector.x, cameraVector.y, cameraVector.z, 0.f);
+	cameraDataPtr->cameraPosition = XMFLOAT4(cameraVector.x, cameraVector.y, cameraVector.z, 1.f);
 	cameraDataPtr->timer = XMFLOAT4(delta, 0.f,0.f,0.f);
 	deviceContext->Unmap(cameraBuffer, 0);
+	deviceContext->VSSetConstantBuffers(1, 1, &cameraBuffer);
 	deviceContext->PSSetConstantBuffers(0, 1, &cameraBuffer);
 
 	// Set shader texture and sampler resource in the pixel shader.

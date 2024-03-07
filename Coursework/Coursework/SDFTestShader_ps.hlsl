@@ -17,6 +17,7 @@ struct InputType
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
+    float4 worldPosition : TEXCOORD1;
 };
 
 float sdfSphere(float3 position, float radius)
@@ -160,7 +161,9 @@ float4 main(InputType input) : SV_TARGET
 
 	//finalColour = finalColour * exp(distanceToSphere);
 
-	//return finalColour;
+    input.position = float4(input.tex.x, 0.f, input.tex.y, 0.f);
 
-    return float4(1 - finalColour, 1.0f) * textureColor;
+    //return float4(1 - finalColour, 1.0f) * textureColor;
+    return float4(1 - finalColour, 1.0f);
+
 }

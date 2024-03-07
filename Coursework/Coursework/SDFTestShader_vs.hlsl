@@ -8,6 +8,11 @@ cbuffer MatrixBuffer : register(b0)
     matrix projectionMatrix;
 };
 
+cbuffer CameraBuffer : register(b1)
+{
+    float4 cameraPos;
+    float4 timer;
+}
 
 struct InputType
 {
@@ -21,7 +26,7 @@ struct OutputType
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
-
+    float4 worldPosition : TEXCOORD1;
 };
 
 
@@ -37,9 +42,8 @@ OutputType main( InputType input )
 	// Store the texture coordinates for the pixel shader.
     output.tex = input.tex;
 
-	// Calculate the normal vector against the world matrix only and normalise.
-    output.normal = mul(input.normal, (float3x3) worldMatrix);
-    output.normal = normalize(output.normal);
+	//Setting the camera position in the world
+    output.worldPosition = cameraPos;
 
 	return output;
 }
