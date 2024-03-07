@@ -64,7 +64,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	spotlight->generateProjectionMatrix(0.1f, 600.f);
 	spotlight->setPosition(spotlightPosition.x,spotlightPosition.y,spotlightPosition.z);
 
-	//initialiseSPHParticles();//DO THIS LAST. It initialises the SPH particles and places them in the scene
+	initialiseSPHParticles();//DO THIS LAST. It initialises the SPH particles and places them in the scene
 }
 
 
@@ -390,7 +390,7 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX scaleSDFPlane = XMMatrixScaling(120,120.0f,120);
 	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
 	
-	/*
+	
 	//WATER PLANE-----------------------------------------------------------------------------
 	//Currently only used for the feasibility demo to show what a water plane might look like once in the scene and simulating
 	if (guiSettings.displayWaterSurface) {
@@ -424,7 +424,7 @@ void App1::renderSceneShaders(float time)
 		}
 
 		renderer->setAlphaBlending(false);
-	}*/
+	}
 
 
 	//LIGHTING DEBUG SPHERES-------------------------------------------------------------------
@@ -442,6 +442,7 @@ void App1::renderSceneShaders(float time)
 		}
 	}
 
+	/*
 	//SDF TEST----------------------------------------------------------------------------------
 	//Set the render target to be the RtT and clear it
 	sdfRenderTexture->setRenderTarget(renderer->getDeviceContext());
@@ -461,7 +462,7 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-
+	*/
 	// Render GUI
 	gui();
 
@@ -476,7 +477,7 @@ bool App1::render()
 	//Add delta time
 	time += timer->getTime();
 
-	//sphSimulationComputePass();//Runs the SPH simulation compute shaders
+	sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
 	renderSceneShaders(time);//Renders the actual water simulation in the scene
 
