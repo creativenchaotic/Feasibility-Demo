@@ -5,7 +5,7 @@ enum class RenderSettings {
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 20;
+	int numParticlesPerAxis = 2;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	int particleResolution = 10;
 	float particleSpacing = 10.f;
