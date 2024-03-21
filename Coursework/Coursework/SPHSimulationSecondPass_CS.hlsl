@@ -51,35 +51,35 @@ cbuffer cb_simConstants : register(b0)
 
 
 //SPATIAL 3D HASH----------------------------------------------------------------
-static const int3 offsets3D[27] =
+static const uint3 offsets3D[27] =
 {
-    int3(-1, -1, -1),
-	int3(-1, -1, 0),
-	int3(-1, -1, 1),
-	int3(-1, 0, -1),
-	int3(-1, 0, 0),
-	int3(-1, 0, 1),
-	int3(-1, 1, -1),
-	int3(-1, 1, 0),
-	int3(-1, 1, 1),
-	int3(0, -1, -1),
-	int3(0, -1, 0),
-	int3(0, -1, 1),
-	int3(0, 0, -1),
-	int3(0, 0, 0),
-	int3(0, 0, 1),
-	int3(0, 1, -1),
-	int3(0, 1, 0),
-	int3(0, 1, 1),
-	int3(1, -1, -1),
-	int3(1, -1, 0),
-	int3(1, -1, 1),
-	int3(1, 0, -1),
-	int3(1, 0, 0),
-	int3(1, 0, 1),
-	int3(1, 1, -1),
-	int3(1, 1, 0),
-	int3(1, 1, 1)
+    uint3(-1, -1, -1),
+	uint3(-1, -1, 0),
+	uint3(-1, -1, 1),
+	uint3(-1, 0, -1),
+	uint3(-1, 0, 0),
+	uint3(-1, 0, 1),
+	uint3(-1, 1, -1),
+	uint3(-1, 1, 0),
+	uint3(-1, 1, 1),
+	uint3(0, -1, -1),
+	uint3(0, -1, 0),
+	uint3(0, -1, 1),
+	uint3(0, 0, -1),
+	uint3(0, 0, 0),
+	uint3(0, 0, 1),
+	uint3(0, 1, -1),
+	uint3(0, 1, 0),
+	uint3(0, 1, 1),
+	uint3(1, -1, -1),
+	uint3(1, -1, 0),
+	uint3(1, -1, 1),
+	uint3(1, 0, -1),
+	uint3(1, 0, 0),
+	uint3(1, 0, 1),
+	uint3(1, 1, -1),
+	uint3(1, 1, 0),
+	uint3(1, 1, 1)
 };
 
 // Constants used for hashing
@@ -88,7 +88,7 @@ static const uint hashK2 = 9737333;
 static const uint hashK3 = 440817757;
 
 // Convert floating point position into an integer cell coordinate
-int3 GetCell3D(float3 position, float radius)
+uint3 GetCell3D(float3 position, float radius)
 {
     //position = abs(position);
     //float x = floor(position.x / radius);
@@ -102,13 +102,12 @@ int3 GetCell3D(float3 position, float radius)
     //return int3(x, y, z);
         
     //original
-    return (int3) floor(position / radius);
+    return (uint3) floor(position / radius);
 }
 
 // Hash cell coordinate to a single unsigned integer
-uint HashCell3D(int3 cell)
+uint HashCell3D(uint3 cell)
 {
-    cell = (uint3) cell;
     return (cell.x * hashK1) + (cell.y * hashK2) + (cell.z * hashK3);
 }
 
@@ -267,7 +266,7 @@ void CalculatePressureForce(int3 thread)
     float3 pressureForce = 0;
 	
     float3 pos = particleData[thread.x].predictedPosition;
-    int3 originCell = GetCell3D(pos, smoothingRadius);
+    uint3 originCell = GetCell3D(pos, smoothingRadius);
     float sqrRadius = smoothingRadius * smoothingRadius;
 
 	// Neighbour search
@@ -318,7 +317,7 @@ void CalculatePressureForce(int3 thread)
         }
     }
 
-    float3 acceleration = pressureForce / density;
+    float3 acceleration = pressureForce / density; //Here the density is sometimes 0 so its doing 0/0 which is undefined. This means the error comes from earlier
     particleData[thread.x].velocity += acceleration * deltaTime;
 }
 
@@ -329,7 +328,7 @@ void CalculateDensities(int3 thread)
         return;
 
     float3 pos = particleData[thread.x].predictedPosition;
-    int3 originCell = GetCell3D(pos, smoothingRadius);
+    uint3 originCell = GetCell3D(pos, smoothingRadius);
     float sqrRadius = smoothingRadius * smoothingRadius;
     float density = 0;
     float nearDensity = 0;
@@ -379,7 +378,7 @@ void CalculateViscosity(int3 thread)
         return;
 		
     float3 pos = particleData[thread.x].predictedPosition;
-    int3 originCell = GetCell3D(pos, smoothingRadius);
+    uint3 originCell = GetCell3D(pos, smoothingRadius);
     float sqrRadius = smoothingRadius * smoothingRadius;
 
     float3 viscosityForce = 0;
@@ -431,10 +430,11 @@ void UpdatePositions(int3 thread)
     if (thread.x >= numParticles)
         return;
     
-    float3 CurrentParticle = particleData[thread.x].currentPosition;
+    float3 CurrentParticle = particleData[thread.x].predictedPosition;
     float3 DeltaPosition = particleData[thread.x].velocity * deltaTime;
     
-    particleData[thread.x].currentPosition = CurrentParticle + DeltaPosition;
+    particleData[thread.x].predictedPosition = CurrentParticle + DeltaPosition;
+    particleData[thread.x].currentPosition = particleData[thread.x].predictedPosition;
     
     //particleData[thread.x].currentPosition += particleData[thread.x].velocity * deltaTime;
     ResolveCollisions(thread.x);
