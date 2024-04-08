@@ -54,6 +54,9 @@
     <ClCompile Include="SDFTestShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SDFComputeShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SDFTestShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -152,6 +158,9 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="SDFTestShader_ps.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="SDF_cs.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

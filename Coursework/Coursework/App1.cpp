@@ -375,6 +375,7 @@ void App1::renderSceneShaders(float time)
 		spotlight->setDiffuseColour(0, 0, 0, 1);
 	}
 
+	
 	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 	XMMATRIX viewMatrix = camera->getViewMatrix();
@@ -390,7 +391,7 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX scaleSDFPlane = XMMatrixScaling(120,120.0f,120);
 	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
 	
-	
+	/*
 	//WATER PLANE-----------------------------------------------------------------------------
 	//Currently only used for the feasibility demo to show what a water plane might look like once in the scene and simulating
 	if (guiSettings.displayWaterSurface) {
@@ -440,9 +441,9 @@ void App1::renderSceneShaders(float time)
 			sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSpotlight, viewMatrix, projectionMatrix);
 			sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
 		}
-	}
+	}*/
 
-	/*
+	
 	//SDF TEST----------------------------------------------------------------------------------
 	//Set the render target to be the RtT and clear it
 	sdfRenderTexture->setRenderTarget(renderer->getDeviceContext());
@@ -462,7 +463,8 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-	*/
+	
+
 	// Render GUI
 	gui();
 
@@ -477,7 +479,7 @@ bool App1::render()
 	//Add delta time
 	time += timer->getTime();
 
-	sphSimulationComputePass();//Runs the SPH simulation compute shaders
+	//sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
 	renderSceneShaders(time);//Renders the actual water simulation in the scene
 
