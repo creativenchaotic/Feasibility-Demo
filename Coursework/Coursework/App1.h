@@ -16,6 +16,8 @@
 #include "OffsetCalculationComputeShader.h"
 #include "SDFTestShader.h"
 
+#include "SDFComputeShader.h"
+
 class App1 : public BaseApplication
 {
 public:
@@ -45,6 +47,10 @@ protected:
 
 private:
 
+	SDFComputeShader* sdfComputeShader;
+	std::vector<XMFLOAT3> particlePositionSampleData;
+
+	//---------------------------------------------------------------
 	SDFTestShader* sdfShader;
 	PlaneMeshTessellated* sdfSurface;
 	SDFValues sdfVal;

@@ -43,6 +43,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	spatialOffsetCalculationComputeShader = new OffsetCalculationComputeShader(renderer->getDevice(), hwnd);
 	sdfShader = new SDFTestShader(renderer->getDevice(), hwnd);
 
+	sdfComputeShader = new SDFComputeShader(renderer->getDevice(), hwnd);
+
 	//LIGHTING ---------------------------------------------------------------------------------------
 	// Configure directional light
 	directionalLight = new Light();
@@ -153,6 +155,12 @@ App1::~App1()
 		delete sdfRenderTexture;
 		sdfRenderTexture = 0;
 	}
+
+	if(sdfComputeShader)
+	{
+		delete sdfComputeShader;
+		sdfComputeShader = 0;
+	}
 }
 
 
@@ -219,6 +227,8 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 					sphParticle->setStartPosition(XMFLOAT3(px+50, py+50, pz+50));//Setting the start position of the particles
 					simulationParticles.push_back(sphParticle);//Adding the particle created to a vector of SPH particles
 					simulationParticlesData.push_back(sphParticle->particleData);//Adding the SPH particle data to a vector of SPH particle datas
+
+					particlePositionSampleData.push_back(XMFLOAT3(px + 50, py + 50, pz + 50));//Setting the start position of the particles
 				}
 			}
 		}
@@ -232,6 +242,8 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 	bitonicMergesort->createOutputUAVs(renderer->getDevice(), currentNumParticles);
 	spatialOffsetCalculationComputeShader->createOutputUAVs(renderer->getDevice(), currentNumParticles);
 	sphSimulationComputeShaderSecondPass->createOutputUAVs(renderer->getDevice(), currentNumParticles);
+
+	sdfComputeShader->createOutputUAVs(renderer->getDevice(), &particlePositionSampleData);
 
 }
 
@@ -443,7 +455,17 @@ void App1::renderSceneShaders(float time)
 		}
 	}*/
 
-	
+
+	//SDF Compute Shader-----------------------------------------------------------------------------------------
+	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
+	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), simulationSettings.numParticles, sdfVal.blendAmount);
+	sdfComputeShader->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sdfComputeShader->unbind(renderer->getDeviceContext());
+
+
+	//-----------------------------------------------------------------------------------------------------------
+
+	/*
 	//SDF TEST----------------------------------------------------------------------------------
 	//Set the render target to be the RtT and clear it
 	sdfRenderTexture->setRenderTarget(renderer->getDeviceContext());
@@ -463,7 +485,7 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-	
+	*/
 
 	// Render GUI
 	gui();

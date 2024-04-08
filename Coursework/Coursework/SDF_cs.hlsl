@@ -2,6 +2,11 @@
 
 static const int NumThreads = 64;
 
+cbuffer cb_simConstants : register(b0){
+    int numParticles;
+    float blendAmount;
+}
+
 
 float sdfSphere(float3 position, float radius)
 {

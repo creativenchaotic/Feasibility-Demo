@@ -18,7 +18,7 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
 
     // Setup constant buffer
     simConstantsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    simConstantsBufferDesc.ByteWidth = sizeof(SDFCosntantBufferType);
+    simConstantsBufferDesc.ByteWidth = sizeof(SDFConstantBufferType);
     simConstantsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     simConstantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     simConstantsBufferDesc.MiscFlags = 0;
@@ -30,13 +30,15 @@ void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numPartic
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
-    SDFCosntantBufferType* simulationConstPtr;
+    SDFConstantBufferType* simulationConstPtr;
     dc->Map(sdfConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
-    simulationConstPtr = (SDFCosntantBufferType*)mappedResource.pData;
+    simulationConstPtr = (SDFConstantBufferType*)mappedResource.pData;
 
     simulationConstPtr->numParticles = numParticlesVal;
     simulationConstPtr->blendAmount = blendAmount;
+    simulationConstPtr->padding = 0.0f;
+    simulationConstPtr->padding2 = 0.0f;
 
     dc->Unmap(sdfConstantsBuffer, 0);
     dc->CSSetConstantBuffers(0, 1, &sdfConstantsBuffer);

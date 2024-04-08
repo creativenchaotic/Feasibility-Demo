@@ -20,10 +20,12 @@ public:
 private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
 
-    struct SDFCosntantBufferType
+    struct SDFConstantBufferType
     {
         int numParticles;
         float blendAmount;
+        float padding = 0;
+        float padding2 = 0;
     };
 
     //RW Structured Buffers-----------------------------------------------
