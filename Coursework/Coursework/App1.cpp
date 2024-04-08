@@ -195,6 +195,8 @@ void App1::rebuildWaterPlane()//Feasibility Demo water plane that is used just t
 void App1::rebuildSPHParticles()//Used for when the number of particles is changed
 {
 	simulationParticles.clear();
+	simulationParticlesData.clear();
+	particlePositionSampleData.clear();
 
 	initialiseSPHParticles();
 	
@@ -509,7 +511,7 @@ void App1::gui()
 
 	if (!guiSettings.hideInstructions) {
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));//Adds spacing
-		ImGui::TextWrapped("This is a code sample for the Feasibility Demo of my project 'Evaluating Realistic Water Surface Creation in 3D Water Simulations for Video Games using Smoothed Particle Hydrodynamics (SPH)'");
+		ImGui::TextWrapped("This the artefact my project 'Evaluating Realistic Water Surface Creation in 3D Water Simulations for Video Games using Smoothed Particle Hydrodynamics (SPH)'");
 		ImGui::Dummy(ImVec2(0.0f, 5.0f));
 		ImGui::TextWrapped("Camera Controls\nLeft Mouse Button: Rotate Camera\nWASD: Move Camera\nEQ: Raise/Lower Camera");
 	}
