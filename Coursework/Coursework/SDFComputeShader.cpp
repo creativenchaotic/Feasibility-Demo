@@ -49,7 +49,7 @@ void SDFComputeShader::setShaderParameters(ID3D11DeviceContext* dc)
 	dc->CSSetUnorderedAccessViews(0, 1, &sdfPixelCalcOutputWritable, 0);//Same as UAVs
 }
 
-void SDFComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XMFLOAT3>* particles)
+void SDFComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XMFLOAT4>* particles)
 {
     //Creating a buffer to output the data from the compute shader
     D3D11_BUFFER_DESC bufferDesc = {};//Creating a buffer description to create the buffer from

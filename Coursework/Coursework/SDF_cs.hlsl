@@ -2,6 +2,8 @@
 
 static const int NumThreads = 64;
 
+RWStructuredBuffer<float4> particleData : register(u0); //Data we pass to and from the compute shader. Currently the particle data, this should probably be an SRV instead since we are wanting to output the results of the SDF from this shader.
+
 cbuffer cb_simConstants : register(b0){
     int numParticles;
     float blendAmount;
@@ -21,6 +23,12 @@ float smoothUnion(float shapeA, float shapeB)
 {
     float h = max(blendAmount - abs(shapeA - shapeB), 0.0f) / blendAmount;
     return min(shapeA, shapeB) - h * h * h * blendAmount * (1.0f / 6.0f);
+}
+
+
+float sdfCalculations(float3 position)
+{
+    smoothUnion(0,0);
 }
 
 [numthreads(1, 1, 1)]
@@ -60,4 +68,6 @@ void main( uint3 DTid : SV_DispatchThreadID )
         
         
     }*/
+
+
 }

@@ -5,13 +5,14 @@ enum class RenderSettings {
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 2;
+	int numParticlesPerAxis = 10;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	int particleResolution = 10;
 	float particleSpacing = 10.f;
 	int particleScale = 1;
 	float sizeOfSpawner = 36.7f;
-	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(0.f,0.f,0.f);
+	//float sizeOfSpawner = 10.f;
+	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(50.f,50.f,50.f);
 
 	float gravity = -10.f;
 	float collisionDamping = 0.95f;

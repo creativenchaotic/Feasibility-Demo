@@ -1,6 +1,8 @@
 
 // Texture and sampler registers
 Texture2D texture0 : register(t0);
+StructuredBuffer<float4> sdfParticlePositions : register(t1);
+
 SamplerState Sampler0 : register(s0);
 
 cbuffer CameraBuffer : register(b0){
@@ -9,6 +11,7 @@ cbuffer CameraBuffer : register(b0){
 }
 cbuffer SDFBuffer : register (b1){
     float4 blendAmount;
+    float4 numParticles;
 }
 
 
@@ -37,80 +40,28 @@ float smoothUnion(float shapeA, float shapeB)
 
 float sdfCalculations(float3 position)
 {
-    float sine = sin(timer) * 5.0f;
-    float cosine = cos(timer) * 2.0f;
-
-    float sine2 = sin(timer) * 10.0f;
-    float cosine2 = cos(timer) * 20.0f;
-
     
-    /*
-    //1st BIT TO SHOW------------------------------------------------------------------------------
-    float3 spherePosition1 = float3(10, 10, 70); //Position of the sphere in SDF Object World
-    float sphere1 = sdfSphere(position - spherePosition1, 7.f); //Sphere SDF
+    float finalValue;
 
+    float sphere1 = sdfSphere(position - float3(sdfParticlePositions[0].xyz), 1.f); //Sphere SDF
+    float sphere2 = sdfSphere(position - float3(sdfParticlePositions[1].xyz), 1.f); //Sphere SDF
 
-    return sphere1;
-    //---------------------------------------------------------------------------------------------
-    */
-    /*
-    //2nd BIT TO SHOW------------------------------------------------------------------------------
-    float3 spherePosition1 = float3(10, 10, 60); //Position of the sphere in SDF Object World
-    float sphere1 = sdfSphere(position - spherePosition1, 5.f); //Sphere SDF
+    finalValue = smoothUnion(sphere1, sphere2);
 
-    float3 spherePosition2 = float3(20, 15, 60); //Position of the sphere in SDF Object World
-    float sphere2 = sdfSphere(position - spherePosition2, 5.f); //Sphere SDF
+	if(numParticles.x>2){
+	    for (int i = 2; i < numParticles.x; i++)
+	    {
+	        float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz), 1.f); //Sphere SDF
 
+    		finalValue = smoothUnion(sphere, finalValue);
 
-    return smoothUnion(sphere1, sphere2);
-    //---------------------------------------------------------------------------------------------
-    */
-    /*
-    //3rd BIT TO SHOW------------------------------------------------------------------------------
-    float3 spherePosition1 = float3(20, cosine + 20, 60); //Position of the sphere in SDF Object World
-    float sphere1 = sdfSphere(position - spherePosition1, 6.f); //Sphere SDF
-
-    float3 spherePosition2 = float3(sine + 20.f, 10, 60); //Position of the sphere in SDF Object World
-    float sphere2 = sdfSphere(position - spherePosition2, 6.f); //Sphere SDF
-
-    float3 spherePosition3 = float3(sine + 30.0f, cosine + 10, 60); //Position of the sphere in SDF Object World
-    float sphere3 = sdfSphere(position - spherePosition3, 1.f); //Sphere SDF
-
-    float3 spherePosition4 = float3(sine + 10.f, 20, 60); //Position of the sphere in SDF Object World
-    float sphere4 = sdfSphere(position - spherePosition4, 6.f); //Sphere SDF
-
-    return smoothUnion(sphere4, smoothUnion(sphere3, smoothUnion(sphere1, sphere2)));
-    //---------------------------------------------------------------------------------------------
-    */
+	    }
+    }
     
-    //4th BIT TO SHOW------------------------------------------------------------------------------
-    float3 spherePosition1 = float3(sine * 1.2 + 20, abs(cosine) + 7, 65); //Position of the sphere in SDF Object World
-    float sphere1 = sdfSphere(position - spherePosition1, 5.f); //Sphere SDF
-
-    float3 spherePosition2 = float3(-sine * 2.8 + 20, abs(cosine) + 13, 63); //Position of the sphere in SDF Object World
-    float sphere2 = sdfSphere(position - spherePosition2, 5.f); //Sphere SDF
-
-    float3 spherePosition3 = float3(sine * 2.4 + 20, abs(cosine) + 15, 60); //Position of the sphere in SDF Object World
-    float sphere3 = sdfSphere(position - spherePosition3, 5.f); //Sphere SDF
-
-    float3 spherePosition4 = float3(-sine * 1.3 + 20, abs(cosine) + 11, 61); //Position of the sphere in SDF Object World
-    float sphere4 = sdfSphere(position - spherePosition4, 5.f); //Sphere SDF
-
-    float3 spherePosition5 = float3(sine * 5.0f + 20, abs(cosine) + 5, 57); //Position of the sphere in SDF Object World
-    float sphere5 = sdfSphere(position - spherePosition5, 5.f); //Sphere SDF
-
-    float3 spherePosition6 = float3(-sine + 20, abs(cosine) + 10, 59); //Position of the sphere in SDF Object World
-    float sphere6 = sdfSphere(position - spherePosition6, 5.f); //Sphere SDF
-
-    float3 spherePosition7 = float3(sine + 20, abs(cosine) + 10, 53); //Position of the sphere in SDF Object World
-    float sphere7 = sdfSphere(position - spherePosition7, 5.f); //Sphere SDF
-
-    float3 spherePosition8 = float3(-sine + 20, abs(cosine) + 10, 55); //Position of the sphere in SDF Object World
-    float sphere8 = sdfSphere(position - spherePosition8, 5.f); //Sphere SDF
-
-    return smoothUnion(sphere8, smoothUnion(sphere7, smoothUnion(sphere6, smoothUnion(sphere5, smoothUnion(sphere4, smoothUnion(sphere3, smoothUnion(sphere1, sphere2)))))));
-    //---------------------------------------------------------------------------------------------
-    
+    //float finalValue = sdfSphere(position - float3(sdfParticlePositions[8].xyz), 1.f); //Sphere SDF
+  
+    return finalValue;
+   
     
 }
 
@@ -123,7 +74,7 @@ float4 main(InputType input) : SV_TARGET
     float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
 
     //Initialising variables used for raymarching
-    float3 rayOrigin = float3(0,0,-10.f);
+    float3 rayOrigin = float3(10,0,-10.f);
     //float3 rayOrigin = cameraPos;
     float3 rayDirection = normalize(float3(input.tex, 1)); //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
@@ -146,8 +97,6 @@ float4 main(InputType input) : SV_TARGET
         {
             break;
         }
-           
-        
         
     }
 

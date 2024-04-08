@@ -15,6 +15,7 @@ class SDFTestShader :
     struct SDFValuesBufferType
     {
         XMFLOAT4 blendingAmount;
+        XMFLOAT4 numParticles;
     };
 
 public:
@@ -22,7 +23,8 @@ public:
     ~SDFTestShader();
 
     void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT3 cameraPos, float delta, ID3D11ShaderResourceView* renderTexture);
-    void setSDFParameters(ID3D11DeviceContext*, float blendVal);
+    void setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);//Sets the SRV for the compute shader
+	void setSDFParameters(ID3D11DeviceContext*, float blendVal, float numParticles);
 
 private:
     void initShader(const wchar_t* cs, const wchar_t* ps);

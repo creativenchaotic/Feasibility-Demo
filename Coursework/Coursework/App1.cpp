@@ -206,8 +206,7 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 
 	//Placing the SPH particles as a grid based on how many particles there should be per axis
 	if (currentNumParticles!=0) {
-		
-		float particleSpacing = simulationSettings.particleSpacing;
+
 
 		for (int x = 0; x < simulationSettings.numParticlesPerAxis; x++) {
 			for (int y = 0; y < simulationSettings.numParticlesPerAxis; y++) {
@@ -228,7 +227,7 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 					simulationParticles.push_back(sphParticle);//Adding the particle created to a vector of SPH particles
 					simulationParticlesData.push_back(sphParticle->particleData);//Adding the SPH particle data to a vector of SPH particle datas
 
-					particlePositionSampleData.push_back(XMFLOAT3(px + 50, py + 50, pz + 50));//Setting the start position of the particles
+					particlePositionSampleData.push_back(XMFLOAT4(px, py, pz, 0));//Setting the start position of the particles
 				}
 			}
 		}
@@ -458,14 +457,14 @@ void App1::renderSceneShaders(float time)
 
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
-	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), simulationSettings.numParticles, sdfVal.blendAmount);
+	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount);
 	sdfComputeShader->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
 	sdfComputeShader->unbind(renderer->getDeviceContext());
 
 
 	//-----------------------------------------------------------------------------------------------------------
 
-	/*
+	
 	//SDF TEST----------------------------------------------------------------------------------
 	//Set the render target to be the RtT and clear it
 	sdfRenderTexture->setRenderTarget(renderer->getDeviceContext());
@@ -483,9 +482,10 @@ void App1::renderSceneShaders(float time)
 
 	orthoMesh->sendData(renderer->getDeviceContext());
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
-	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount);
+	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput());
+	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-	*/
+	
 
 	// Render GUI
 	gui();
@@ -592,7 +592,7 @@ void App1::gui()
 	//SDF---------------------------------------------------------------------
 	if(ImGui::TreeNode("Signed Distance Fields"))
 	{
-		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0, 20);
+		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0.01, 20);
 
 		ImGui::TreePop();
 	}

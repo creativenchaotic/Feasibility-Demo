@@ -10,7 +10,7 @@ public:
     ~SDFComputeShader();
 
     void setShaderParameters(ID3D11DeviceContext* dc);//Sets the output UAV for the compute shader
-    void createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XMFLOAT3>* particles);//Creates the output UAVs for the shader
+    void createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XMFLOAT4>* particles);//Creates the output UAVs for the shader
     void unbind(ID3D11DeviceContext* dc);
     ID3D11ShaderResourceView* getComputeShaderOutput() { return sdfPixelCalcOutputReadable; };
 

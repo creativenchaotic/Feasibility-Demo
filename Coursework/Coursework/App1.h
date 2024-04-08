@@ -48,7 +48,7 @@ protected:
 private:
 
 	SDFComputeShader* sdfComputeShader;
-	std::vector<XMFLOAT3> particlePositionSampleData;
+	std::vector<XMFLOAT4> particlePositionSampleData;
 
 	//---------------------------------------------------------------
 	SDFTestShader* sdfShader;

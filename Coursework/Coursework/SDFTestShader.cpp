@@ -133,13 +133,19 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 }
 
-void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal)
+void SDFTestShader::setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV)
+{
+	deviceContext->PSSetShaderResources(1, 1, &computeShaderSRV);
+}
+
+void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal, float numParticles)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	SDFValuesBufferType* dataPtr;
 	deviceContext->Map(sdfBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	dataPtr = (SDFValuesBufferType*)mappedResource.pData;
 	dataPtr->blendingAmount = XMFLOAT4(blendVal, 0.f,0.f,0.f);
+	dataPtr->numParticles = XMFLOAT4(numParticles, 0.f, 0.f, 0.f);
 	deviceContext->Unmap(sdfBuffer, 0);
 	deviceContext->PSSetConstantBuffers(1, 1, &sdfBuffer);
 
