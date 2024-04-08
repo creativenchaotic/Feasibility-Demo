@@ -403,19 +403,6 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
 	
 	/*
-	//WATER PLANE-----------------------------------------------------------------------------
-	//Currently only used for the feasibility demo to show what a water plane might look like once in the scene and simulating
-	if (guiSettings.displayWaterSurface) {
-		renderer->setAlphaBlending(true);
-		water->sendData(renderer->getDeviceContext());
-		waterShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateWaterPlane, viewMatrix, projectionMatrix, directionalLightValues.lightSpecularColour, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
-		waterShader->setWaveParameters(renderer->getDeviceContext(), time, waterAmpl1, waterFreq1, waterSpeed1, waterDirection1, waterAmpl2, waterFreq2, waterSpeed2, waterDirection2, waterAmpl3, waterFreq3, waterSpeed3, waterDirection3, steepness, waterHeight);
-		waterShader->setLightingParameters(renderer->getDeviceContext(), directionalLight, spotlight, -1.0f, 1.0f, sizeSpotlight);
-		waterShader->setAttenuationFactors(renderer->getDeviceContext(), attenuationValues);
-		waterShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
-		waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
-		renderer->setAlphaBlending(false);
-	}
 
 	//SPH PARTICLES---------------------------------------------------------------------------
 	if (guiSettings.displaySPHSimulationParticles) {
