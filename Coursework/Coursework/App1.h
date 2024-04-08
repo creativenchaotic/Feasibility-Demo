@@ -4,7 +4,6 @@
 
 // Includes
 #include "DXF.h"
-#include "WaterShader.h"
 #include "SunShader.h"
 #include "PlaneMeshTessellated.h"
 #include "Externals.h"
@@ -32,7 +31,6 @@ protected:
 	bool render();
 	void gui();
 
-	void rebuildWaterPlane();//Used to rebuild the water plane on top of the particles
 	void rebuildSPHParticles();//Used to rebuild the SPH particles when the number of particles changes
 	void initialiseSPHParticles();//Used to initialise the SPH particles: lays them out in a grid
 	void sphSimulationComputePass();//Runs compute shaders used in the SPH sim
@@ -69,12 +67,6 @@ private:
 
 	//----------------------------------------------------------------
 	//MESHES----------------------------------------------------------
-	//Water Plane
-	WaterShader* waterShader;
-	PlaneMeshTessellated* water;
-	int waterPlaneResolution = 200;
-
-	//----------------------------------------------
 	//Sun
 	SunShader* sunShader;
 	SphereMesh* sun;
@@ -118,6 +110,14 @@ private:
 	float PI = 3.14159265358979f;
 
 
+	//Water lighting values
+	PBRMaterialValues waterMaterial;
+
+	int sceneWidth = 1200;
+	int sceneHeight = 1200;
+
+	XMFLOAT3 waterTranslationGUI = XMFLOAT3(-97.647f, -3.529f, -83.721f);
+
 
 	//----------------------------------------------------------------
 	// Changing background colour
@@ -125,38 +125,6 @@ private:
 
 	//delta time
 	float time;
-
-
-
-	//----------------------------------------------------------------
-	//WATER MANIPULATION----------------------------------------------
-	//to manipulate water with waves
-	//Only used on the plane for the feasibility demo. Not to be used for the final water surface
-	float steepness = 2.f;
-	float waterHeight = 3.291f;
-
-	float waterAmpl1= 0.585f;
-	float waterFreq1= 0.358f;
-	float waterSpeed1= 1.519f;
-	XMFLOAT3 waterDirection1 = XMFLOAT3(3.012f,0.0f,-0.638);
-
-	float waterAmpl2 = 0.245f;
-	float waterFreq2 = 0.199f;
-	float waterSpeed2 = 0.190f;
-	XMFLOAT3 waterDirection2 = XMFLOAT3(0.12f, 0.0f, 0.952f);
-
-	float waterAmpl3 = 0.447f;
-	float waterFreq3 = 0.139f;
-	float waterSpeed3 = 0.190;
-	XMFLOAT3 waterDirection3 = XMFLOAT3(2.0f, 0.0f, -2.889f);
-
-	//Water lighting values
-	PBRMaterialValues waterMaterial;
-
-	int sceneWidth = 1200;
-	int sceneHeight = 1200;
-
-	XMFLOAT3 waterTranslationGUI = XMFLOAT3(-97.647f,-3.529f, -83.721f);
 
 
 	//----------------------------------------------------------------

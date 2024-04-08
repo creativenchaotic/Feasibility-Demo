@@ -21,9 +21,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WaterShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SunShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,12 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainManipulation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WaterShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SunShader.h">
@@ -106,22 +97,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="WaterShader_vs.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="WaterShader_ps.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
     <FxCompile Include="SunShader_vs.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="SunShader_ps.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="WaterShader_hs.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="WaterShader_ds.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="DepthShader_vs.hlsl">

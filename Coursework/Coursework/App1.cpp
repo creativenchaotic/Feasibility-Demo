@@ -25,7 +25,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
 	// Create Mesh objects
-	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 2);
@@ -34,7 +33,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 
 	//Creating shaders
-	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	sunShader = new SunShader(renderer->getDevice(), hwnd);
 	sphParticleShader = new SPHShader(renderer->getDevice(), hwnd);
 	sphSimulationComputeShaderFirstPass = new ComputeShader(renderer->getDevice(), hwnd);
@@ -76,21 +74,9 @@ App1::~App1()
 	BaseApplication::~BaseApplication();
 
 	// Release the Direct3D object.---------------
-
-	if (water)
-	{
-		delete water;
-		water = 0;
-	}
-
 	if (sun) {
 		delete sun;
 		sun = 0;
-	}
-
-	if (waterShader) {
-		delete waterShader;
-		waterShader = 0;
 	}
 
 	if (directionalLight) {
@@ -182,13 +168,6 @@ bool App1::frame()
 	}
 
 	return true;
-}
-
-
-void App1::rebuildWaterPlane()//Feasibility Demo water plane that is used just to see what it might look like in the end
-{
-	delete water;
-	water = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), waterPlaneResolution);
 }
 
 
@@ -647,54 +626,19 @@ void App1::gui()
 
 	//------------------------------------------------------------------------
 	//WAVES
-	if (ImGui::TreeNode("Water")) {
-		ImGui::Checkbox("Display Water Plane", &guiSettings.displayWaterSurface);
-		if (ImGui::TreeNode("Water Manipulation")) {
-			if (!guiSettings.hideInstructions) {
-				ImGui::TextWrapped("Currently the water plane is used to visualise what the final water surface might look like once the surface generation is implemented for the SPH. Currently, there is a 2D water simulation using Gerstner Waves. In the final project the plane will adapt to the surface of the SPH, for now it is just implemented with Gerstner Waves to help aid visually.");
-			}
-			//To manipulate terrain with waves
-			ImGui::SliderInt("Plane resolution", &waterPlaneResolution, 10, 1000);
-			if (ImGui::Button("Rebuild Water")) {
-				rebuildWaterPlane();
-			}
-			ImGui::SliderFloat3("Translate Water Plane", (float*) & waterTranslationGUI, -100.f, 100.f);
-			ImGui::SliderFloat("Wave Steepness", &steepness, 0.00f, 2.f);
-			ImGui::SliderFloat("Water Height", &waterHeight, 0, 20.f);
-			ImGui::Text("WAVE 1");
-			ImGui::SliderFloat("Amplitude 1", &waterAmpl1, 0, 10);
-			ImGui::SliderFloat("Frequency 1", &waterFreq1, 0, 3.14);
-			ImGui::SliderFloat("Speed 1", &waterSpeed1, 0, 30);
-			ImGui::SliderFloat3("Wave 1 Direction (X,Y,Z)", (float*)&waterDirection1, -10.f, 10.f);
-			ImGui::Spacing();
-			ImGui::Text("WAVE 2");
-			ImGui::SliderFloat("Amplitude 2", &waterAmpl2, 0, 10);
-			ImGui::SliderFloat("Frequency 2", &waterFreq2, 0, 3.14);
-			ImGui::SliderFloat("Speed 2", &waterSpeed2, 0, 30);
-			ImGui::SliderFloat3("Wave 2 Direction (X,Y,Z)", (float*)&waterDirection2, -10.f, 10.f);
-			ImGui::Spacing();
-			ImGui::Text("WAVE 3");
-			ImGui::SliderFloat("Amplitude 3", &waterAmpl3, 0, 10);
-			ImGui::SliderFloat("Frequency 3", &waterFreq3, 0, 3.14);
-			ImGui::SliderFloat("Speed 3", &waterSpeed3, 0, 30);
-			ImGui::SliderFloat3("Wave 3 Direction (X,Y,Z)", (float*)&waterDirection3, -10.f, 10.f);
-			ImGui::Dummy(ImVec2(0.0f, 10.0f));
-			ImGui::TreePop();
+		
+	if (ImGui::TreeNode("Water Material")) {
+		if (!guiSettings.hideInstructions) {
+			ImGui::TextWrapped("The water lighting is done using Physically Based Rendering. The values for rendering the material can be changed ");
 		}
-
-		if (ImGui::TreeNode("Water Material")) {
-			if (!guiSettings.hideInstructions) {
-				ImGui::TextWrapped("The water lighting is done using Physically Based Rendering. The values for rendering the material can be changed ");
-			}
-			ImGui::SliderFloat("Water Roughness", &waterMaterial.materialRoughness, 0.001, 1);
-			ImGui::SliderFloat("Water Metallic Amount", &waterMaterial.metallicFactor, 0.001, 1);
-			ImGui::SliderFloat("Water Base Reflectivity", &waterMaterial.baseReflectivity, 0.001, 1);
-			ImGui::Dummy(ImVec2(0.0f, 10.0f));
-			ImGui::TreePop();
-		}
-
+		ImGui::SliderFloat("Water Roughness", &waterMaterial.materialRoughness, 0.001, 1);
+		ImGui::SliderFloat("Water Metallic Amount", &waterMaterial.metallicFactor, 0.001, 1);
+		ImGui::SliderFloat("Water Base Reflectivity", &waterMaterial.baseReflectivity, 0.001, 1);
+		ImGui::Dummy(ImVec2(0.0f, 10.0f));
 		ImGui::TreePop();
 	}
+
+	
 
 	//------------------------------------------------------------------------
 	//LIGHTS
