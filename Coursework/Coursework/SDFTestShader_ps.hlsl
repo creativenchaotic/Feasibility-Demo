@@ -57,8 +57,6 @@ float sdfCalculations(float3 position)
 
 	    }
     }
-    
-    //float finalValue = sdfSphere(position - float3(sdfParticlePositions[8].xyz), 1.f); //Sphere SDF
   
     return finalValue;
    
@@ -74,7 +72,7 @@ float4 main(InputType input) : SV_TARGET
     float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
 
     //Initialising variables used for raymarching
-    float3 rayOrigin = float3(10,0,-10.f);
+    float3 rayOrigin = float3(0,-10,10.f);
     //float3 rayOrigin = cameraPos;
     float3 rayDirection = normalize(float3(input.tex, 1)); //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position

@@ -53,7 +53,7 @@ void SDFComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XM
 {
     //Creating a buffer to output the data from the compute shader
     D3D11_BUFFER_DESC bufferDesc = {};//Creating a buffer description to create the buffer from
-    bufferDesc.ByteWidth = particles->size() * sizeof(particles);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
+    bufferDesc.ByteWidth = particles->size() * sizeof(particles[0]);//sizeofT should be the particle data struct. Setting the size of the buffer to whatever amount is needed
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;//Setting how the buffer works
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;

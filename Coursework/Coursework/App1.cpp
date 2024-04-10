@@ -260,8 +260,6 @@ float App1::logarithm(int x, int base)
 }
 //-------------------------------------------
 
-
-
 void App1::sphSimulationComputePass()//Runs all the compute shaders needed to run the SPH simulation
 {
 	//SPH SIMULATION FIRST PASS----------------------------------------
