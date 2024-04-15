@@ -455,7 +455,7 @@ void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_Dis
     SetParticleDataOffsetsAndIndices(dispatchThreadID);
    
     CalculateDensities(dispatchThreadID);
-    CalculatePressureForce(dispatchThreadID);
-    CalculateViscosity(dispatchThreadID);
-    UpdatePositions(dispatchThreadID);
+    //CalculatePressureForce(dispatchThreadID);
+    //CalculateViscosity(dispatchThreadID);
+    //UpdatePositions(dispatchThreadID);
 }

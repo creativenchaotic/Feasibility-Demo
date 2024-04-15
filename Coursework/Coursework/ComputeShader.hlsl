@@ -89,20 +89,10 @@ cbuffer cb_simConstants : register(b0)
 // Convert floating point position into an integer cell coordinate
 int3 GetCell3D(float3 position, float radius)//CHANGED THIS FUNCTION BC THERES AN ERROR SOMEWHERE
 {
-    //This is how I was trying to calculate it and it doesnt work
-   // position = abs(position);
-   // float x = floor(position.x / radius);
-   // float y = floor(position.y / radius);
-   // float z = floor(position.z / radius);
-    
-    //int ix = (int) x;
-    //int iy = (int) y;
-    //int iz = (int) z;
     
     //original from Sebastian Lague
     return (int3) floor(position / radius);
-    
-    //return int3(x,y,z);
+
 }
 
 // Hash cell coordinate to a single unsigned integer
@@ -141,8 +131,8 @@ void UpdateSpatialHash(uint3 thread)
 	// Update index buffer
     uint index = thread.x;
     int3 cell = GetCell3D(particleData[index].predictedPosition, smoothingRadius);
-    int hash = HashCell3D(cell);
-    int key = KeyFromHash(hash, numParticles);
+    uint hash = HashCell3D(cell);
+    uint key = KeyFromHash(hash, numParticles);
     particleData[thread.x].spatialIndices = uint3(index, hash, key);
 }
 

@@ -278,11 +278,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	//Sets the SRV for the compute shader
 	bitonicMergesort->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());
 	//Sets the output UAV for the compute shader
-	//bitonicMergesort->createDebugUAV(renderer->getDevice()); // UAV used for debugging. Contains a small number of unordered numbers to make sure the bitonic mergesort works 
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
-	//bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), currentNumParticles, 0, 0, 0);//Used for debugging to make sure the bitonic mergesort works
-	//bitonicMergesort->compute(renderer->getDeviceContext(),currentNumParticles, 1, 1);//Used with line above to make sure that the bitonic mergesort works
-
 	
 	// Launch each step of the sorting algorithm (once the previous step is complete)
 	// Number of steps = [log2(n) * (log2(n) + 1)] / 2
@@ -303,8 +299,9 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 			bitonicMergesort->compute(renderer->getDeviceContext(), NextPowerOfTwo(currentNumParticles) / 2, 1, 1);
 		}
 	}
-	
 	bitonicMergesort->unbind(renderer->getDeviceContext());
+
+
 	
 	//SPATIAL OFFSET CALCULATION-----------------
 	spatialOffsetCalculationComputeShader->setShaderParameters(renderer->getDeviceContext());
@@ -312,7 +309,8 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	spatialOffsetCalculationComputeShader->setOffsetCalculationsSettings(renderer->getDeviceContext(), currentNumParticles);
 	spatialOffsetCalculationComputeShader->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
 	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
-	
+
+
 	//SPH SIMULATION SECOND PASS-----------------
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
@@ -465,7 +463,7 @@ bool App1::render()
 	//Add delta time
 	time += timer->getTime();
 
-	//sphSimulationComputePass();//Runs the SPH simulation compute shaders
+	sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
 	renderSceneShaders(time);//Renders the actual water simulation in the scene
 
