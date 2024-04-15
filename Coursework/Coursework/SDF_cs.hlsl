@@ -28,14 +28,33 @@ float smoothUnion(float shapeA, float shapeB)
 
 float sdfCalculations(float3 position)
 {
-    smoothUnion(0,0);
+        
+    float finalValue;
+
+    float sphere1 = sdfSphere(position - float3(particleData[0].xyz), 1.f); //Sphere SDF
+    float sphere2 = sdfSphere(position - float3(particleData[1].xyz), 1.f); //Sphere SDF
+
+    finalValue = smoothUnion(sphere1, sphere2);
+
+    if (numParticles.x > 2)
+    {
+        for (int i = 2; i < numParticles.x; i++)
+        {
+            float sphere = sdfSphere(position - float3(particleData[i].xyz), 1.f); //Sphere SDF
+
+            finalValue = smoothUnion(sphere, finalValue);
+
+        }
+    }
+  
+    return finalValue;
 }
 
 [numthreads(1, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
 {
     /*
-     //Setting up colours for SDF
+	//Setting up colours for SDF
     float3 finalColour = float3(0, 0, 0);
     float4 posColour = float4(0.0, 0.0, 1.0f, 1.0f);
     float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
@@ -64,10 +83,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
         {
             break;
         }
-           
-        
-        
-    }*/
 
-
+    }
+*/
 }

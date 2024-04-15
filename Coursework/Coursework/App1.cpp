@@ -374,14 +374,13 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX scaleSun = XMMatrixScaling(3.0f, 3.0f, 3.0f);
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
-	XMMATRIX translateWaterPlane = XMMatrixTranslation(waterTranslationGUI.x, waterTranslationGUI.y, waterTranslationGUI.z);
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
 
 	XMMATRIX translateSDFPlane = XMMatrixTranslation(0, 0, 0);
 	XMMATRIX scaleSDFPlane = XMMatrixScaling(120,120.0f,120);
 	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
 	
-	/*
+	
 
 	//SPH PARTICLES---------------------------------------------------------------------------
 	if (guiSettings.displaySPHSimulationParticles) {
@@ -418,9 +417,8 @@ void App1::renderSceneShaders(float time)
 			sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSpotlight, viewMatrix, projectionMatrix);
 			sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
 		}
-	}*/
-
-
+	}
+		/*
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
 	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount);
@@ -451,7 +449,7 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-	
+	*/
 
 	// Render GUI
 	gui();
@@ -501,8 +499,8 @@ void App1::gui()
 	ImGui::Text("Camera Position: %f, %f, %f", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 	ImGui::Text("Camera Rotation: %f, %f, %f", camera->getRotation().x, camera->getRotation().y, camera->getRotation().z);
 	if (ImGui::Button("Reset Camera Position")) {//Added in case the user gets lost in the scene when moving the camera
-		camera->setPosition(64.0f, 38.0f, -96.0f);
-		camera->setRotation(11.5f, -28.75f, 0.f);
+		camera->setPosition(59.725620f, 100.967369f, 23.202298f);
+		camera->setRotation(6.0f, 13.25f, 0.f);
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));

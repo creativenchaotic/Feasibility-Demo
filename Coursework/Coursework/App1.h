@@ -116,8 +116,6 @@ private:
 	int sceneWidth = 1200;
 	int sceneHeight = 1200;
 
-	XMFLOAT3 waterTranslationGUI = XMFLOAT3(-97.647f, -3.529f, -83.721f);
-
 
 	//----------------------------------------------------------------
 	// Changing background colour
