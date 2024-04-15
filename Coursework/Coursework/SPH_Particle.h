@@ -8,31 +8,25 @@ struct uint3 {
 };
 
 struct ParticleData {
-    int size;
-    XMFLOAT3 startPosition = XMFLOAT3(0.0f,0.0f,0.0f);
+    int particleNum = 0;
 
-    XMFLOAT3 currentPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    float density = 0.0f;
-
-    XMFLOAT3 predictedPosition = XMFLOAT3(0.0f,0.0f,0.0f);
-    float nearDensity = 0.0f;
-
+    XMFLOAT3 position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    XMFLOAT3 predictedPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
     XMFLOAT3 velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    unsigned int spatialOffsets = 0;
-
+    XMFLOAT2 density = XMFLOAT2(0.0,0.0);
     uint3 spatialIndices;
-    float padding = 0.0f;
-
+    unsigned int spatialOffsets = 0;
 };
 
 class SPH_Particle :
     public SphereMesh
 {
 public:
-    SPH_Particle(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution, int lsize);
+    SPH_Particle(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution);
     ~SPH_Particle();
 
     void setStartPosition(XMFLOAT3 pos);
+    void setParticleNum(int num);
 
     ParticleData particleData;
     int resolution;

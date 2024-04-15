@@ -188,12 +188,13 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 	//Placing the SPH particles as a grid based on how many particles there should be per axis
 	if (currentNumParticles!=0) {
 
+		int currentParticle = 0;
 
 		for (int x = 0; x < simulationSettings.numParticlesPerAxis; x++) {
 			for (int y = 0; y < simulationSettings.numParticlesPerAxis; y++) {
 				for (int z = 0; z < simulationSettings.numParticlesPerAxis; z++) {
 
-					sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution, simulationSettings.particleResolution);
+					sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution);
 
 					float tx = x / (simulationSettings.numParticlesPerAxis - 1.f);
 					float ty = y / (simulationSettings.numParticlesPerAxis - 1.f);
@@ -204,11 +205,14 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 					float py = (ty - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.y;
 					float pz = (tz - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.z;
 
-					sphParticle->setStartPosition(XMFLOAT3(px+50, py+50, pz+50));//Setting the start position of the particles
+					sphParticle->setParticleNum(currentParticle);
+					sphParticle->setStartPosition(XMFLOAT3(px, py, pz));//Setting the start position of the particles
 					simulationParticles.push_back(sphParticle);//Adding the particle created to a vector of SPH particles
 					simulationParticlesData.push_back(sphParticle->particleData);//Adding the SPH particle data to a vector of SPH particle datas
 
 					particlePositionSampleData.push_back(XMFLOAT4(px, py, pz, 0));//Setting the start position of the particles
+
+					currentParticle++;
 				}
 			}
 		}
@@ -283,7 +287,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	// Launch each step of the sorting algorithm (once the previous step is complete)
 	// Number of steps = [log2(n) * (log2(n) + 1)] / 2
 	// where n = nearest power of 2 that is greater or equal to the number of inputs
-	int numStages = (int)logarithm(NextPowerOfTwo(currentNumParticles), 2);
+	int numStages = (int)logarithm(NextPowerOfTwo(currentNumParticles), 2); //THERE COULD BE AN ERROR HEREEEEEEEEEEEEEEEEEEEEEE
 
 	for (int stageIndex = 0; stageIndex < numStages; stageIndex++)
 	{
@@ -296,7 +300,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 			bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), currentNumParticles, groupWidth, groupHeight, stepIndex);
 
 			//Run the pair-wise sorting step
-			bitonicMergesort->compute(renderer->getDeviceContext(), NextPowerOfTwo(currentNumParticles) / 2, 1, 1);
+			bitonicMergesort->compute(renderer->getDeviceContext(), NextPowerOfTwo(currentNumParticles) / 2, 1, 1);//NEXT POWER OF TWO COULD HAVE AN ERRORRRRRRRRRRRRRRRRRRRR
 		}
 	}
 	bitonicMergesort->unbind(renderer->getDeviceContext());
@@ -386,7 +390,7 @@ void App1::renderSceneShaders(float time)
 
 		for (int i = 0; i < currentNumParticles; i++) {
 
-			XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->particleData.startPosition.x, simulationParticles[i]->particleData.startPosition.y, simulationParticles[i]->particleData.startPosition.z);
+			XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->particleData.position.x, simulationParticles[i]->particleData.position.y, simulationParticles[i]->particleData.position.z);
 
 			simulationParticles[i]->sendData(renderer->getDeviceContext());
 			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);

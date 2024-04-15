@@ -2,16 +2,13 @@ static const int NumThreads = 128;
 
 struct Particle
 {
-    int size;
-    float3 startPosition;
-    float3 currentPosition;
-    float density;
+    int particleNum;
+    float3 position;
     float3 predictedPosition;
-    float nearDensity;
     float3 velocity;
-    int spatialOffsets;
+    float2 density;
     uint3 spatialIndices; //x is the original index //y is the hash //z is the key
-    float padding;
+    uint spatialOffsets;
 };
 
 struct Entry
@@ -25,8 +22,6 @@ struct Entry
 };
 
 RWStructuredBuffer<uint3> particleData : register(u0); //Data we pass to and from the compute shader
-//RWStructuredBuffer<int> debugData : register(u0);
-
 StructuredBuffer<Particle> particleDataOutputFromSPHSimFirstPass : register(t0);
 
 cbuffer cb_bitonicMergesortConstants : register(b0)
@@ -37,7 +32,7 @@ cbuffer cb_bitonicMergesortConstants : register(b0)
     int stepIndex;
 }
 
-void bitonicMergesort(int3 dispatchThreadID)
+void bitonicMergesort(uint3 dispatchThreadID)
 {
     particleData[dispatchThreadID.x] = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices;
     
@@ -68,34 +63,16 @@ void bitonicMergesort(int3 dispatchThreadID)
         temp.key = particleData[indexLeft].z;
         
         particleData[indexLeft] = particleData[indexRight];
+
         particleData[indexRight].x = temp.originalIndex;
         particleData[indexRight].y = temp.hash;
         particleData[indexRight].z = temp.key;
     }
-   
-    /*
-    uint valueLeft = debugData[indexLeft];
-    uint valueRight = debugData[indexRight];
-
-	// Swap entries if value is descending
-    if (valueLeft > valueRight)
-    {
-        
-        //Entry temp = Entries[indexLeft];
-        //Entries[indexLeft] = Entries[indexRight];
-        //Entries[indexRight] = temp;
-        
-        int temp;
-        temp = debugData[indexLeft];
-
-        debugData[indexLeft] = debugData[indexRight];
-        debugData[indexRight] = temp;
-    }*/
 
 }
 
 [numthreads(NumThreads, 1, 1)]
-void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
+void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {   
     bitonicMergesort(dispatchThreadID);
 

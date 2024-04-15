@@ -5,14 +5,14 @@ enum class RenderSettings {
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 3;
+	int numParticlesPerAxis = 2;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	int particleResolution = 10;
 	float particleSpacing = 10.f;
 	int particleScale = 1;
 	float sizeOfSpawner = 10.f;
 	//float sizeOfSpawner = 10.f;
-	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(50.f,50.f,50.f);
+	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(0.f,0.f,0.f);
 
 	float gravity = -10.f;
 	float collisionDamping = 0.95f;
@@ -30,12 +30,12 @@ struct SPHSimulationValues {
 };
 
 struct SimulationBoundingBox {
-	float Front = 0;
-	float Back = 100;
-	float LeftSide = 0;
-	float RightSide = 100;
-	float Top = 100;
-	float Bottom = 0;
+	float Front = -20;
+	float Back = 20;
+	float LeftSide = -20;
+	float RightSide = 20;
+	float Top = 20;
+	float Bottom = -20;
 };
 
 struct LightValues {

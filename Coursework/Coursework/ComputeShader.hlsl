@@ -1,5 +1,4 @@
 //compute shader used for SPH simulation
-
 static const int NumThreads = 64;
 
 //SPATIAL 3D HASH----------------------------------------------------------------
@@ -42,16 +41,13 @@ static const uint hashK3 = 440817757;
 
 struct Particle
 {
-    int size;
-    float3 startPosition;
-    float3 currentPosition;
-    float density;
+    int particleNum;
+    float3 position;
     float3 predictedPosition;
-    float nearDensity;
     float3 velocity;
-    uint spatialOffsets;
+    float2 density;
     uint3 spatialIndices;
-    float padding;
+    uint spatialOffsets;
 };
 
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
@@ -87,7 +83,7 @@ cbuffer cb_simConstants : register(b0)
 
 
 // Convert floating point position into an integer cell coordinate
-int3 GetCell3D(float3 position, float radius)//CHANGED THIS FUNCTION BC THERES AN ERROR SOMEWHERE
+int3 GetCell3D(float3 position, float radius)
 {
     
     //original from Sebastian Lague
@@ -108,7 +104,7 @@ uint KeyFromHash(uint hash, uint tableSize)
 }
 
 //SIMULATION FUNCTIONS---------------------------------------------------------
-void ExternalForces(int3 thread)
+void ExternalForces(uint3 thread)
 {
     if (thread.x >= numParticles)
         return;
@@ -117,7 +113,7 @@ void ExternalForces(int3 thread)
     particleData[thread.x].velocity += float3(0, gravity, 0) * deltaTime;
 
 	// Predict
-    particleData[thread.x].predictedPosition = particleData[thread.x].currentPosition + particleData[thread.x].velocity * 1 / 120.0;
+    particleData[thread.x].predictedPosition = particleData[thread.x].position + particleData[thread.x].velocity * 1 / 120.0;
 }
 
 
@@ -136,7 +132,7 @@ void UpdateSpatialHash(uint3 thread)
     particleData[thread.x].spatialIndices = uint3(index, hash, key);
 }
 
-void setValuesFromPreviousIterationToCurrentIteration(int3 thread)
+void setValuesFromPreviousIterationToCurrentIteration(uint3 thread)
 {
     particleData[thread.x] = (Particle)sphSimulationSecondPassOutput[thread.x];
 }

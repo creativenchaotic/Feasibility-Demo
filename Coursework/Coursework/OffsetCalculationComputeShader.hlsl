@@ -1,19 +1,5 @@
 static const int NumThreads = 128;
 
-struct Particle
-{
-    int size;
-    float3 startPosition;
-    float3 currentPosition;
-    float density;
-    float3 predictedPosition;
-    float nearDensity;
-    float3 velocity;
-    int spatialOffsets;
-    uint3 spatialIndices; //x is the original index //y is the hash //z is the key
-    float padding;
-};
-
 RWStructuredBuffer<int> particleOffsets : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<uint3> particleIndicesOutputFromBitonicMergesort : register(t0);
 
@@ -24,7 +10,7 @@ cbuffer cb_offsetCalculationsConstants : register(b0)
 }
 
 [numthreads(NumThreads, 1, 1)]
-void main(uint3 groupThreadID : SV_GroupThreadID, int3 dispatchThreadID : SV_DispatchThreadID)
+void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     if (dispatchThreadID.x >= numParticles)
     {
