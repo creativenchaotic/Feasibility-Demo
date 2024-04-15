@@ -44,6 +44,9 @@ cbuffer cb_simConstants : register(b0)
     float boundingBoxFront;
     float boundingBoxBack;
     float2 padding2;
+
+    float4x4 localToWorld;
+    float4x4 worldToLocal;
 };
 
 
@@ -112,6 +115,38 @@ static const float PI = 3.1415926f;
  //HELPER FUNCTIONS-----------------------------------------------------------
 void ResolveCollisions(int particleIndex)
 {
+    /*
+    // Transform position/velocity to the local space of the bounding box (scale not included)
+    float3 posLocal = mul(worldToLocal, float4(particleData[particleIndex].position, 1)).xyz;
+    float3 velocityLocal = mul(worldToLocal, float4(particleData[particleIndex].velocity, 0)).xyz;
+
+	// Calculate distance from box on each axis (negative values are inside box)
+    const float3 halfSize = 0.5;
+    const float3 edgeDst = halfSize - abs(posLocal);
+
+	// Resolve collisions
+    if (edgeDst.x <= 0)
+    {
+        posLocal.x = halfSize.x * sign(posLocal.x);
+        velocityLocal.x *= -1 * collisionsDamping;
+    }
+    if (edgeDst.y <= 0)
+    {
+        posLocal.y = halfSize.y * sign(posLocal.y);
+        velocityLocal.y *= -1 * collisionsDamping;
+    }
+    if (edgeDst.z <= 0)
+    {
+        posLocal.z = halfSize.z * sign(posLocal.z);
+        velocityLocal.z *= -1 * collisionsDamping;
+    }
+
+	// Transform resolved position/velocity back to world space
+    particleData[particleIndex].position = mul(localToWorld, float4(posLocal, 1)).xyz;
+    particleData[particleIndex].velocity = mul(localToWorld, float4(velocityLocal, 0)).xyz;
+    */
+
+    
 	// Resolve collisions
     //Resolving collisions in X-axis
     if (particleData[particleIndex].position.x <= boundingBoxLeftSide)
