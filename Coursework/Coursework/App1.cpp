@@ -208,7 +208,7 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 					simulationParticles.push_back(sphParticle);//Adding the particle created to a vector of SPH particles
 					simulationParticlesData.push_back(sphParticle->particleData);//Adding the SPH particle data to a vector of SPH particle datas
 
-					particlePositionSampleData.push_back(XMFLOAT4(px, py, pz, 0));//Setting the start position of the particles
+					particlePositionSampleData.push_back(XMFLOAT4(px-20, py-20, pz+50, 0));//Setting the start position of the particles
 				}
 			}
 		}
@@ -443,6 +443,7 @@ void App1::renderSceneShaders(float time)
 
 	//RENDER TO TEXTURE----------------------------------------------------------------------------------
 	renderer->setZBuffer(false);
+	renderer->setAlphaBlending(true);
 	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
 	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
 
@@ -451,7 +452,7 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-	
+	renderer->setAlphaBlending(false);
 
 	// Render GUI
 	gui();

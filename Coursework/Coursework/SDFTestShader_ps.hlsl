@@ -40,20 +40,43 @@ float smoothUnion(float shapeA, float shapeB)
 
 float sdfCalculations(float3 position)
 {
-    
+    float sine = sin(timer) * 0.8f;
+    float cosine = cos(timer) * 2.3f;
+    float cosine2 = cos(timer) * 1.5f;
+    float sine2 = -sin(timer) * 1.7f;
+
     float finalValue;
 
-    float sphere1 = sdfSphere(position - float3(sdfParticlePositions[0].xyz), 1.f); //Sphere SDF
-    float sphere2 = sdfSphere(position - float3(sdfParticlePositions[1].xyz), 1.f); //Sphere SDF
+    float sphere1 = sdfSphere(position - float3(sdfParticlePositions[0].xyz) + float3(1,-10,1) + sine, 0.3f); //Sphere SDF
+    float sphere2 = sdfSphere(position - float3(sdfParticlePositions[1].xyz) + float3(1, -10, 1) + cosine+sine, 0.3f); //Sphere SDF
 
     finalValue = smoothUnion(sphere1, sphere2);
 
 	if(numParticles.x>2){
 	    for (int i = 2; i < numParticles.x; i++)
 	    {
-	        float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz), 1.f); //Sphere SDF
+            if (i%3)
+            {
+                float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz) + float3(1, -10, 1) + sine, 0.3f); //Sphere SDF
+                finalValue = smoothUnion(sphere, finalValue);
+            }
+            if (i % 5)
+            {
+                float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz) + float3(1, -10, 1) + sine2, 0.3f); //Sphere SDF
+                finalValue = smoothUnion(sphere, finalValue);
+            }
+            if (i % 2)
+            {
+                float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz) + float3(1, -10, 1) + -sine2+cosine2, 0.3f); //Sphere SDF
+                finalValue = smoothUnion(sphere, finalValue);
+            }
+            else
+            {
+                float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz) + float3(1, -10, 1) + cosine+-sine, 0.3f); //Sphere SDF
+                finalValue = smoothUnion(sphere, finalValue);
+            }
 
-    		finalValue = smoothUnion(sphere, finalValue);
+    		
 
 	    }
     }
@@ -68,11 +91,11 @@ float4 main(InputType input) : SV_TARGET
 {
     //Setting up colours for SDF
     float3 finalColour = float3(0,0,0);
-    float4 posColour = float4(0.0, 0.0, 1.0f, 1.0f);
-    float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
+    float4 posColour = float4(0.53, 0.83, 0.98f, 1.0f);
+    float4 negColour = float4(0.1, 0.0, 0.0, 1.0f);
 
     //Initialising variables used for raymarching
-    float3 rayOrigin = float3(0,-10,10.f);
+    float3 rayOrigin = float3(0,-10,50.f);
     //float3 rayOrigin = cameraPos;
     float3 rayDirection = normalize(float3(input.tex, 1)); //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
@@ -88,8 +111,15 @@ float4 main(InputType input) : SV_TARGET
 
         totalDistanceTravelled += distanceToScene;
 
-         //Colouring
-        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) /100;
+    	//Colouring
+        if (totalDistanceTravelled>0)
+        {
+            finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+        }
+        else
+        {
+	        finalColour = float3(0, 0, 0);
+        }
 
         if (distanceToScene < 0.001f || totalDistanceTravelled > 100.f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
         {
@@ -111,6 +141,9 @@ float4 main(InputType input) : SV_TARGET
     input.position = float4(input.tex.x, 0.f, input.tex.y, 0.f);
 
     //return float4(1 - finalColour, 1.0f) * textureColor;
-    return float4(1 - finalColour, 1.0f);
+
+
+    return (float4(1 - finalColour, 1.0f) * posColour)*0.4/0.2;
+   
 
 }
