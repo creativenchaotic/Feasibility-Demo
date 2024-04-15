@@ -40,8 +40,6 @@ protected:
 	int NextPowerOfTwo(int value);//Used for bitonic mergesort
 	float logarithm(int x, int base);//Used for bitonic mergesort
 
-	void runSimulationStep(float frameTime);//Sebastian Lague runs his simulation multiple times per frame so I included the function to have it just in case
-
 
 private:
 

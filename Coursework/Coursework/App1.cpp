@@ -194,16 +194,16 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 			for (int y = 0; y < simulationSettings.numParticlesPerAxis; y++) {
 				for (int z = 0; z < simulationSettings.numParticlesPerAxis; z++) {
 
-					sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), simulationSettings.particleResolution);
+					sphParticle = new SPH_Particle(renderer->getDevice(), renderer->getDeviceContext(), 10);
 
 					float tx = x / (simulationSettings.numParticlesPerAxis - 1.f);
 					float ty = y / (simulationSettings.numParticlesPerAxis - 1.f);
 					float tz = z / (simulationSettings.numParticlesPerAxis - 1.f);
 
 					//sizeOfSpawner is the size of the spawn bow that the particles get spawned in
-					float px = (tx - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.x;
-					float py = (ty - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.y;
-					float pz = (tz - 0.5f) * simulationSettings.sizeOfSpawner + simulationSettings.particlesSpawnCenter.z;
+					float px = (tx - 0.5f) * simulationSettings.sizeOfSpawner.x + simulationSettings.particlesSpawnCenter.x;
+					float py = (ty - 0.5f) * simulationSettings.sizeOfSpawner.y + simulationSettings.particlesSpawnCenter.y;
+					float pz = (tz - 0.5f) * simulationSettings.sizeOfSpawner.z + simulationSettings.particlesSpawnCenter.z;
 
 					sphParticle->setParticleNum(currentParticle);
 					sphParticle->setStartPosition(XMFLOAT3(px, py, pz));//Setting the start position of the particles
@@ -231,21 +231,9 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 
 }
 
-void App1::runSimulationStep(float frameTime)//Used to run the simulation multiple times per frame since Sebastian Lague does it in his simulation
-{
-	float timeStep = frameTime / simulationSettings.iterationsPerFrame * simulationSettings.timeScale;
-
-	simulationSettings.deltaTime = timeStep;
-
-	for (int i = 0; i < simulationSettings.iterationsPerFrame; i++)
-	{
-		sphSimulationComputePass();
-	}
-}
-
 //-------------------------------------------
 //Used for the bitonic mergesort
-int App1::NextPowerOfTwo(int value)
+int App1::NextPowerOfTwo(int value)//From Unity's Mathf.NextPowerOfTwo on Github
 {
 	value -= 1;
 	value |= value >> 16;
@@ -272,7 +260,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	//Sets the SRV for the compute shader
 	sphSimulationComputeShaderFirstPass->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderSecondPass->getComputeShaderOutput());//Output data from the final compute pass of the SPH simulation gets fed back into the start of the simulation
 	//Passes simulation values into compute shader buffer
-	sphSimulationComputeShaderFirstPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, isFirstIteration);
+	sphSimulationComputeShaderFirstPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, 0, 0, 0, 0, 0, 0, isFirstIteration);
 	//Dispatches the shader
 	sphSimulationComputeShaderFirstPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
 	sphSimulationComputeShaderFirstPass->unbind(renderer->getDeviceContext());
@@ -283,6 +271,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	bitonicMergesort->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());
 	//Sets the output UAV for the compute shader
 	bitonicMergesort->setShaderParameters(renderer->getDeviceContext());
+
 	
 	// Launch each step of the sorting algorithm (once the previous step is complete)
 	// Number of steps = [log2(n) * (log2(n) + 1)] / 2
@@ -300,9 +289,10 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 			bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), currentNumParticles, groupWidth, groupHeight, stepIndex);
 
 			//Run the pair-wise sorting step
-			bitonicMergesort->compute(renderer->getDeviceContext(), NextPowerOfTwo(currentNumParticles) / 2, 1, 1);//NEXT POWER OF TWO COULD HAVE AN ERRORRRRRRRRRRRRRRRRRRRR
+			bitonicMergesort->compute(renderer->getDeviceContext(), NextPowerOfTwo(currentNumParticles) / 2, 1, 1);
 		}
 	}
+
 	bitonicMergesort->unbind(renderer->getDeviceContext());
 
 
@@ -316,8 +306,10 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 
 
 	//SPH SIMULATION SECOND PASS-----------------
+
+
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
-	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front);
+	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front,simulationSettings.localToWorld, simulationSettings.worldToLocal);
 	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(),sphSimulationComputeShaderFirstPass->getComputeShaderOutput(), bitonicMergesort->getComputeShaderOutput(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
 	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
 	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());
@@ -588,11 +580,9 @@ void App1::gui()
 
 
 		//Spacing between particles and resolution
-		ImGui::SliderFloat("Particle Spacing", &simulationSettings.particleSpacing, 0, 20);
-		ImGui::SliderInt("Particle Resolution",&simulationSettings.particleResolution,4, 10);
 		ImGui::SliderInt("Particle Size", &simulationSettings.particleScale, 1, 100);
 		ImGui::SliderFloat3("Particles Spawnpoint Centre", (float*) & simulationSettings.particlesSpawnCenter, -10,10);
-		ImGui::SliderFloat("Spawnpoint Size", &simulationSettings.sizeOfSpawner, 2, 100);
+		ImGui::SliderFloat3("Spawnpoint Size",(float*)& simulationSettings.sizeOfSpawner, 2, 100);
 
 		ImGui::SliderFloat("Gravity", &simulationSettings.gravity, -20, 20);
 		ImGui::SliderFloat("Collision Damping", &simulationSettings.collisionDamping, 0, 3);
@@ -601,12 +591,16 @@ void App1::gui()
 		ImGui::SliderFloat("Pressure Multiplier", &simulationSettings.pressureMultiplier, 0, 500);
 		ImGui::SliderFloat("Near Pressure Multiplier", &simulationSettings.nearPressureMultiplier, 0, 20);
 		ImGui::SliderFloat("Viscosity Strength", &simulationSettings.viscosityStrength, 0, 1);
-		//ImGui::SliderFloat("Edge Force", &simulationSettings.edgeForce, 0, 10);
-		//ImGui::SliderFloat("Edge Force Distance", &simulationSettings.edgeForceDst, 0, 10);
+		ImGui::SliderFloat("Edge Force", &simulationSettings.edgeForce, 0, 10);
+		ImGui::SliderFloat("Edge Force Distance", &simulationSettings.edgeForceDst, 0, 10);
 
 		ImGui::Dummy(ImVec2(0.0f,10.0f));
 
 		if (ImGui::TreeNode("Bounding Box for the Simulation")) {
+			ImGui::SliderFloat3("Bounding Box Centre", (float*)&simulationSettings.boundingBoxPosition, -10, 10);
+			ImGui::SliderFloat3("Bounding Box Rotation", (float*)&simulationSettings.boundingBoxRotation, -10, 10);
+			ImGui::SliderFloat3("Bounding Box Scale", (float*)&simulationSettings.sizeOfBoundingBox, 10, 100);
+			
 			//Limits in Y-axis
 			ImGui::SliderFloat("Bottom of Bounding Box", &boundingBox.Bottom, -100,100);
 			ImGui::SliderFloat("Top of Bounding Box", &boundingBox.Top, -100, 100);

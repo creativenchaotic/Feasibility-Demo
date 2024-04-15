@@ -3,6 +3,19 @@
 Texture2D texture0 : register(t0);
 StructuredBuffer<float4> sdfParticlePositions : register(t1);
 
+struct ParticleData
+{
+    int particleNum;
+    float3 position;
+    float3 predictedPosition;
+    float3 velocity;
+    float2 density;
+    uint3 spatialIndices; //x is the original index //y is the hash //z is the key
+    uint spatialOffsets;
+};
+
+//StructuredBuffer<ParticleData> sdfParticlePositions : register(t1);
+
 SamplerState Sampler0 : register(s0);
 
 cbuffer CameraBuffer : register(b0){

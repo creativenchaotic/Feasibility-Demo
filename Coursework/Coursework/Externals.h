@@ -5,37 +5,50 @@ enum class RenderSettings {
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 2;
+	int numParticlesPerAxis = 10;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
-	int particleResolution = 10;
-	float particleSpacing = 10.f;
-	int particleScale = 1;
-	float sizeOfSpawner = 10.f;
-	//float sizeOfSpawner = 10.f;
-	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(0.f,0.f,0.f);
-
 	float gravity = -10.f;
+	float deltaTime;
+
 	float collisionDamping = 0.95f;
 	float smoothingRadius = 0.2f;
 	float targetDensity = 630.f;
 	float pressureMultiplier = 288.f;
-	float nearPressureMultiplier = 2.25f;
+
+	float nearPressureMultiplier;
 	float viscosityStrength = 0.001f;
 	float edgeForce = 0.0f;
 	float edgeForceDst = 0.0f;
 
-	float timeScale = 1.f;
-	int iterationsPerFrame = 3;
-	float deltaTime;
+	XMFLOAT3 sizeOfSpawner = XMFLOAT3(10.f,10.f,10.f);
+	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(0.f, 0.f, 0.f);
+	XMFLOAT3 spawnRotation = XMFLOAT3(0.f,0.f,0.f);
+
+	XMFLOAT3 sizeOfBoundingBox = XMFLOAT3(40.f, 40.f, 40.f);
+	XMFLOAT3 boundingBoxRotation = XMFLOAT3(0.f, 0.f, 0.f);
+	XMFLOAT3 boundingBoxPosition = XMFLOAT3(0.f, 0.f, 0.f);
+
+	XMMATRIX boundingScale = XMMatrixScaling(sizeOfBoundingBox.x, sizeOfBoundingBox.y, sizeOfBoundingBox.z);
+	XMMATRIX boundingRot = XMMatrixRotationRollPitchYaw(boundingBoxRotation.x, boundingBoxRotation.y, boundingBoxRotation.z);
+	XMMATRIX boundingPos = XMMatrixTranslation(particlesSpawnCenter.x, particlesSpawnCenter.y, particlesSpawnCenter.z);
+	XMMATRIX spawnWorldMatrix = boundingRot * boundingScale * boundingPos;
+
+	XMMATRIX invScale = XMMatrixScaling(1.f/ sizeOfBoundingBox.x, 1.f / sizeOfBoundingBox.y, 1.f / sizeOfBoundingBox.z);
+
+	XMMATRIX localToWorld = spawnWorldMatrix;
+	XMMATRIX worldToLocal = (boundingPos *-1)*(invScale)*XMMatrixTranspose(boundingRot);
+
+	int particleScale = 1;
+
 };
 
 struct SimulationBoundingBox {
-	float Front = -20;
-	float Back = 20;
-	float LeftSide = -20;
-	float RightSide = 20;
-	float Top = 20;
-	float Bottom = -20;
+	float Front = -40;
+	float Back = 40;
+	float LeftSide = -40;
+	float RightSide = 40;
+	float Top = 40;
+	float Bottom = -40;
 };
 
 struct LightValues {

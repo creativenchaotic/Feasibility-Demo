@@ -2,7 +2,7 @@
 
 SPH_Particle::SPH_Particle(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int lresolution):SphereMesh(device, deviceContext, lresolution)
 {
-	resolution = lresolution;
+	resolution = 10;
 }
 
 SPH_Particle::~SPH_Particle()
