@@ -1,4 +1,4 @@
-//compute shader used for SDF Rendering
+//compute shader used to create a 3D texture out of the SDF calculations
 
 static const int NumThreads = 64;
 
@@ -9,6 +9,7 @@ RWTexture3D<snorm float> SDFImage : register(u1);
 cbuffer cb_simConstants : register(b0){
     int numParticles;
     float blendAmount;
+    int stride;
 }
 
 
@@ -33,8 +34,8 @@ float sdfCalculations(float3 position)
         
     float finalValue;
 
-    float sphere1 = sdfSphere(position - float3(particleData[0].xyz), 1.f); //Sphere SDF
-    float sphere2 = sdfSphere(position - float3(particleData[1].xyz), 1.f); //Sphere SDF
+    float sphere1 = sdfSphere(position - ((float3(particleData[0].xyz) * stride)-10), 1.f); //Sphere SDF
+    float sphere2 = sdfSphere(position - ((float3(particleData[1].xyz) * stride) - 10), 1.f); //Sphere SDF
 
     finalValue = smoothUnion(sphere1, sphere2);
 
@@ -42,7 +43,7 @@ float sdfCalculations(float3 position)
     {
         for (int i = 2; i < numParticles.x; i++)
         {
-            float sphere = sdfSphere(position - float3(particleData[i].xyz), 1.f); //Sphere SDF
+            float sphere = sdfSphere(position - ((float3(particleData[i].xyz) * stride) - 10), 1.f); //Sphere SDF
 
             finalValue = smoothUnion(sphere, finalValue);
 
@@ -53,8 +54,11 @@ float sdfCalculations(float3 position)
 }
 
 [numthreads(32, 32, 1)]
-void main( uint3 DTid : SV_DispatchThreadID, uint3 groupId : SV_GroupID, uint3 GroupThreadID : SV_GroupThreadID, int groupIndex : SV_GroupIndex )
+void main( uint3 DTid : SV_DispatchThreadID)
 {
-    uint3 resolution;
+	uint3 resolution;
     SDFImage.GetDimensions(resolution.x, resolution.y, resolution.z);
+    float sdfCalc = sdfCalculations(float3(DTid)/resolution);
+    SDFImage[DTid] = sdfCalc;
+
 }

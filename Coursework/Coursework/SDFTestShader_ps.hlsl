@@ -87,7 +87,7 @@ float4 main(InputType input) : SV_TARGET
     //float3 rayOrigin = cameraPos;
     float3 rayDirection = normalize(float3(input.tex *0.7f, 1)); //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
-
+    float3 pointOfIntersection;
 
     //Raymarching (Sphere tracing)
 
@@ -98,6 +98,8 @@ float4 main(InputType input) : SV_TARGET
         float distanceToScene = sdfCalculations(positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
 
         totalDistanceTravelled += distanceToScene;
+
+        pointOfIntersection = rayOrigin + rayDirection * totalDistanceTravelled;
 
          //Colouring
         finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) /100;
