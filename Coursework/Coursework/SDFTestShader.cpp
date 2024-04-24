@@ -133,9 +133,10 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 }
 
-void SDFTestShader::setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV)
+void SDFTestShader::setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV, ID3D11ShaderResourceView* texture3d)
 {
 	deviceContext->PSSetShaderResources(1, 1, &computeShaderSRV);
+	deviceContext->PSSetShaderResources(2, 1, &texture3d);
 }
 
 void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal, float numParticles)

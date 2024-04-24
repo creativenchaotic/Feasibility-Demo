@@ -23,7 +23,7 @@ public:
     ~SDFTestShader();
 
     void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT3 cameraPos, float delta, ID3D11ShaderResourceView* renderTexture);
-    void setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);//Sets the SRV for the compute shader
+    void setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV, ID3D11ShaderResourceView* texture3d);//Sets the SRV for the compute shader
 	void setSDFParameters(ID3D11DeviceContext*, float blendVal, float numParticles);
 
 private:
@@ -33,5 +33,6 @@ private:
     ID3D11Buffer* cameraBuffer;
     ID3D11Buffer* sdfBuffer;
     ID3D11SamplerState* sampleState;
+
 };
 
