@@ -412,11 +412,11 @@ void App1::renderSceneShaders(float time)
 			sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
 		}
 	}
-		/*
+
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
 	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount);
-	sdfComputeShader->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sdfComputeShader->compute(renderer->getDeviceContext(), 256/32, 256/32, 256);
 	sdfComputeShader->unbind(renderer->getDeviceContext());
 
 
@@ -443,7 +443,7 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-	*/
+	
 
 	// Render GUI
 	gui();
@@ -596,23 +596,6 @@ void App1::gui()
 
 		ImGui::Dummy(ImVec2(0.0f,10.0f));
 
-		if (ImGui::TreeNode("Bounding Box for the Simulation")) {
-			ImGui::SliderFloat3("Bounding Box Centre", (float*)&simulationSettings.boundingBoxPosition, -10, 10);
-			ImGui::SliderFloat3("Bounding Box Rotation", (float*)&simulationSettings.boundingBoxRotation, -10, 10);
-			ImGui::SliderFloat3("Bounding Box Scale", (float*)&simulationSettings.sizeOfBoundingBox, 10, 100);
-			
-			//Limits in Y-axis
-			ImGui::SliderFloat("Bottom of Bounding Box", &boundingBox.Bottom, -100,100);
-			ImGui::SliderFloat("Top of Bounding Box", &boundingBox.Top, -100, 100);
-			//Limits on X-axis
-			ImGui::SliderFloat("Left Side of Bounding Box", &boundingBox.LeftSide, -100, 100);
-			ImGui::SliderFloat("Right Side of Bounding Box", &boundingBox.RightSide, -100, 100);
-			//Limits on Z-axis
-			ImGui::SliderFloat("Front of Bounding Box", &boundingBox.Front, -100, 100);
-			ImGui::SliderFloat("Back of Bounding Box", &boundingBox.Back, -100, 100);
-
-			ImGui::TreePop();
-		}
 		ImGui::TreePop();
 	}
 
