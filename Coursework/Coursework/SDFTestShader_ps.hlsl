@@ -14,8 +14,6 @@ struct ParticleData
     uint spatialOffsets;
 };
 
-//StructuredBuffer<ParticleData> sdfParticlePositions : register(t1);
-
 SamplerState Sampler0 : register(s0);
 
 cbuffer CameraBuffer : register(b0){
@@ -87,7 +85,7 @@ float4 main(InputType input) : SV_TARGET
     //Initialising variables used for raymarching
     float3 rayOrigin = float3(0,-10,10.f);
     //float3 rayOrigin = cameraPos;
-    float3 rayDirection = normalize(float3(input.tex, 1)); //Sets the direction of the ray to each point in the plane based on UVs
+    float3 rayDirection = normalize(float3(input.tex *0.7f, 1)); //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
 
 
@@ -113,13 +111,6 @@ float4 main(InputType input) : SV_TARGET
 
    	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
     float4 textureColor = texture0.Sample(Sampler0, input.tex);
-
-
-    //float distanceToSphere = sdfSphere(cameraPos, input.position.xyz, 1);
-    
-    //finalColour = distanceToSphere > 0.0f ? posColour : negColour;
-
-	//finalColour = finalColour * exp(distanceToSphere);
 
     input.position = float4(input.tex.x, 0.f, input.tex.y, 0.f);
 
