@@ -13,6 +13,7 @@ public:
     void createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XMFLOAT4>* particles);//Creates the output UAVs for the shader
     void unbind(ID3D11DeviceContext* dc);
     ID3D11ShaderResourceView* getComputeShaderOutput() { return sdfPixelCalcOutputReadable; };
+    ID3D11ShaderResourceView* getTexture3D() { return texture3DComputeShaderOutputReadable; };
 
     //Passes simulation values into compute shader buffer
     void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount);
@@ -33,8 +34,14 @@ private:
     ID3D11ShaderResourceView* sdfPixelCalcOutputReadable;
     ID3D11UnorderedAccessView* sdfPixelCalcOutputWritable;
 
+    ID3D11Texture3D* texture3DComputeShaderOutput;
+    ID3D11ShaderResourceView* texture3DComputeShaderOutputReadable;
+    ID3D11UnorderedAccessView* texture3DComputeShaderOutputWritable;
+
+
     //Constant Buffer-----------------------------------------------------
     ID3D11Buffer* sdfConstantsBuffer;
+
 
 };
 

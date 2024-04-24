@@ -24,6 +24,34 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     simConstantsBufferDesc.MiscFlags = 0;
     simConstantsBufferDesc.StructureByteStride = 0;
     renderer->CreateBuffer(&simConstantsBufferDesc, NULL, &sdfConstantsBuffer);
+
+    DXGI_FORMAT FORMAT = DXGI_FORMAT_R8_SNORM;
+
+    D3D11_TEXTURE3D_DESC volumeDesc;
+    ZeroMemory(&volumeDesc, sizeof(D3D11_TEXTURE3D_DESC));
+    volumeDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+    volumeDesc.Width = volumeDesc.Height = volumeDesc.Depth = 256;
+    volumeDesc.Usage = D3D11_USAGE_DEFAULT;
+    volumeDesc.MipLevels = 1;
+    volumeDesc.Format = FORMAT;
+    if (FAILED(renderer->CreateTexture3D(&volumeDesc, NULL, &texture3DComputeShaderOutput)))throw std::exception();
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC vSRVDesc;
+    ZeroMemory(&vSRVDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+    vSRVDesc.Format = FORMAT;
+    vSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
+    vSRVDesc.Texture3D.MipLevels = 1;
+    vSRVDesc.Texture3D.MostDetailedMip = 0;
+    if (FAILED(renderer->CreateShaderResourceView(texture3DComputeShaderOutput, &vSRVDesc, &texture3DComputeShaderOutputReadable)))throw std::exception();
+
+    D3D11_UNORDERED_ACCESS_VIEW_DESC vUAVDesc;
+    ZeroMemory(&vUAVDesc, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC));
+    vUAVDesc.Format = FORMAT;
+    vUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+    vUAVDesc.Texture3D.MipSlice = 0;
+    vUAVDesc.Texture3D.FirstWSlice = 0;
+    vUAVDesc.Texture3D.WSize = volumeDesc.Depth;
+    if (FAILED(renderer->CreateUnorderedAccessView(texture3DComputeShaderOutput, &vUAVDesc, &texture3DComputeShaderOutputWritable)))throw std::exception();
 }
 
 void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount)
