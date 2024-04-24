@@ -43,12 +43,12 @@ struct SPHSimulationValues {
 };
 
 struct SimulationBoundingBox {
-	float Front = -40;
-	float Back = 40;
-	float LeftSide = -40;
-	float RightSide = 40;
-	float Top = 40;
-	float Bottom = -40;
+	float Front = -20;
+	float Back = 20;
+	float LeftSide = -20;
+	float RightSide = 20;
+	float Top = 20;
+	float Bottom = -20;
 };
 
 struct LightValues {
