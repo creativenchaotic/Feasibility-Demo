@@ -2,6 +2,7 @@
 // Texture and sampler registers
 Texture2D texture0 : register(t0);
 StructuredBuffer<float4> sdfParticlePositions : register(t1);
+StructuredBuffer<snorm float> texture3d : register(t2);
 
 struct ParticleData
 {
