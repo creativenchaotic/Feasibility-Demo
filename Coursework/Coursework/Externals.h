@@ -75,4 +75,5 @@ struct GUISettings {
 struct SDFValues
 {
 	float blendAmount = 2.0f;
+	int stride = 20;
 };

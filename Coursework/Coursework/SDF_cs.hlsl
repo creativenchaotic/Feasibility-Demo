@@ -10,6 +10,7 @@ cbuffer cb_simConstants : register(b0){
     int numParticles;
     float blendAmount;
     int stride;
+    float padding;
 }
 
 

@@ -16,7 +16,7 @@ public:
     ID3D11ShaderResourceView* getTexture3D() { return texture3DComputeShaderOutputReadable; };
 
     //Passes simulation values into compute shader buffer
-    void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount);
+    void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride);
 
 private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
@@ -25,8 +25,8 @@ private:
     {
         int numParticles;
         float blendAmount;
+        int stride;
         float padding = 0;
-        float padding2 = 0;
     };
 
     //RW Structured Buffers-----------------------------------------------

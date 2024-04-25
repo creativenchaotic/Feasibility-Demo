@@ -415,7 +415,7 @@ void App1::renderSceneShaders(float time)
 
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
-	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount);
+	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride);
 	sdfComputeShader->compute(renderer->getDeviceContext(), 256/32, 256/32, 256);
 	sdfComputeShader->unbind(renderer->getDeviceContext());
 
@@ -551,6 +551,7 @@ void App1::gui()
 	if(ImGui::TreeNode("Signed Distance Fields"))
 	{
 		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0.01, 20);
+		ImGui::SliderInt("Texture3D Stride", &sdfVal.stride, 1, 50);
 
 		ImGui::TreePop();
 	}
