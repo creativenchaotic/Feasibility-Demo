@@ -25,7 +25,7 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     simConstantsBufferDesc.StructureByteStride = 0;
     renderer->CreateBuffer(&simConstantsBufferDesc, NULL, &sdfConstantsBuffer);
 
-    DXGI_FORMAT FORMAT = DXGI_FORMAT_R8_SNORM;
+    DXGI_FORMAT FORMAT = DXGI_FORMAT_R32_FLOAT;
 
     D3D11_TEXTURE3D_DESC volumeDesc;
     ZeroMemory(&volumeDesc, sizeof(D3D11_TEXTURE3D_DESC));
@@ -54,7 +54,7 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     if (FAILED(renderer->CreateUnorderedAccessView(texture3DComputeShaderOutput, &vUAVDesc, &texture3DComputeShaderOutputWritable)))throw std::exception();
 }
 
-void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride)
+void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -66,7 +66,7 @@ void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numPartic
     simulationConstPtr->numParticles = numParticlesVal;
     simulationConstPtr->blendAmount = blendAmount;
     simulationConstPtr->stride = stride;
-    simulationConstPtr->padding = 0.0f;
+    simulationConstPtr->offset = offset;
 
     dc->Unmap(sdfConstantsBuffer, 0);
     dc->CSSetConstantBuffers(0, 1, &sdfConstantsBuffer);

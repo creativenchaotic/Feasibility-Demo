@@ -276,7 +276,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	// Launch each step of the sorting algorithm (once the previous step is complete)
 	// Number of steps = [log2(n) * (log2(n) + 1)] / 2
 	// where n = nearest power of 2 that is greater or equal to the number of inputs
-	int numStages = (int)logarithm(NextPowerOfTwo(currentNumParticles), 2); //THERE COULD BE AN ERROR HEREEEEEEEEEEEEEEEEEEEEEE
+	int numStages = (int)log2(NextPowerOfTwo(currentNumParticles));
 
 	for (int stageIndex = 0; stageIndex < numStages; stageIndex++)
 	{
@@ -415,7 +415,7 @@ void App1::renderSceneShaders(float time)
 
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
-	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride);
+	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.RightSide);
 	sdfComputeShader->compute(renderer->getDeviceContext(), 256/32, 256/32, 256);
 	sdfComputeShader->unbind(renderer->getDeviceContext());
 

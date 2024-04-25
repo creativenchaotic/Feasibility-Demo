@@ -43,12 +43,12 @@ struct SPHSimulationValues {
 };
 
 struct SimulationBoundingBox {
-	float Front = -20;
-	float Back = 20;
-	float LeftSide = -20;
-	float RightSide = 20;
-	float Top = 20;
-	float Bottom = -20;
+	float Back = 100.f;
+	float Front = -Back;
+	float LeftSide = -Back;
+	float RightSide = Back;
+	float Top = Back;
+	float Bottom = -Back;
 };
 
 struct LightValues {
@@ -74,6 +74,6 @@ struct GUISettings {
 
 struct SDFValues
 {
-	float blendAmount = 2.0f;
+	float blendAmount = 0.1f;
 	int stride = 20;
 };

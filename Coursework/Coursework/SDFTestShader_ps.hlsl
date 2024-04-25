@@ -2,7 +2,7 @@
 // Texture and sampler registers
 Texture2D texture0 : register(t0);
 StructuredBuffer<float4> sdfParticlePositions : register(t1);
-StructuredBuffer<snorm float> texture3d : register(t2);
+Texture3D texture3d : register(t2);
 
 struct ParticleData
 {
@@ -16,6 +16,7 @@ struct ParticleData
 };
 
 SamplerState Sampler0 : register(s0);
+SamplerState Sampler3D : register(s1);
 
 cbuffer CameraBuffer : register(b0){
     float4 cameraPos;
@@ -75,18 +76,68 @@ float sdfCalculations(float3 position)
     
 }
 
+float3 CalculateColor(float distanceTravelled)
+{
+    // Calculate color based on distance traveled
+    float3 color = float3(distanceTravelled * 0.01f, 0.5f, 1.0f);
+    return color;
+}
 
 float4 main(InputType input) : SV_TARGET
 {
-    //Setting up colours for SDF
-    float3 finalColour = float3(0,0,0);
+
+    /*
+      //Setting up colours for SDF
+    float3 finalColour = float3(0, 0, 0);
     float4 posColour = float4(0.0, 0.0, 1.0f, 1.0f);
     float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
 
     //Initialising variables used for raymarching
-    float3 rayOrigin = float3(0,-10,10.f);
+    float3 rayOrigin = float3(0, -10, 10.f);
     //float3 rayOrigin = cameraPos;
-    float3 rayDirection = normalize(float3(input.tex *0.7f, 1)); //Sets the direction of the ray to each point in the plane based on UVs
+    float3 rayDirection = normalize(float3(input.tex * 0.7f, 1)); //Sets the direction of the ray to each point in the plane based on UVs
+    float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
+    float3 pointOfIntersection;
+
+    //Raymarching (Sphere tracing)
+
+    for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
+    {
+        float3 positionInRay = rayOrigin + rayDirection * totalDistanceTravelled; //Current position along the ray based on the distance from the rays origin
+
+        float distanceToScene = texture3d.Sample(Sampler3D, positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
+
+        totalDistanceTravelled += distanceToScene;
+
+        pointOfIntersection = rayOrigin + rayDirection * totalDistanceTravelled;
+
+         //Colouring
+        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+
+        if (distanceToScene < 0.001f || totalDistanceTravelled > 100.f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+        {
+            break;
+        }
+
+    }
+
+       // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    float4 textureColor = texture0.Sample(Sampler0, input.tex);
+
+    input.position = float4(input.tex.x, 0.f, input.tex.y, 0.f);
+
+    //return float4(1 - finalColour, 1.0f) * textureColor;
+    return float4(1 - finalColour, 1.0f);*/
+
+     //Setting up colours for SDF
+    float3 finalColour = float3(0, 0, 0);
+    float4 posColour = float4(0.0, 0.0, 1.0f, 1.0f);
+    float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
+
+    //Initialising variables used for raymarching
+    float3 rayOrigin = float3(0, -10, 10.f);
+    //float3 rayOrigin = cameraPos;
+    float3 rayDirection = normalize(float3(input.tex * 0.7f, 1)); //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
     float3 pointOfIntersection;
 
@@ -103,16 +154,16 @@ float4 main(InputType input) : SV_TARGET
         pointOfIntersection = rayOrigin + rayDirection * totalDistanceTravelled;
 
          //Colouring
-        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) /100;
+        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
 
         if (distanceToScene < 0.001f || totalDistanceTravelled > 100.f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
         {
             break;
         }
-        
+
     }
 
-   	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
+       // Sample the pixel color from the texture using the sampler at this texture coordinate location.
     float4 textureColor = texture0.Sample(Sampler0, input.tex);
 
     input.position = float4(input.tex.x, 0.f, input.tex.y, 0.f);

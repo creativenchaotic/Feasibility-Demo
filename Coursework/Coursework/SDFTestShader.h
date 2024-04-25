@@ -33,6 +33,7 @@ private:
     ID3D11Buffer* cameraBuffer;
     ID3D11Buffer* sdfBuffer;
     ID3D11SamplerState* sampleState;
+    ID3D11SamplerState* sampleState3D;
 
 };
 

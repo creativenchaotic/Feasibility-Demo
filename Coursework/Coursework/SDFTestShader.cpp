@@ -40,6 +40,12 @@ SDFTestShader::~SDFTestShader()
 		sampleState = 0;
 	}
 
+	if (sampleState3D)
+	{
+		sampleState3D->Release();
+		sampleState3D = 0;
+	}
+
 
 	//Release base shader components
 	BaseShader::~BaseShader();
@@ -51,6 +57,7 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	D3D11_BUFFER_DESC cameraBufferDesc;
 	D3D11_BUFFER_DESC sdfBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_SAMPLER_DESC samplerDesc3D;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
@@ -96,6 +103,20 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 
 	// Create the texture sampler state.
 	renderer->CreateSamplerState(&samplerDesc, &sampleState);
+
+	// Create a texture sampler state description.
+	samplerDesc3D.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc3D.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc3D.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc3D.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc3D.MipLODBias = 0.0f;
+	samplerDesc3D.MaxAnisotropy = 1;
+	samplerDesc3D.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc3D.MinLOD = 0;
+	samplerDesc3D.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	renderer->CreateSamplerState(&samplerDesc3D, &sampleState3D);
 }
 
 void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, XMFLOAT3 cameraVector, float delta, ID3D11ShaderResourceView* renderTexture)
@@ -131,6 +152,7 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	// Set shader texture and sampler resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &renderTexture);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
+	deviceContext->PSSetSamplers(1, 1, &sampleState3D);
 }
 
 void SDFTestShader::setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV, ID3D11ShaderResourceView* texture3d)
