@@ -495,8 +495,8 @@ void App1::gui()
 	ImGui::Text("Camera Position: %f, %f, %f", camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 	ImGui::Text("Camera Rotation: %f, %f, %f", camera->getRotation().x, camera->getRotation().y, camera->getRotation().z);
 	if (ImGui::Button("Reset Camera Position")) {//Added in case the user gets lost in the scene when moving the camera
-		camera->setPosition(59.725620f, 100.967369f, 23.202298f);
-		camera->setRotation(6.0f, 13.25f, 0.f);
+		camera->setPosition(-7.0f, -11.0f, -129.0f);
+		camera->setRotation(0.0f, 0.0, 0.0f);
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));

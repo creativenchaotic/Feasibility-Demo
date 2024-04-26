@@ -10,6 +10,7 @@ class SDFTestShader :
     struct CameraBufferType {
         XMFLOAT4 cameraPosition;
         XMFLOAT4 timer;
+        XMMATRIX viewMatrix;
     };
 
     struct SDFValuesBufferType

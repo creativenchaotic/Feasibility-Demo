@@ -5,7 +5,7 @@ enum class RenderSettings {
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 3;
+	int numParticlesPerAxis = 2;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	float gravity = -10.f;
 	float deltaTime;

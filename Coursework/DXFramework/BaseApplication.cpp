@@ -54,8 +54,8 @@ void BaseApplication::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int 
 
 	// Create the camera object and set to default position.
 	camera = new FPCamera(input, sWidth, sHeight, wnd);
-	camera->setPosition(51.525620f, 100.967369f, -190.202298f);
-	camera->setRotation(12.0f,-359.25f,0.f);
+	camera->setPosition(-7.0f, -11.0f, -129.0f);
+	camera->setRotation(0.0f, 0.0, 0.0f);
 	camera->update();
 
 	// Create the timer object (for delta time and FPS calculation.

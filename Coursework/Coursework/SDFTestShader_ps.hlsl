@@ -1,4 +1,5 @@
 
+
 // Texture and sampler registers
 Texture2D texture0 : register(t0);
 StructuredBuffer<float4> sdfParticlePositions : register(t1);
@@ -21,6 +22,7 @@ SamplerState Sampler3D : register(s1);
 cbuffer CameraBuffer : register(b0){
     float4 cameraPos;
     float4 timer;
+    matrix viewMatrix;
 }
 cbuffer SDFBuffer : register (b1){
     float4 blendAmount;
@@ -209,6 +211,36 @@ float4 calcLighting(float3 worldPos, float3 normal, float4 particleColour)
 
 //----------------------------------------------------------------------------------------------------------------
 
+bool intersectionCheck(float3 ro, float3 rd, out float2 intersectionPoints)
+{
+    float3 pos = float3(0, 0, 0);
+    float scale = 20.f;
+
+    float3 boxTranslation = pos * scale;
+
+    ro += boxTranslation;
+
+    //Ray Box Intersection
+    float3 bmin = float3(-20, -20, -20);
+    float3 bmax = float3(scale, scale, scale);
+
+    float3 ri = 1.f / rd;
+    float3 tbot = ri * (bmin - ro);
+    float3 ttop = ri * (bmax - ro);
+
+    float tmin = max(max(min(ttop.x, tbot.x), min(ttop.y, tbot.y)), min(ttop.z, tbot.z));
+    float tmax = min(min(max(ttop.x, tbot.x), max(ttop.y, tbot.y)), max(ttop.z, tbot.z));
+
+    if (tmax < 0 || tmin > tmax)
+    {
+        //shape.tmin = abs(shape.tmin);
+        return false;
+    }
+
+    intersectionPoints = float2(tmin, tmax);
+
+    return true;
+}
 
 float4 main(InputType input) : SV_TARGET
 {
@@ -264,38 +296,67 @@ float4 main(InputType input) : SV_TARGET
     float4 waterColour = float4(0.23, 0.56, 0.96f, 1.0f);
 
     //Initialising variables used for raymarching
-    //float3 rayOrigin = cameraPos;
-    float3 rayOrigin = float3(0, -20, -50);
-    float3 rayDirection = normalize(float3(input.tex, 1)); //Sets the direction of the ray to each point in the plane based on UVs
+    //float3 rayOrigin = float3(-0.5,0.5,-5);
+    float3 rayOrigin = cameraPos;
+    float aspectRatio = 675 * 1248;
+    float3 rayDirection = normalize(float3((input.tex.x) * 2.0f - 0.5f, input.tex.y * 2.0f - 0.5f, 3));
+
+
+    rayDirection = normalize(mul(float4(rayDirection.x, rayDirection.y, rayDirection.z, 1), viewMatrix).xyz);
+
+    //float3 rayDirection = normalize(mul(float4(input.tex, 1, 1), viewMatrix)).xyz; //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
     float3 positionInRay;
     float3 normal;
+    float distanceToScene;
+    float2 intersectionPoints;
 
-    //Raymarching (Sphere tracing)
-    for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
+    //bool res = intersectionCheck(rayOrigin, rayDirection, invRayDirection);
+    bool res = intersectionCheck(rayOrigin, rayDirection, intersectionPoints);
+
+    if(res)
     {
-    	positionInRay = rayOrigin + rayDirection * totalDistanceTravelled; //Current position along the ray based on the distance from the rays origin
-    	normal = calcNormal(positionInRay);
-        float distanceToScene = sdfCalculations(positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-
-        totalDistanceTravelled += distanceToScene;
-
-        
-
-        if (distanceToScene < 0.001f || totalDistanceTravelled > 100.f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+        //Raymarching (Sphere tracing)
+        for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
         {
-            break;
+            positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
+            normal = calcNormal(positionInRay);
+            distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) ; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
+
+            totalDistanceTravelled += distanceToScene;
+
+            if (distanceToScene < 0.001f || intersectionPoints.x +
+                totalDistanceTravelled > intersectionPoints.y)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+            {
+                
+                break;
+            }
+
         }
 
+
+		 //Colouring
+        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+        finalLight = calcLighting(positionInRay, normal, waterColour);
+
+        //return (float4(1 - finalColour, 1.0f) * waterColour) * 0.4f / 0.2f;
+
+	    /*
+	    if (distanceToScene >= 0)
+	    {
+	        return (float4(finalLight.xyz, 1.0f) * waterColour);
+	    }
+	    else if (distanceToScene <= 0)
+	    {
+	        return (float4(0,0,0, 1.0f));
+	    }*/
+
+        return (float4(1-finalColour.xyz, 1.0f) * waterColour);
+    }
+    else
+    {
+        return float4(0, 0, 0,1);
     }
 
-     //Colouring
-    finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
-    finalLight = calcLighting(positionInRay, normal, waterColour);
-
-    //return (float4(1 - finalColour, 1.0f) * waterColour) * 0.4f / 0.2f;
-
-
-    return (float4(finalLight.xyz, 1.0f) * waterColour);
 
 }
