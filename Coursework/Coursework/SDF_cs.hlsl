@@ -61,7 +61,7 @@ void main( uint3 DTid : SV_DispatchThreadID)
     float3 worldMin = float3(-offset, -offset, -offset);
     float3 worldMax = float3(offset, offset, offset);
 
-    float3 position = lerp(worldMin, worldMax, DTid / (float3(resolution) - 1.0f));
+    float3 position = lerp(worldMin, worldMax, DTid / (float3(resolution) - 1.0f)) * 0.5;
 
     float sdfCalc = sdfCalculations(position);
     SDFImage[DTid.xyz] = sdfCalc; // Assign the calculated SDF value to the corresponding texel

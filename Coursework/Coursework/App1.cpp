@@ -375,7 +375,7 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
 	
 	
-
+	/*
 	//SPH PARTICLES---------------------------------------------------------------------------
 	if (guiSettings.displaySPHSimulationParticles) {
 		renderer->setAlphaBlending(true);
@@ -395,9 +395,9 @@ void App1::renderSceneShaders(float time)
 		}
 
 		renderer->setAlphaBlending(false);
-	}
+	}*/
 
-
+	/*
 	//LIGHTING DEBUG SPHERES-------------------------------------------------------------------
 	if (currentRenderSettingForShader!=RenderSettings::SignedDistanceField) {
 		if (guiSettings.isLightOn) {
@@ -411,7 +411,7 @@ void App1::renderSceneShaders(float time)
 			sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSpotlight, viewMatrix, projectionMatrix);
 			sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
 		}
-	}
+	}*/
 
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
@@ -445,7 +445,9 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
 	sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-	
+
+	ID3D11ShaderResourceView* nullSRV[] = { NULL,NULL };
+	renderer->getDeviceContext()->PSSetShaderResources(0, 2, nullSRV);
 
 	// Render GUI
 	gui();
@@ -461,7 +463,7 @@ bool App1::render()
 	//Add delta time
 	time += timer->getTime();
 
-	sphSimulationComputePass();//Runs the SPH simulation compute shaders
+	//sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
 	renderSceneShaders(time);//Renders the actual water simulation in the scene
 

@@ -131,9 +131,9 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 
 	// Create a texture sampler state description.
 	samplerDesc3D.Filter = D3D11_FILTER_MINIMUM_MIN_MAG_MIP_LINEAR;
-	samplerDesc3D.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc3D.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc3D.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc3D.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc3D.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc3D.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc3D.MipLODBias = 0.0f;
 	samplerDesc3D.MaxAnisotropy = 1;
 	samplerDesc3D.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
@@ -184,7 +184,7 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 void SDFTestShader::setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV, ID3D11ShaderResourceView* texture3d)
 {
 	deviceContext->PSSetShaderResources(1, 1, &computeShaderSRV);
-	deviceContext->PSSetShaderResources(2, 1, &texture3d);
+	deviceContext->PSSetShaderResources(0, 1, &texture3d);
 }
 
 void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal, float numParticles)

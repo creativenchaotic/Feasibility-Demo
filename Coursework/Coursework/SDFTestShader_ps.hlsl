@@ -1,9 +1,9 @@
 
 
 // Texture and sampler registers
-Texture2D texture0 : register(t0);
+//Texture2D texture0 : register(t0);
 StructuredBuffer<float4> sdfParticlePositions : register(t1);
-Texture3D texture3d : register(t2);
+Texture3D<float> texture3d : register(t0);
 
 struct ParticleData
 {
@@ -321,19 +321,20 @@ float4 main(InputType input) : SV_TARGET
         {
             positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
             normal = calcNormal(positionInRay);
-            distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) ; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
+            distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) /20; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
 
             totalDistanceTravelled += distanceToScene;
 
-            if (distanceToScene < 0.001f || intersectionPoints.x +
-                totalDistanceTravelled > intersectionPoints.y)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+            if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
             {
-                
+                finalLight = calcLighting(positionInRay, normal, waterColour);
+                return (float4(finalLight.xyz, 1.0f) * waterColour);
                 break;
             }
 
         }
 
+        return float4(1, 1, 0, 1);
 
 		 //Colouring
         finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
