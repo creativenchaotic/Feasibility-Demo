@@ -56,6 +56,9 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC cameraBufferDesc;
 	D3D11_BUFFER_DESC sdfBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
+	D3D11_BUFFER_DESC materialBufferDesc;
+
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_SAMPLER_DESC samplerDesc3D;
 
@@ -89,6 +92,28 @@ void SDFTestShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	sdfBufferDesc.MiscFlags = 0;
 	sdfBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&sdfBufferDesc, NULL, &sdfBuffer);
+
+	// Setup light buffer
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
+
+	// Setup material buffer
+	materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	materialBufferDesc.ByteWidth = sizeof(MaterialBufferType);
+	materialBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	materialBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	materialBufferDesc.MiscFlags = 0;
+	materialBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&materialBufferDesc, NULL, &materialBuffer);
+
+	//--------------------------------------------------------------------------------------------------------
 
 	// Create a texture sampler state description.
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -172,6 +197,42 @@ void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float b
 	deviceContext->Unmap(sdfBuffer, 0);
 	deviceContext->PSSetConstantBuffers(1, 1, &sdfBuffer);
 
+}
+
+
+void SDFTestShader::setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	//Additional
+	// Send light data to pixel shader
+	LightBufferType* lightPtr;
+	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	lightPtr = (LightBufferType*)mappedResource.pData;
+
+	lightPtr->diffuse = light->getDiffuseColour();
+	lightPtr->ambient = light->getAmbientColour();
+	lightPtr->direction = XMFLOAT4(light->getDirection().x, light->getDirection().y, light->getDirection().z, 0.f);
+	lightPtr->lightPosition = XMFLOAT4(light->getPosition().x, light->getPosition().y, light->getPosition().z, 0.0f);
+
+	deviceContext->Unmap(lightBuffer, 0);
+	deviceContext->PSSetConstantBuffers(3, 1, &lightBuffer);
+}
+
+void SDFTestShader::setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	//Adding material values to PS
+	MaterialBufferType* materialPtr;
+	deviceContext->Map(materialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	materialPtr = (MaterialBufferType*)mappedResource.pData;
+	materialPtr->baseReflectivity = reflectivity;
+	materialPtr->metallic = metallic;
+	materialPtr->roughness = roughness;
+	materialPtr->padding = 0.f;
+	deviceContext->Unmap(materialBuffer, 0);
+	deviceContext->PSSetConstantBuffers(2, 1, &materialBuffer);
 }
 
 

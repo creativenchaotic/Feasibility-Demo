@@ -27,6 +27,23 @@ cbuffer SDFBuffer : register (b1){
     float4 numParticles;
 }
 
+//Material Values
+cbuffer MaterialBuffer : register(b2)
+{
+    float roughness;
+    float metallic;
+    float baseReflectivity;
+    float padding;
+}
+
+//Lighting values
+cbuffer LightBuffer : register(b3)
+{
+    float4 diffuseColour;
+    float4 ambientColour;
+    float4 lightDirection;
+    float4 lightPosition;
+};
 
 struct InputType
 {
@@ -72,16 +89,126 @@ float sdfCalculations(float3 position)
     }
   
     return finalValue;
-   
     
 }
 
-float3 CalculateColor(float distanceTravelled)
+float3 calcNormal(float3 pos)
 {
-    // Calculate color based on distance traveled
-    float3 color = float3(distanceTravelled * 0.01f, 0.5f, 1.0f);
-    return color;
+    float3 step = float3(0.001f, 0.0f, 0.0f);
+    float3 normal;
+    normal.x = sdfCalculations(pos + step.xyy) - sdfCalculations(pos - step.xyy);
+    normal.y = sdfCalculations(pos + step.yxy) - sdfCalculations(pos - step.yxy);
+    normal.z = sdfCalculations(pos + step.yyx) - sdfCalculations(pos - step.yyx);
+    return normalize(normal);
 }
+
+
+//LIGHTING CALCULATIONS------------------------------------------------------
+//Fresnel factor
+float3 fresnel(float3 baseReflect, float3 viewVector, float3 halfwayVector, float4 waterColour, float metallicFactor)
+{ //Base reflectivity based on base reflectivity getting passed in per material, the texture colour and the metallic property of the material
+    baseReflect = lerp(baseReflect, waterColour.xyz, metallicFactor);
+    return baseReflect + (float3(1.0, 1.f, 1.f) - baseReflect) * pow(1 - max(dot(viewVector, halfwayVector), 0.0), 5.0);
+}
+
+//GGX/Trowbridge-Reitz normal distribution
+float3 normalDistribution(float roughness, float3 normal, float3 halfway)
+{
+    float pi = 3.141592653589793;
+    
+    float numerator = pow(roughness, 2.0f);
+    
+    float NdotH = max(dot(normal, halfway), 0.0f);
+    
+    float denominator = pi * pow(pow(NdotH, 2.0) * (pow(roughness, 2.0) - 1.0) + 1.0, 2.0);
+    denominator = max(denominator, 0.0000001);
+    
+    return float3(numerator / denominator, numerator / denominator, numerator / denominator);
+}
+
+//Schlick-Beckmann Geometric Shadow-Masking
+float schlickbeckmannGS(float roughness, float3 normal, float3 v)
+{
+    float numerator = max(dot(normal, v), 0.0f);
+    
+    float k = roughness / 2.f;
+    float denominator = max(dot(normal, v), 0.000001f) * (1.0 - k) + k;
+    denominator = max(denominator, 0.000001);
+    
+    return numerator / denominator;
+}
+
+//Smith Geometric Shadow-Masking
+float geometryShadowing(float roughness, float3 normal, float3 viewVector, float3 lightVector)
+{
+    return schlickbeckmannGS(roughness, normal, viewVector) * schlickbeckmannGS(roughness, normal, lightVector);
+}
+
+
+//Main PBR function
+float3 PBR(float3 worldPos, float3 normalVector, float roughness, float4 particleColour, float3 cameraPosition, float3 lightDir, float baseReflect, float metallicFactor, float4 lightDiffuse, float4 lightAmbient)
+{
+    //Values needed
+    float3 lighting;
+    float3 normal = normalize(normalVector);
+    float3 viewVector = normalize(cameraPosition - worldPos);
+    float3 lightVector = normalize(-lightDir); //Directional light
+    float3 halfwayVector = normalize(viewVector + lightVector);
+
+    //Fresnel Factor (Ks)
+    float3 Ks = fresnel(baseReflect, viewVector, halfwayVector, particleColour, metallicFactor);
+    float3 Kd = float3(1.0, 1.0, 1.0) - Ks;
+    
+    //Lambert used for fDiffuse
+    float3 diffuse = particleColour.xyz / 3.14f;
+    
+    //fSpecular
+    float3 specularNumerator = normalDistribution(roughness, normal, halfwayVector) * geometryShadowing(roughness, normal, viewVector, lightVector) * fresnel(baseReflect, viewVector, halfwayVector, particleColour, metallicFactor);
+    float3 specularDenominator = 4.0 * max(dot(viewVector, normal), 0.0f) * max(dot(lightVector, normal), 0.0);
+    specularDenominator = max(specularDenominator, 0.0000001);
+    float3 specular = specularNumerator / specularDenominator;
+    
+    //BRDF Calculation
+    float3 BRDF = Kd * diffuse + specular;
+    
+    //Ambient lighting
+    float3 ambient = float3(0.03, 0.03, 0.03) * particleColour.xyz;
+ 
+    //Final lighting
+    lighting = float3(BRDF * lightDiffuse.xyz * max(dot(lightVector, normal), 0.0f)) + ambient;
+    
+    //HDR tonemapping
+    lighting = lighting / (lighting + float3(1.0, 1.0, 1.0));
+    
+    //Gamma Correct
+    lighting = pow(lighting, float3(1.0 / 2.5, 1.0 / 2.5, 1.0 / 2.5));
+ 
+    
+    return lighting;
+}
+
+float4 calcLighting(float3 worldPos, float3 normal, float4 particleColour)
+{
+
+    float4 finalLight = float4(0, 0, 0, 1);
+
+    float3 lightVector = (lightPosition.xyz - worldPos); //Vector from the light to the pixel thats getting lit
+        
+    float4 combinedLightColour = float4(0.f, 0.f, 0.f, 0.f);
+        
+    if (!(diffuseColour.x == 0.f && diffuseColour.y == 0 && diffuseColour.z == 0))
+    {
+            //directional light
+        combinedLightColour = saturate(float4(PBR(worldPos, normal, roughness, particleColour, cameraPos.xyz, lightDirection.xyz, baseReflectivity, metallic, diffuseColour, ambientColour), 1.0f));
+    }
+        
+    finalLight += combinedLightColour;
+
+    return finalLight;
+}
+
+//----------------------------------------------------------------------------------------------------------------
+
 
 float4 main(InputType input) : SV_TARGET
 {
@@ -129,32 +256,31 @@ float4 main(InputType input) : SV_TARGET
     //return float4(1 - finalColour, 1.0f) * textureColor;
     return float4(1 - finalColour, 1.0f);*/
 
+    //----------------------------------------------------------------------------------------------------------------
+
      //Setting up colours for SDF
     float3 finalColour = float3(0, 0, 0);
-    float4 posColour = float4(0.0, 0.0, 1.0f, 1.0f);
-    float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
+    float4 finalLight = float4(0, 0, 0, 1);
+    float4 waterColour = float4(0.23, 0.56, 0.96f, 1.0f);
 
     //Initialising variables used for raymarching
-    float3 rayOrigin = float3(0, -10, 10.f);
     //float3 rayOrigin = cameraPos;
-    float3 rayDirection = normalize(float3(input.tex * 0.7f, 1)); //Sets the direction of the ray to each point in the plane based on UVs
+    float3 rayOrigin = float3(0, -20, -50);
+    float3 rayDirection = normalize(float3(input.tex, 1)); //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
-    float3 pointOfIntersection;
+    float3 positionInRay;
+    float3 normal;
 
     //Raymarching (Sphere tracing)
-
     for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
     {
-        float3 positionInRay = rayOrigin + rayDirection * totalDistanceTravelled; //Current position along the ray based on the distance from the rays origin
-
+    	positionInRay = rayOrigin + rayDirection * totalDistanceTravelled; //Current position along the ray based on the distance from the rays origin
+    	normal = calcNormal(positionInRay);
         float distanceToScene = sdfCalculations(positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
 
         totalDistanceTravelled += distanceToScene;
 
-        pointOfIntersection = rayOrigin + rayDirection * totalDistanceTravelled;
-
-         //Colouring
-        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+        
 
         if (distanceToScene < 0.001f || totalDistanceTravelled > 100.f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
         {
@@ -163,12 +289,13 @@ float4 main(InputType input) : SV_TARGET
 
     }
 
-       // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-    float4 textureColor = texture0.Sample(Sampler0, input.tex);
+     //Colouring
+    finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+    finalLight = calcLighting(positionInRay, normal, waterColour);
 
-    input.position = float4(input.tex.x, 0.f, input.tex.y, 0.f);
+    //return (float4(1 - finalColour, 1.0f) * waterColour) * 0.4f / 0.2f;
 
-    //return float4(1 - finalColour, 1.0f) * textureColor;
-    return float4(1 - finalColour, 1.0f);
+
+    return (float4(finalLight.xyz, 1.0f) * waterColour);
 
 }

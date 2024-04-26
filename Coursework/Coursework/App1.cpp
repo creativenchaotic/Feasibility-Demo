@@ -442,6 +442,8 @@ void App1::renderSceneShaders(float time)
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
 	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput(), sdfComputeShader->getTexture3D());
 	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles);
+	sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
+	sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
 	
 
