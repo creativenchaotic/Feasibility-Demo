@@ -45,7 +45,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	bitonicMergesort = new BitonicMergesort(renderer->getDevice(), hwnd);
 	spatialOffsetCalculationComputeShader = new OffsetCalculationComputeShader(renderer->getDevice(), hwnd);
 	sdfShader = new SDFTestShader(renderer->getDevice(), hwnd);
-
 	sdfComputeShader = new SDFComputeShader(renderer->getDevice(), hwnd);
 
 	//LIGHTING ---------------------------------------------------------------------------------------
@@ -525,7 +524,6 @@ void App1::gui()
 		currentRenderSettingForShader = RenderSettings::Intersection;
 	}
 
-
 	//Selecting a render method in the ImGui window
 	if (ImGui::BeginCombo("Type of Simulation", currentSimType)) {
 		for (int i = 0; i < IM_ARRAYSIZE(simRenderType); i++) {
@@ -557,8 +555,6 @@ void App1::gui()
 	{
 		currentSimTypeRendered = RenderSimulationType::PlainSDFsSPHSimulation;
 	}
-
-
 
 	//------------------------------------------------------------------------
 	//SKY

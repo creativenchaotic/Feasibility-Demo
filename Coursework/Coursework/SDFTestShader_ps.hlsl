@@ -107,6 +107,18 @@ float3 calcNormal(float3 pos)
 }
 
 
+float3 calcNormal3DTexture(float3 pos)
+{
+    float3 step = float3(0.001f, 0.0f, 0.0f);
+    float3 normal;
+    
+    normal.x = texture3d.SampleLevel(Sampler3D, pos / 20 + step.xyy, 0) / 20 - texture3d.SampleLevel(Sampler3D, pos / 20 - step.xyy, 0) / 20;
+    normal.y = texture3d.SampleLevel(Sampler3D, pos / 20 + step.yxy, 0) / 20 - texture3d.SampleLevel(Sampler3D, pos / 20 - step.yxy, 0) / 20;
+    normal.z = texture3d.SampleLevel(Sampler3D, pos / 20 + step.yyx, 0) / 20 - texture3d.SampleLevel(Sampler3D, pos / 20 - step.yyx, 0) / 20;
+    return normalize(normal);
+}
+
+
 //LIGHTING CALCULATIONS------------------------------------------------------
 //Fresnel factor
 float3 fresnel(float3 baseReflect, float3 viewVector, float3 halfwayVector, float4 waterColour, float metallicFactor)
@@ -200,7 +212,7 @@ float4 calcLighting(float3 worldPos, float3 normal, float4 particleColour)
         
     if (!(diffuseColour.x == 0.f && diffuseColour.y == 0 && diffuseColour.z == 0))
     {
-            //directional light
+        //directional light
         combinedLightColour = saturate(float4(PBR(worldPos, normal, roughness, particleColour, cameraPos.xyz, lightDirection.xyz, baseReflectivity, metallic, diffuseColour, ambientColour), 1.0f));
     }
         
@@ -258,26 +270,24 @@ float4 main(InputType input) : SV_TARGET
 
     rayDirection = normalize(mul(float4(rayDirection.x, rayDirection.y, rayDirection.z, 1), viewMatrix).xyz);
 
-    //float3 rayDirection = normalize(mul(float4(input.tex, 1, 1), viewMatrix)).xyz; //Sets the direction of the ray to each point in the plane based on UVs
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
     float3 positionInRay;
     float3 normal;
     float distanceToScene;
     float2 intersectionPoints;
 
-    //bool res = intersectionCheck(rayOrigin, rayDirection, invRayDirection);
     bool res = intersectionCheck(rayOrigin, rayDirection, intersectionPoints);
     
     if (res)
     {
-    //Raymarching (Sphere tracing)
+		//Raymarching (Sphere tracing)
         for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
         {
 			if (simType == 0) //Using 3D Texture
 			{
 				positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
 				distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) / 20; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-				normal = calcNormal(positionInRay*20);
+				normal = calcNormal3DTexture(positionInRay);
 			}
             else if(simType == 1) //Using normal SDFs
             {
@@ -289,7 +299,7 @@ float4 main(InputType input) : SV_TARGET
 			normal = calcNormal(positionInRay);
             totalDistanceTravelled += distanceToScene;
 
-            if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+            if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating
             {
                 if(renderSetting == 0)
                 {
