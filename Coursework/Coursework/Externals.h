@@ -1,7 +1,12 @@
 #pragma once
 
 enum class RenderSettings {
-	RenderColours, WorldPosition, Normals, SignedDistanceField
+	PBR, WorldPosition, Normals, Intersection
+};
+
+enum class RenderSimulationType
+{
+	Texture3DStaticParticles, Texture3DSPHSimulation, PlainSDFsStatic, PlainSDFsSPHSimulation
 };
 
 struct SPHSimulationValues {
@@ -60,15 +65,14 @@ struct LightValues {
 };
 
 struct PBRMaterialValues {
-	float materialRoughness = 0.088f;
-	float metallicFactor = 0.039f;
-	float baseReflectivity = 0.681f;
+	float materialRoughness = 0.017f;
+	float metallicFactor = 0.001f;
+	float baseReflectivity = 1.0f;
 };
 
 struct GUISettings {
 	bool hideInstructions = true;
 	bool displaySPHSimulationParticles = true;
-	bool displayWaterSurface = false;
 	bool isLightOn = true;
 };
 

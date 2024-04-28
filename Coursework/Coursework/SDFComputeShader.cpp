@@ -30,7 +30,7 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     D3D11_TEXTURE3D_DESC volumeDesc;
     ZeroMemory(&volumeDesc, sizeof(D3D11_TEXTURE3D_DESC));
     volumeDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-    volumeDesc.Width = volumeDesc.Height = volumeDesc.Depth = 256;
+    volumeDesc.Width = volumeDesc.Height = volumeDesc.Depth = 768;
     volumeDesc.Usage = D3D11_USAGE_DEFAULT;
     volumeDesc.MipLevels = 1;
     volumeDesc.Format = FORMAT;

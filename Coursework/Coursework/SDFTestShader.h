@@ -15,8 +15,10 @@ class SDFTestShader :
 
     struct SDFValuesBufferType
     {
-        XMFLOAT4 blendingAmount;
-        XMFLOAT4 numParticles;
+        float blendingAmount;
+        int numParticles;
+        int currentRenderSetting;
+        float padding = 0.f;
     };
 
     //Light values
@@ -42,7 +44,7 @@ public:
 
     void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, XMFLOAT3 cameraPos, float delta, ID3D11ShaderResourceView* renderTexture);
     void setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV, ID3D11ShaderResourceView* texture3d);//Sets the SRV for the compute shader
-	void setSDFParameters(ID3D11DeviceContext*, float blendVal, float numParticles);
+	void setSDFParameters(ID3D11DeviceContext*, float blendVal, int numParticles, RenderSettings currentRenderSetting);
     void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light);
     void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
 

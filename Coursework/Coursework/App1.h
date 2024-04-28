@@ -95,16 +95,7 @@ private:
 	Light* directionalLight;
 	LightValues directionalLightValues;
 	float isDirectionalLightOnParam = 1.0f;
-	
-	//Spotlight
-	Light* spotlight;
-	XMFLOAT4 spotlightDiffuse = XMFLOAT4(1.0f, 0.f, 1.0, 1.0f);
-	XMFLOAT4 spotlightAmbient = XMFLOAT4(0.18, 0.14, 0.14, 1.0f);
-	XMFLOAT4 spotlightDirection = XMFLOAT4(0.538,-0.744f, 0.463,0.f);
-	XMFLOAT3 spotlightPosition = XMFLOAT3(11.538,29.487,32.927);
-	float sizeSpotlight = 0.82f;
-	bool isSpotlightOn = false;
-	float isSpotlightOnParam = 0.0f;
+
 	float PI = 3.14159265358979f;
 
 
@@ -127,8 +118,12 @@ private:
 	//DISPLAYING DIFFERENT RENDERING SETTINGS
 
 	const char* renderSettings[4];
-	const char* currentRenderSetting = "Render Colours";
+	const char* currentRenderSetting = "Render with PBR";
 	RenderSettings currentRenderSettingForShader;
+
+	const char* simRenderType[4];
+	const char* currentSimType = "3D Texture with Static Particles";
+	RenderSimulationType currentSimTypeRendered;
 
 
 	int currentNumParticles = simulationSettings.numParticles;

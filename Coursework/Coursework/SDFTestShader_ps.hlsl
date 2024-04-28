@@ -25,8 +25,10 @@ cbuffer CameraBuffer : register(b0){
     matrix viewMatrix;
 }
 cbuffer SDFBuffer : register (b1){
-    float4 blendAmount;
-    float4 numParticles;
+    float blendAmount;
+    int numParticles;
+    int renderSetting;
+    float padding2;
 }
 
 //Material Values
@@ -233,7 +235,6 @@ bool intersectionCheck(float3 ro, float3 rd, out float2 intersectionPoints)
 
     if (tmax < 0 || tmin > tmax)
     {
-        //shape.tmin = abs(shape.tmin);
         return false;
     }
 
@@ -327,37 +328,57 @@ float4 main(InputType input) : SV_TARGET
 
             if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
             {
-                finalLight = calcLighting(positionInRay, normal, waterColour);
-                return (float4(finalLight.xyz, 1.0f) * waterColour);
+                switch(renderSetting)
+                {
+	                case 0:
+                        finalLight = calcLighting(positionInRay / 20, normal, waterColour);
+                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+                        
+	                case 1:
+                        finalColour = float3(positionInRay.x, positionInRay.y, positionInRay.z);
+                        return float4(finalColour, 1);
+                        
+	                case 2:
+                        finalColour = float3(normal);
+                        return float4(finalColour, 1);
+	                case 3:
+                        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+                        return float4(1-finalColour, 1) * waterColour * 0.4f / 0.2f;
+	                    
+                }
+
                 break;
             }
 
         }
 
-        return float4(1, 1, 0, 1);
+        if (renderSetting == 3)
+        {
+            return float4(1, 1, 0, 1);
+        }
+        if(renderSetting == 2 || renderSetting == 1)
+        {
+            return float4(0,0,0,1);
+        }
+        if(renderSetting == 0)
+        {
+            return float4(0,0,0,0);
+        }
 
-		 //Colouring
-        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
-        finalLight = calcLighting(positionInRay, normal, waterColour);
-
-        //return (float4(1 - finalColour, 1.0f) * waterColour) * 0.4f / 0.2f;
-
-	    /*
-	    if (distanceToScene >= 0)
-	    {
-	        return (float4(finalLight.xyz, 1.0f) * waterColour);
-	    }
-	    else if (distanceToScene <= 0)
-	    {
-	        return (float4(0,0,0, 1.0f));
-	    }*/
-
-        return (float4(1-finalColour.xyz, 1.0f) * waterColour);
     }
     else
     {
-        return float4(0, 0, 0,1);
+        if (renderSetting == 1 || renderSetting == 2 || renderSetting == 3)
+        {
+            return float4(0, 0, 0, 1);
+        }
+
+        if(renderSetting == 0)
+        {
+            return float4(0,0,0,0);
+        }
     }
 
+    return float4(1,0,0,1);
 
 }

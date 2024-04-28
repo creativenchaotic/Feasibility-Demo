@@ -133,7 +133,7 @@ void SPHShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XM
 	cameraPtr = (CameraBufferType*)mappedResource.pData;
 	cameraPtr->cameraPosition = cameraPos;
 	switch (renderSetting) {
-	case RenderSettings::RenderColours:
+	case RenderSettings::PBR:
 		cameraPtr->renderSettings = XMFLOAT4(-1.f, 0.0f, 0.0f, 0.0f);
 		break;
 	case RenderSettings::WorldPosition:

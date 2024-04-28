@@ -16,10 +16,15 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	windowHeight = screenHeight;
 
 	// Initalise scene variables.
-	renderSettings[0] = "Render Colours";
+	renderSettings[0] = "Render with PBR";
 	renderSettings[1] = "World Position";
 	renderSettings[2] = "Normals";
-	renderSettings[3] = "Signed Distance Fields";
+	renderSettings[3] = "Ray-Box Intersection";
+
+	simRenderType[0] = "3D Texture with Static Particles";
+	simRenderType[1] = "3D Texture with SPH Particles";
+	simRenderType[2] = "SDFs in Pixel Shader with Static Particles";
+	simRenderType[3] = "SDFs in Pixel Shader with SPH Particles";
 
 	currentNumParticles = simulationSettings.numParticles;
 
@@ -54,16 +59,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	directionalLight->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 600.f);
 	directionalLight->setPosition(directionalLightValues.lightPosition.x, directionalLightValues.lightPosition.y, directionalLightValues.lightPosition.z);
 
-	//Configure Spotlight
-	spotlight = new Light();
-	spotlight->setDiffuseColour(spotlightDiffuse.x, spotlightDiffuse.y, spotlightDiffuse.z, spotlightDiffuse.w);
-	spotlight->setAmbientColour(spotlightAmbient.x, spotlightAmbient.y, spotlightAmbient.z, spotlightAmbient.w);
-	spotlight->setDirection(spotlightDirection.x,spotlightDirection.y,spotlightDirection.z);
-	spotlight->setSpecularColour(1.0f, 1.0f, 1.0f, 1.0f);
-	spotlight->setSpecularPower(30);
-	spotlight->generateProjectionMatrix(0.1f, 600.f);
-	spotlight->setPosition(spotlightPosition.x,spotlightPosition.y,spotlightPosition.z);
-
 	initialiseSPHParticles();//DO THIS LAST. It initialises the SPH particles and places them in the scene
 }
 
@@ -82,11 +77,6 @@ App1::~App1()
 	if (directionalLight) {
 		delete directionalLight;
 		directionalLight = 0;
-	}
-
-	if (spotlight) {
-		delete spotlight;
-		spotlight = 0;
 	}
 
 	if (spotlightMesh) {
@@ -320,7 +310,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 void App1::renderSceneShaders(float time)
 {
 	// Clear the scene. (default orange colour)
-	if (currentRenderSettingForShader != RenderSettings::SignedDistanceField) {
+	if (currentRenderSettingForShader != RenderSettings::WorldPosition || currentRenderSettingForShader != RenderSettings::WorldPosition) {
 		renderer->beginScene(skyColour.x, skyColour.y, skyColour.z, skyColour.w);
 	}
 	else
@@ -341,8 +331,6 @@ void App1::renderSceneShaders(float time)
 	//Update light values
 	directionalLight->setDirection(directionalLightValues.lightDirection.x, directionalLightValues.lightDirection.y, directionalLightValues.lightDirection.z);
 	directionalLight->setPosition(directionalLightValues.lightPosition.x, directionalLightValues.lightPosition.y, directionalLightValues.lightPosition.z);
-	spotlight->setDirection(spotlightDirection.x, spotlightDirection.y, spotlightDirection.z);
-	spotlight->setPosition(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 
 
 	//Setting lights on and off
@@ -351,12 +339,6 @@ void App1::renderSceneShaders(float time)
 	}
 	else {
 		directionalLight->setDiffuseColour(0, 0, 0, 1);
-	}
-	if (isSpotlightOn) {
-		spotlight->setDiffuseColour(spotlightDiffuse.x, spotlightDiffuse.y, spotlightDiffuse.z, 1);
-	}
-	else {
-		spotlight->setDiffuseColour(0, 0, 0, 1);
 	}
 
 	
@@ -367,7 +349,6 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX translateSun = XMMatrixTranslation(directionalLightValues.lightPosition.x, directionalLightValues.lightPosition.y + 10.f, directionalLightValues.lightPosition.z);
 	XMMATRIX scaleSun = XMMatrixScaling(3.0f, 3.0f, 3.0f);
 	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
-	XMMATRIX translateSpotlight = XMMatrixTranslation(spotlightPosition.x, spotlightPosition.y, spotlightPosition.z);
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
 
 	XMMATRIX translateSDFPlane = XMMatrixTranslation(0, 0, 0);
@@ -416,7 +397,7 @@ void App1::renderSceneShaders(float time)
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
 	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.RightSide);
-	sdfComputeShader->compute(renderer->getDeviceContext(), 256/32, 256/32, 256);
+	sdfComputeShader->compute(renderer->getDeviceContext(), 768/32, 768/32, 768);
 	sdfComputeShader->unbind(renderer->getDeviceContext());
 
 
@@ -438,16 +419,20 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
 	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
 
+	renderer->setAlphaBlending(true);
+
 	orthoMesh->sendData(renderer->getDeviceContext());
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
 	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput(), sdfComputeShader->getTexture3D());
-	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles);
+	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles, currentRenderSettingForShader);
 	sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
 	sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
 
 	ID3D11ShaderResourceView* nullSRV[] = { NULL,NULL };
 	renderer->getDeviceContext()->PSSetShaderResources(0, 2, nullSRV);
+
+	renderer->setAlphaBlending(false);
 
 	// Render GUI
 	gui();
@@ -526,8 +511,8 @@ void App1::gui()
 	}
 
 	//Setting the current render method
-	if (currentRenderSetting == "Render Colours") {
-		currentRenderSettingForShader = RenderSettings::RenderColours;
+	if (currentRenderSetting == "Render with PBR") {
+		currentRenderSettingForShader = RenderSettings::PBR;
 	}
 	else if(currentRenderSetting == "World Position") {
 		currentRenderSettingForShader = RenderSettings::WorldPosition;
@@ -535,9 +520,42 @@ void App1::gui()
 	else if(currentRenderSetting == "Normals") {
 		currentRenderSettingForShader = RenderSettings::Normals;
 	}
-	else if(currentRenderSetting == "Signed Distance Fields")
+	else if(currentRenderSetting == "Ray-Box Intersection")
 	{
-		currentRenderSettingForShader = RenderSettings::SignedDistanceField;
+		currentRenderSettingForShader = RenderSettings::Intersection;
+	}
+
+
+	//Selecting a render method in the ImGui window
+	if (ImGui::BeginCombo("Type of Simulation", currentSimType)) {
+		for (int i = 0; i < IM_ARRAYSIZE(simRenderType); i++) {
+
+			bool isSelected = (currentSimType == simRenderType[i]);
+
+			if (ImGui::Selectable(simRenderType[i], isSelected)) {
+				currentSimType = simRenderType[i];
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+
+	}
+
+	//Setting the current render method
+	if (currentSimType == "3D Texture with Static Particles") {
+		currentSimTypeRendered = RenderSimulationType::Texture3DStaticParticles;
+	}
+	else if (currentSimType == "3D Texture with SPH Particles") {
+		currentSimTypeRendered = RenderSimulationType::Texture3DSPHSimulation;
+	}
+	else if (currentSimType == "SDFs in Pixel Shader with Static Particles") {
+		currentSimTypeRendered = RenderSimulationType::PlainSDFsStatic;
+	}
+	else if (currentSimType == "SDFs in Pixel Shader with SPH Particles")
+	{
+		currentSimTypeRendered = RenderSimulationType::PlainSDFsSPHSimulation;
 	}
 
 
@@ -631,21 +649,6 @@ void App1::gui()
 		ImGui::SliderFloat3("Directional Light Position", (float*)&directionalLightValues.lightPosition, -50,50);
 		ImGui::SliderFloat3("Directional Light Direction", (float*)&directionalLightValues.lightDirection, -1.f, 1.f);
 		ImGui::Checkbox("Turn on directional light", &guiSettings.isLightOn);
-
-		ImGui::Spacing();
-		ImGui::Text("SPOTLIGHT");
-		//Spotlight
-		ImGui::ColorEdit4("Spotlight Diffuse Colour", (float*)&spotlightDiffuse);
-		/*ImGui::ColorEdit4("Spotlight Ambient Colour", (float*)&spotlightAmbient);*/
-		ImGui::SliderFloat3("Spotlight Position", (float*)&spotlightPosition, -50.f, 50.f);
-		ImGui::SliderFloat3("Spotlight Direction", (float*)&spotlightDirection, -1.f, 1.f);
-		ImGui::SliderFloat("Size Spotlight", &sizeSpotlight, 0, 1.57);
-		ImGui::Checkbox("Turn on Spotlight", &isSpotlightOn);
-
-		//Attenuation values
-		ImGui::SliderFloat("Constant Factor", &attenuationValues.x, 0, 1);
-		ImGui::SliderFloat("Linear Factor", &attenuationValues.y, 0, 1);
-		ImGui::SliderFloat("Quadratic Factor", &attenuationValues.z, 0, 1);
 
 		ImGui::TreePop();
 	}
