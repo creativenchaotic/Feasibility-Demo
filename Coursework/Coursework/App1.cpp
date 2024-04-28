@@ -396,7 +396,7 @@ void App1::renderSceneShaders(float time)
 
 	//SDF Compute Shader-----------------------------------------------------------------------------------------
 	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
-	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.RightSide);
+	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.RightSide, currentSimTypeRendered);
 	sdfComputeShader->compute(renderer->getDeviceContext(), 768/32, 768/32, 768);
 	sdfComputeShader->unbind(renderer->getDeviceContext());
 
@@ -424,7 +424,7 @@ void App1::renderSceneShaders(float time)
 	orthoMesh->sendData(renderer->getDeviceContext());
 	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
 	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput(), sdfComputeShader->getTexture3D());
-	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles, currentRenderSettingForShader);
+	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles, currentRenderSettingForShader, currentSimTypeRendered);
 	sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
 	sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
 	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());

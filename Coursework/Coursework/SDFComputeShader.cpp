@@ -54,7 +54,7 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     if (FAILED(renderer->CreateUnorderedAccessView(texture3DComputeShaderOutput, &vUAVDesc, &texture3DComputeShaderOutputWritable)))throw std::exception();
 }
 
-void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset)
+void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset, RenderSimulationType currentSimType)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -67,6 +67,15 @@ void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numPartic
     simulationConstPtr->blendAmount = blendAmount;
     simulationConstPtr->stride = stride;
     simulationConstPtr->offset = offset;
+
+    if(currentSimType == RenderSimulationType::Texture3DSPHSimulation || currentSimType == RenderSimulationType::Texture3DStaticParticles)
+    {
+        simulationConstPtr->renderSetting = XMFLOAT4(1,0,0,0);
+    }
+    else
+    {
+        simulationConstPtr->renderSetting = XMFLOAT4(0, 0, 0, 0);
+    }
 
     dc->Unmap(sdfConstantsBuffer, 0);
     dc->CSSetConstantBuffers(0, 1, &sdfConstantsBuffer);

@@ -28,7 +28,7 @@ cbuffer SDFBuffer : register (b1){
     float blendAmount;
     int numParticles;
     int renderSetting;
-    float padding2;
+    int simType;
 }
 
 //Material Values
@@ -245,6 +245,30 @@ bool intersectionCheck(float3 ro, float3 rd, out float2 intersectionPoints)
 
 float4 main(InputType input) : SV_TARGET
 {
+    
+	//Setting up colours for SDF
+    float3 finalColour = float3(0, 0, 0);
+    float4 finalLight = float4(0, 0, 0, 1);
+    float4 waterColour = float4(0.23, 0.56, 0.96f, 1.0f);
+
+    //Initialising variables used for raymarching
+    //float3 rayOrigin = float3(-0.5,0.5,-5);
+    float3 rayOrigin = cameraPos;
+    float aspectRatio = 675 * 1248;
+    float3 rayDirection = normalize(float3((input.tex.x) * 2.0f - 0.5f, input.tex.y * 2.0f - 0.5f, 3));
+
+
+    rayDirection = normalize(mul(float4(rayDirection.x, rayDirection.y, rayDirection.z, 1), viewMatrix).xyz);
+
+    //float3 rayDirection = normalize(mul(float4(input.tex, 1, 1), viewMatrix)).xyz; //Sets the direction of the ray to each point in the plane based on UVs
+    float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
+    float3 positionInRay;
+    float3 normal;
+    float distanceToScene;
+    float2 intersectionPoints;
+
+    //bool res = intersectionCheck(rayOrigin, rayDirection, invRayDirection);
+    bool res = intersectionCheck(rayOrigin, rayDirection, intersectionPoints);
 
     /*
       //Setting up colours for SDF
@@ -291,94 +315,95 @@ float4 main(InputType input) : SV_TARGET
 
     //----------------------------------------------------------------------------------------------------------------
 
-     //Setting up colours for SDF
-    float3 finalColour = float3(0, 0, 0);
-    float4 finalLight = float4(0, 0, 0, 1);
-    float4 waterColour = float4(0.23, 0.56, 0.96f, 1.0f);
-
-    //Initialising variables used for raymarching
-    //float3 rayOrigin = float3(-0.5,0.5,-5);
-    float3 rayOrigin = cameraPos;
-    float aspectRatio = 675 * 1248;
-    float3 rayDirection = normalize(float3((input.tex.x) * 2.0f - 0.5f, input.tex.y * 2.0f - 0.5f, 3));
-
-
-    rayDirection = normalize(mul(float4(rayDirection.x, rayDirection.y, rayDirection.z, 1), viewMatrix).xyz);
-
-    //float3 rayDirection = normalize(mul(float4(input.tex, 1, 1), viewMatrix)).xyz; //Sets the direction of the ray to each point in the plane based on UVs
-    float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
-    float3 positionInRay;
-    float3 normal;
-    float distanceToScene;
-    float2 intersectionPoints;
-
-    //bool res = intersectionCheck(rayOrigin, rayDirection, invRayDirection);
-    bool res = intersectionCheck(rayOrigin, rayDirection, intersectionPoints);
-
-    if(res)
-    {
-        //Raymarching (Sphere tracing)
-        for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
+    
+        if (res)
         {
-            positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
-            normal = calcNormal(positionInRay);
-            distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) /20; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-
-            totalDistanceTravelled += distanceToScene;
-
-            if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+        //Raymarching (Sphere tracing)
+            for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
             {
-                switch(renderSetting)
+				if (simType == 0) //Using 3D Texture
+				{
+					positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
+					distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) / 20; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
+					normal = calcNormal(positionInRay*20);
+				}
+                else if(simType == 1) //Using normal SDFs
                 {
-	                case 0:
-                        finalLight = calcLighting(positionInRay / 20, normal, waterColour);
-                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+	                positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
+	                distanceToScene = sdfCalculations(positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
+					normal = calcNormal(positionInRay);
+				}
+
+				normal = calcNormal(positionInRay);
+                totalDistanceTravelled += distanceToScene;
+
+                if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+                {
+	                if(renderSetting == 0)
+	                {
+	                    if (simType == 0)
+	                    {
+	                        finalLight = calcLighting(positionInRay / 20, normal, waterColour);
+	                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+	                    }
+	                    if (simType == 1)
+	                    {
+	                        finalLight = calcLighting(positionInRay, normal, waterColour);
+	                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+	                    }
+					}
+
+                    switch (renderSetting)
+                    {
+
+                        case 1:
+                            finalColour = float3(positionInRay.x, positionInRay.y, positionInRay.z);
+                            return float4(finalColour, 1);
                         
-	                case 1:
-                        finalColour = float3(positionInRay.x, positionInRay.y, positionInRay.z);
-                        return float4(finalColour, 1);
-                        
-	                case 2:
-                        finalColour = float3(normal);
-                        return float4(finalColour, 1);
-	                case 3:
-                        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
-                        return float4(1-finalColour, 1) * waterColour * 0.4f / 0.2f;
+                        case 2:
+                            finalColour = float3(normal);
+                            return float4(finalColour, 1);
+                        case 3:
+                            finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+                            return float4(1 - finalColour, 1) * waterColour * 0.4f / 0.2f;
 	                    
+                    }
+
+                    break;
                 }
 
-                break;
+            }
+
+            if (renderSetting == 3)
+            {
+                return float4(1, 1, 0, 1);
+            }
+            if (renderSetting == 2 || renderSetting == 1)
+            {
+                return float4(0, 0, 0, 1);
+            }
+            if (renderSetting == 0)
+            {
+                return float4(0, 0, 0, 0);
             }
 
         }
+        else
+        {
+            if (renderSetting == 1 || renderSetting == 2 || renderSetting == 3)
+            {
+                return float4(0, 0, 0, 1);
+            }
 
-        if (renderSetting == 3)
-        {
-            return float4(1, 1, 0, 1);
-        }
-        if(renderSetting == 2 || renderSetting == 1)
-        {
-            return float4(0,0,0,1);
-        }
-        if(renderSetting == 0)
-        {
-            return float4(0,0,0,0);
-        }
-
-    }
-    else
-    {
-        if (renderSetting == 1 || renderSetting == 2 || renderSetting == 3)
-        {
-            return float4(0, 0, 0, 1);
+            if (renderSetting == 0)
+            {
+                return float4(0, 0, 0, 0);
+            }
         }
 
-        if(renderSetting == 0)
-        {
-            return float4(0,0,0,0);
-        }
-    }
+        
+    
 
-    return float4(1,0,0,1);
+    return float4(1, 0, 0, 1);
 
 }

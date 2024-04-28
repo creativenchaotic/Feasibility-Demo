@@ -1,6 +1,7 @@
 #pragma once
 #include "D:\University\Year 4\CMP400 Honours Project Proposal and Execution\Feasibility Demo\Code\Demo\Feasibility-Demo\Coursework\include\BaseShader.h"
 #include <vector>
+#include "Externals.h"
 
 class SDFComputeShader :
     public BaseShader
@@ -16,7 +17,7 @@ public:
     ID3D11ShaderResourceView* getTexture3D() { return texture3DComputeShaderOutputReadable; };
 
     //Passes simulation values into compute shader buffer
-    void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset);
+    void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset, RenderSimulationType currentSimType);
 
 private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
@@ -27,6 +28,7 @@ private:
         float blendAmount;
         int stride;
         float offset;
+        XMFLOAT4 renderSetting;
     };
 
     //RW Structured Buffers-----------------------------------------------

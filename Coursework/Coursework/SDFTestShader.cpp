@@ -187,7 +187,7 @@ void SDFTestShader::setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, 
 	deviceContext->PSSetShaderResources(0, 1, &texture3d);
 }
 
-void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal, int numParticles, RenderSettings currentRenderSetting)
+void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal, int numParticles, RenderSettings currentRenderSetting, RenderSimulationType currentSimType)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	SDFValuesBufferType* dataPtr;
@@ -209,6 +209,22 @@ void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float b
 			break;
 		case RenderSettings::Intersection:
 			dataPtr->currentRenderSetting = 3;
+			break;
+	}
+
+	switch(currentSimType)
+	{
+		case RenderSimulationType::Texture3DSPHSimulation:
+			dataPtr->simType = 0;
+			break;
+		case RenderSimulationType::Texture3DStaticParticles:
+			dataPtr->simType = 0;
+			break;
+		case RenderSimulationType::PlainSDFsSPHSimulation:
+			dataPtr->simType = 1;
+			break;
+		case RenderSimulationType::PlainSDFsStatic:
+			dataPtr->simType = 1;
 			break;
 	}
 
