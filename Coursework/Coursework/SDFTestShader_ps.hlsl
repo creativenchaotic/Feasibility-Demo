@@ -195,9 +195,7 @@ float4 calcLighting(float3 worldPos, float3 normal, float4 particleColour)
 {
 
     float4 finalLight = float4(0, 0, 0, 1);
-
     float3 lightVector = (lightPosition.xyz - worldPos); //Vector from the light to the pixel thats getting lit
-        
     float4 combinedLightColour = float4(0.f, 0.f, 0.f, 0.f);
         
     if (!(diffuseColour.x == 0.f && diffuseColour.y == 0 && diffuseColour.z == 0))
@@ -269,141 +267,92 @@ float4 main(InputType input) : SV_TARGET
 
     //bool res = intersectionCheck(rayOrigin, rayDirection, invRayDirection);
     bool res = intersectionCheck(rayOrigin, rayDirection, intersectionPoints);
-
-    /*
-      //Setting up colours for SDF
-    float3 finalColour = float3(0, 0, 0);
-    float4 posColour = float4(0.0, 0.0, 1.0f, 1.0f);
-    float4 negColour = float4(1.0, 0.0, 0.0, 1.0f);
-
-    //Initialising variables used for raymarching
-    float3 rayOrigin = float3(0, -10, 10.f);
-    //float3 rayOrigin = cameraPos;
-    float3 rayDirection = normalize(float3(input.tex * 0.7f, 1)); //Sets the direction of the ray to each point in the plane based on UVs
-    float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
-    float3 pointOfIntersection;
-
-    //Raymarching (Sphere tracing)
-
-    for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
+    
+    if (res)
     {
-        float3 positionInRay = rayOrigin + rayDirection * totalDistanceTravelled; //Current position along the ray based on the distance from the rays origin
-
-        float distanceToScene = texture3d.Sample(Sampler3D, positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-
-        totalDistanceTravelled += distanceToScene;
-
-        pointOfIntersection = rayOrigin + rayDirection * totalDistanceTravelled;
-
-         //Colouring
-        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
-
-        if (distanceToScene < 0.001f || totalDistanceTravelled > 100.f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+    //Raymarching (Sphere tracing)
+        for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
         {
-            break;
+			if (simType == 0) //Using 3D Texture
+			{
+				positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
+				distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) / 20; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
+				normal = calcNormal(positionInRay*20);
+			}
+            else if(simType == 1) //Using normal SDFs
+            {
+                positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
+                distanceToScene = sdfCalculations(positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
+				normal = calcNormal(positionInRay);
+			}
+
+			normal = calcNormal(positionInRay);
+            totalDistanceTravelled += distanceToScene;
+
+            if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
+            {
+                if(renderSetting == 0)
+                {
+                    if (simType == 0)
+                    {
+                        finalLight = calcLighting(positionInRay / 20, normal, waterColour);
+                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+                    }
+                    if (simType == 1)
+                    {
+                        finalLight = calcLighting(positionInRay, normal, waterColour);
+                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+                    }
+				}
+
+                switch (renderSetting)
+                {
+
+                    case 1:
+                        finalColour = float3(positionInRay.x, positionInRay.y, positionInRay.z);
+                        return float4(finalColour, 1);
+                    
+                    case 2:
+                        finalColour = float3(normal);
+                        return float4(finalColour, 1);
+                    case 3:
+                        finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
+                        return float4(1 - finalColour, 1) * waterColour * 0.4f / 0.2f;
+                    
+                }
+
+                break;
+            }
+
+        }
+
+        if (renderSetting == 3)
+        {
+            return float4(1, 1, 0, 1);
+        }
+        if (renderSetting == 2 || renderSetting == 1)
+        {
+            return float4(0, 0, 0, 1);
+        }
+        if (renderSetting == 0)
+        {
+            return float4(0, 0, 0, 0);
         }
 
     }
-
-       // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-    float4 textureColor = texture0.Sample(Sampler0, input.tex);
-
-    input.position = float4(input.tex.x, 0.f, input.tex.y, 0.f);
-
-    //return float4(1 - finalColour, 1.0f) * textureColor;
-    return float4(1 - finalColour, 1.0f);*/
-
-    //----------------------------------------------------------------------------------------------------------------
-
-    
-        if (res)
+    else
+    {
+        if (renderSetting == 1 || renderSetting == 2 || renderSetting == 3)
         {
-        //Raymarching (Sphere tracing)
-            for (int i = 0; i < 100; i++)//The number of steps affects the quality of the results and the performance
-            {
-				if (simType == 0) //Using 3D Texture
-				{
-					positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
-					distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) / 20; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-					normal = calcNormal(positionInRay*20);
-				}
-                else if(simType == 1) //Using normal SDFs
-                {
-	                positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
-	                distanceToScene = sdfCalculations(positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-					normal = calcNormal(positionInRay);
-				}
-
-				normal = calcNormal(positionInRay);
-                totalDistanceTravelled += distanceToScene;
-
-                if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating //Stop iterating if the ray moves too far without hitting any objects
-                {
-	                if(renderSetting == 0)
-	                {
-	                    if (simType == 0)
-	                    {
-	                        finalLight = calcLighting(positionInRay / 20, normal, waterColour);
-	                        return (float4(finalLight.xyz, 1.0f) * waterColour);
-	                    }
-	                    if (simType == 1)
-	                    {
-	                        finalLight = calcLighting(positionInRay, normal, waterColour);
-	                        return (float4(finalLight.xyz, 1.0f) * waterColour);
-	                    }
-					}
-
-                    switch (renderSetting)
-                    {
-
-                        case 1:
-                            finalColour = float3(positionInRay.x, positionInRay.y, positionInRay.z);
-                            return float4(finalColour, 1);
-                        
-                        case 2:
-                            finalColour = float3(normal);
-                            return float4(finalColour, 1);
-                        case 3:
-                            finalColour = float3(totalDistanceTravelled, totalDistanceTravelled, totalDistanceTravelled) / 100;
-                            return float4(1 - finalColour, 1) * waterColour * 0.4f / 0.2f;
-	                    
-                    }
-
-                    break;
-                }
-
-            }
-
-            if (renderSetting == 3)
-            {
-                return float4(1, 1, 0, 1);
-            }
-            if (renderSetting == 2 || renderSetting == 1)
-            {
-                return float4(0, 0, 0, 1);
-            }
-            if (renderSetting == 0)
-            {
-                return float4(0, 0, 0, 0);
-            }
-
-        }
-        else
-        {
-            if (renderSetting == 1 || renderSetting == 2 || renderSetting == 3)
-            {
-                return float4(0, 0, 0, 1);
-            }
-
-            if (renderSetting == 0)
-            {
-                return float4(0, 0, 0, 0);
-            }
+            return float4(0, 0, 0, 1);
         }
 
-        
-    
+        if (renderSetting == 0)
+        {
+            return float4(0, 0, 0, 0);
+        }
+    }
 
-    return float4(1, 0, 0, 1);
+    return float4(1, 0, 0, 1);//This should only output if somethings gone horribly wrong
 
 }
