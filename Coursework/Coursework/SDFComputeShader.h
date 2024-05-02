@@ -15,6 +15,7 @@ public:
     void unbind(ID3D11DeviceContext* dc);
     ID3D11ShaderResourceView* getComputeShaderOutput() { return sdfPixelCalcOutputReadable; };
     ID3D11ShaderResourceView* getTexture3D() { return texture3DComputeShaderOutputReadable; };
+    void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* simulationOutputRV);
 
     //Passes simulation values into compute shader buffer
     void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset, RenderSimulationType currentSimType);
@@ -40,6 +41,8 @@ private:
     ID3D11ShaderResourceView* texture3DComputeShaderOutputReadable;
     ID3D11UnorderedAccessView* texture3DComputeShaderOutputWritable;
 
+    ID3D11Buffer* particlesInitialData;
+    ID3D11ShaderResourceView* particlesInitialDataReadable;
 
     //Constant Buffer-----------------------------------------------------
     ID3D11Buffer* sdfConstantsBuffer;

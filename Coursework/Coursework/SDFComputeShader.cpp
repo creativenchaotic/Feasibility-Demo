@@ -68,13 +68,20 @@ void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numPartic
     simulationConstPtr->stride = stride;
     simulationConstPtr->offset = offset;
 
-    if(currentSimType == RenderSimulationType::Texture3DSPHSimulation || currentSimType == RenderSimulationType::Texture3DStaticParticles)
+    switch(currentSimType)
     {
-        simulationConstPtr->renderSetting = XMFLOAT4(1,0,0,0);
-    }
-    else
-    {
-        simulationConstPtr->renderSetting = XMFLOAT4(0, 0, 0, 0);
+	    case RenderSimulationType::Texture3DStaticParticles:
+	        simulationConstPtr->renderSetting = XMFLOAT4(0, 0, 0, 0);
+	        break;
+	    case RenderSimulationType::Texture3DSPHSimulation:
+	        simulationConstPtr->renderSetting = XMFLOAT4(1, 0, 0, 0);
+	        break;
+	    case RenderSimulationType::PlainSDFsStatic:
+	        simulationConstPtr->renderSetting = XMFLOAT4(2, 0, 0, 0);
+	        break;
+	    case RenderSimulationType::PlainSDFsSPHSimulation:
+	        simulationConstPtr->renderSetting = XMFLOAT4(3, 0, 0, 0);
+	        break;
     }
 
     dc->Unmap(sdfConstantsBuffer, 0);
@@ -85,6 +92,7 @@ void SDFComputeShader::setShaderParameters(ID3D11DeviceContext* dc)
 {
 	dc->CSSetUnorderedAccessViews(0, 1, &sdfPixelCalcOutputWritable, 0);//Same as UAVs
     dc->CSSetUnorderedAccessViews(1, 1, &texture3DComputeShaderOutputWritable, 0);
+    dc->CSSetShaderResources(1, 1, &particlesInitialDataReadable);
 }
 
 void SDFComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XMFLOAT4>* particles)
@@ -99,6 +107,7 @@ void SDFComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XM
     D3D11_SUBRESOURCE_DATA bufferInitData;
     bufferInitData.pSysMem = particles->data();//Initial data that is getting passed into the buffer
     pd3dDevice->CreateBuffer(&bufferDesc, (particles) ? &bufferInitData : nullptr, &particlesComputeShaderOutput);//Creates the buffer
+    pd3dDevice->CreateBuffer(&bufferDesc, (particles) ? &bufferInitData : nullptr, &particlesInitialData);//Creates the buffer
 
     // Create SRV - Lets you read from the Buffer created
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -106,6 +115,7 @@ void SDFComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XM
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementWidth = particles->size();
     pd3dDevice->CreateShaderResourceView(*&particlesComputeShaderOutput, &srvDesc, &sdfPixelCalcOutputReadable);//Creates the shader resource view from the buffer so you can read values
+    pd3dDevice->CreateShaderResourceView(*&particlesInitialData, &srvDesc, &particlesInitialDataReadable);//Creates the shader resource view from the buffer so you can read values
 
     // Create UAV - Lets you write from the compute shader
     D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
@@ -113,6 +123,13 @@ void SDFComputeShader::createOutputUAVs(ID3D11Device* pd3dDevice, std::vector<XM
     uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
     uavDesc.Buffer.NumElements = particles->size();
     pd3dDevice->CreateUnorderedAccessView(*&particlesComputeShaderOutput, &uavDesc, &sdfPixelCalcOutputWritable);//Creates the unordered access view so you can write to the buffer
+
+
+}
+
+void SDFComputeShader::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* simulationDataSRV)
+{
+    deviceContext->CSSetShaderResources(0, 1, &simulationDataSRV);
 }
 
 void SDFComputeShader::unbind(ID3D11DeviceContext* dc)
