@@ -90,10 +90,7 @@ static const uint hashK3 = 440817757;
 // Convert floating point position into an integer cell coordinate
 int3 GetCell3D(float3 position, float radius)
 {
-    
-    //original from Sebastian Lague
     return (int3) floor(position / radius);
-
 }
 
 // Hash cell coordinate to a single unsigned integer
@@ -149,6 +146,7 @@ void ResolveCollisions(int particleIndex)
     
 	// Resolve collisions
     //Resolving collisions in X-axis
+
     if (particleData[particleIndex].position.x <= boundingBoxLeftSide)
     {
         particleData[particleIndex].position.x = boundingBoxLeftSide;
@@ -159,6 +157,7 @@ void ResolveCollisions(int particleIndex)
         particleData[particleIndex].position.x = boundingBoxRightSide;
         particleData[particleIndex].velocity.x *= -1 * collisionsDamping;
     }
+
     
     //Resolving collisions in Y-axis
     if (particleData[particleIndex].position.y <= boundingBoxBottom)
@@ -171,6 +170,7 @@ void ResolveCollisions(int particleIndex)
         particleData[particleIndex].position.y = boundingBoxTop;
         particleData[particleIndex].velocity.y *= -1 * collisionsDamping;
     }
+
     
     //Resolving collisions in Z-axis
     if (particleData[particleIndex].position.z <= boundingBoxFront)

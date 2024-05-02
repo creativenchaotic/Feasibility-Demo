@@ -29,7 +29,7 @@ struct SPHSimulationValues {
 	XMFLOAT3 particlesSpawnCenter = XMFLOAT3(0.f, 0.f, 0.f);
 	XMFLOAT3 spawnRotation = XMFLOAT3(0.f,0.f,0.f);
 
-	XMFLOAT3 sizeOfBoundingBox = XMFLOAT3(40.f, 40.f, 40.f);
+	XMFLOAT3 sizeOfBoundingBox = XMFLOAT3(20.f, 20.f, 20.f);
 	XMFLOAT3 boundingBoxRotation = XMFLOAT3(0.f, 0.f, 0.f);
 	XMFLOAT3 boundingBoxPosition = XMFLOAT3(0.f, 0.f, 0.f);
 
@@ -48,7 +48,7 @@ struct SPHSimulationValues {
 };
 
 struct SimulationBoundingBox {
-	float Back = 100.f;
+	float Back = 20.f;
 	float Front = -Back;
 	float LeftSide = -Back;
 	float RightSide = Back;

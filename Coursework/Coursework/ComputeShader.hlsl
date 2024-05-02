@@ -33,12 +33,6 @@ static const int3 offsets3D[27] =
 	int3(1, 1, 1)
 };
 
-// Constants used for hashing
-static const uint hashK1 = 15823;
-static const uint hashK2 = 9737333;
-static const uint hashK3 = 440817757;
-
-
 struct Particle
 {
     int particleNum;
@@ -81,14 +75,15 @@ cbuffer cb_simConstants : register(b0)
     float padding2;
 };
 
+// Constants used for hashing
+static const uint hashK1 = 15823;
+static const uint hashK2 = 9737333;
+static const uint hashK3 = 440817757;
 
 // Convert floating point position into an integer cell coordinate
 int3 GetCell3D(float3 position, float radius)
 {
-    
-    //original from Sebastian Lague
     return (int3) floor(position / radius);
-
 }
 
 // Hash cell coordinate to a single unsigned integer
