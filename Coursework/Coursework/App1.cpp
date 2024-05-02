@@ -30,15 +30,12 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//OBJECTS AND SHADERS------------------------------------------------------------------------------
 	// Create Mesh objects
-	sun = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	spotlightMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	sdfSurface = new PlaneMeshTessellated(renderer->getDevice(), renderer->getDeviceContext(), 2);
 	sdfRenderTexture = new RenderTexture(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 	orthoMesh = new OrthoMesh(renderer->getDevice(), renderer->getDeviceContext(), screenWidth, screenHeight, 0, 0);
 
 
 	//Creating shaders
-	sunShader = new SunShader(renderer->getDevice(), hwnd);
 	sphParticleShader = new SPHShader(renderer->getDevice(), hwnd);
 	sphSimulationComputeShaderFirstPass = new ComputeShader(renderer->getDevice(), hwnd);
 	sphSimulationComputeShaderSecondPass = new SPHSimulationComputeShaderSecondPass(renderer->getDevice(), hwnd);
@@ -68,19 +65,10 @@ App1::~App1()
 	BaseApplication::~BaseApplication();
 
 	// Release the Direct3D object.---------------
-	if (sun) {
-		delete sun;
-		sun = 0;
-	}
 
 	if (directionalLight) {
 		delete directionalLight;
 		directionalLight = 0;
-	}
-
-	if (spotlightMesh) {
-		delete spotlightMesh;
-		spotlightMesh = 0;
 	}
 
 	if (sphParticle) {
@@ -377,62 +365,47 @@ void App1::renderSceneShaders(float time)
 		renderer->setAlphaBlending(false);
 	}
 
-	/*
-	//LIGHTING DEBUG SPHERES-------------------------------------------------------------------
-	if (currentRenderSettingForShader!=RenderSettings::SignedDistanceField) {
-		if (guiSettings.isLightOn) {
-			sun->sendData(renderer->getDeviceContext());
-			sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSun * scaleSun, viewMatrix, projectionMatrix);
-			sunShader->render(renderer->getDeviceContext(), sun->getIndexCount());
-		}
-
-		if (isSpotlightOn) {
-			spotlightMesh->sendData(renderer->getDeviceContext());
-			sunShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * translateSpotlight, viewMatrix, projectionMatrix);
-			sunShader->render(renderer->getDeviceContext(), spotlightMesh->getIndexCount());
-		}
-	}*/
-
-	/*
-	//SDF Compute Shader-----------------------------------------------------------------------------------------
-	sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
-	sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.RightSide, currentSimTypeRendered);
-	sdfComputeShader->compute(renderer->getDeviceContext(), 768/32, 768/32, 768);
-	sdfComputeShader->unbind(renderer->getDeviceContext());
+	if (guiSettings.displaySDFs) {
+		//SDF Compute Shader-----------------------------------------------------------------------------------------
+		sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
+		sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.RightSide, currentSimTypeRendered);
+		sdfComputeShader->compute(renderer->getDeviceContext(), 768 / 32, 768 / 32, 768);
+		sdfComputeShader->unbind(renderer->getDeviceContext());
 
 
-	//-----------------------------------------------------------------------------------------------------------
+		//-----------------------------------------------------------------------------------------------------------
 
-	
-	//SDF TEST----------------------------------------------------------------------------------
-	//Set the render target to be the RtT and clear it
-	sdfRenderTexture->setRenderTarget(renderer->getDeviceContext());
-	sdfRenderTexture->clearRenderTarget(renderer->getDeviceContext(), 1.0f, 1.0f, 1.0f, 1.0f);
-	//Setting camera
-	camera->update();
 
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	renderer->setBackBufferRenderTarget();
+		//SDF TEST----------------------------------------------------------------------------------
+		//Set the render target to be the RtT and clear it
+		sdfRenderTexture->setRenderTarget(renderer->getDeviceContext());
+		sdfRenderTexture->clearRenderTarget(renderer->getDeviceContext(), 1.0f, 1.0f, 1.0f, 1.0f);
+		//Setting camera
+		camera->update();
 
-	//RENDER TO TEXTURE----------------------------------------------------------------------------------
-	renderer->setZBuffer(false);
-	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
-	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
+		// Reset the render target back to the original back buffer and not the render to texture anymore.
+		renderer->setBackBufferRenderTarget();
 
-	renderer->setAlphaBlending(true);
+		//RENDER TO TEXTURE----------------------------------------------------------------------------------
+		renderer->setZBuffer(false);
+		XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
+		XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
 
-	orthoMesh->sendData(renderer->getDeviceContext());
-	sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
-	sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput(), sdfComputeShader->getTexture3D());
-	sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles, currentRenderSettingForShader, currentSimTypeRendered);
-	sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
-	sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
-	sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
+		renderer->setAlphaBlending(true);
 
-	ID3D11ShaderResourceView* nullSRV[] = { NULL,NULL };
-	renderer->getDeviceContext()->PSSetShaderResources(0, 2, nullSRV);
+		orthoMesh->sendData(renderer->getDeviceContext());
+		sdfShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, camera->getPosition(), time, sdfRenderTexture->getShaderResourceView());
+		sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput(), sdfComputeShader->getTexture3D());
+		sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles, currentRenderSettingForShader, currentSimTypeRendered);
+		sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
+		sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
+		sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
 
-	renderer->setAlphaBlending(false);*/
+		ID3D11ShaderResourceView* nullSRV[] = { NULL,NULL };
+		renderer->getDeviceContext()->PSSetShaderResources(0, 2, nullSRV);
+
+		renderer->setAlphaBlending(false);
+	}
 
 	// Render GUI
 	gui();
@@ -569,6 +542,15 @@ void App1::gui()
 	//SDF---------------------------------------------------------------------
 	if(ImGui::TreeNode("Signed Distance Fields"))
 	{
+		ImGui::Checkbox("Display SDFs", &guiSettings.displaySDFs);
+		if(guiSettings.displaySDFs == true)
+		{
+			guiSettings.displaySPHSimulationParticles = false;
+		}
+		else
+		{
+			guiSettings.displaySPHSimulationParticles = true;
+		}
 		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0.01, 20);
 		ImGui::SliderInt("Texture3D Stride", &sdfVal.stride, 1, 50);
 
@@ -584,6 +566,14 @@ void App1::gui()
 
 		//Changing the number of particles in the simulation
 		ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
+		if (guiSettings.displaySDFs == true)
+		{
+			guiSettings.displaySPHSimulationParticles = false;
+		}
+		else
+		{
+			guiSettings.displaySPHSimulationParticles = true;
+		}
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));
 		if (!guiSettings.hideInstructions) {
 			ImGui::TextWrapped("For changes to values in the simulation to be applied, press the Rebuild Simulation button");

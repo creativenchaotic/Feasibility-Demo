@@ -64,12 +64,7 @@ private:
 
 
 	//----------------------------------------------------------------
-	//MESHES----------------------------------------------------------
-	//Sun
-	SunShader* sunShader;
-	SphereMesh* sun;
-	SphereMesh* spotlightMesh;
-
+	//MESHES---------------------------------------------------------
 	//----------------------------------------------
 	//SPH
 	SPHShader* sphParticleShader;//Used to render the particles in the scene
