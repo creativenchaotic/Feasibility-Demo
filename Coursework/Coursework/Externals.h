@@ -10,7 +10,7 @@ enum class RenderSimulationType
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 3;
+	int numParticlesPerAxis = 2;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	float gravity = -10.f;
 	float deltaTime;
@@ -72,9 +72,9 @@ struct PBRMaterialValues {
 
 struct GUISettings {
 	bool hideInstructions = true;
-	bool displaySPHSimulationParticles = false;
+	bool displaySPHSimulationParticles = true;
 	bool isLightOn = true;
-	bool displaySDFs = true;
+	bool displaySDFs = false;
 };
 
 struct SDFValues

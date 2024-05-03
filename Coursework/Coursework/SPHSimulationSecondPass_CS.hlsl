@@ -17,11 +17,11 @@ struct Particle
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<Particle> sphSimulationFirstPassOutput : register(t0);
 StructuredBuffer<uint3> bitonicMergesortParticleIndicesOutput : register(t1);
-StructuredBuffer<int> particleOffsetCalculationsOutput : register(t2);
+StructuredBuffer<uint> particleOffsetCalculationsOutput : register(t2);
 
 cbuffer cb_simConstants : register(b0)
 {
-    int numParticles;
+    uint numParticles;
     float gravity;
     float deltaTime;
     float collisionsDamping;
@@ -51,35 +51,35 @@ cbuffer cb_simConstants : register(b0)
 
 
 //SPATIAL 3D HASH----------------------------------------------------------------
-static const uint3 offsets3D[27] =
+static const int3 offsets3D[27] =
 {
-    uint3(-1, -1, -1),
-	uint3(-1, -1, 0),
-	uint3(-1, -1, 1),
-	uint3(-1, 0, -1),
-	uint3(-1, 0, 0),
-	uint3(-1, 0, 1),
-	uint3(-1, 1, -1),
-	uint3(-1, 1, 0),
-	uint3(-1, 1, 1),
-	uint3(0, -1, -1),
-	uint3(0, -1, 0),
-	uint3(0, -1, 1),
-	uint3(0, 0, -1),
-	uint3(0, 0, 0),
-	uint3(0, 0, 1),
-	uint3(0, 1, -1),
-	uint3(0, 1, 0),
-	uint3(0, 1, 1),
-	uint3(1, -1, -1),
-	uint3(1, -1, 0),
-	uint3(1, -1, 1),
-	uint3(1, 0, -1),
-	uint3(1, 0, 0),
-	uint3(1, 0, 1),
-	uint3(1, 1, -1),
-	uint3(1, 1, 0),
-	uint3(1, 1, 1)
+    int3(-1, -1, -1),
+	int3(-1, -1, 0),
+	int3(-1, -1, 1),
+	int3(-1, 0, -1),
+	int3(-1, 0, 0),
+	int3(-1, 0, 1),
+	int3(-1, 1, -1),
+	int3(-1, 1, 0),
+	int3(-1, 1, 1),
+	int3(0, -1, -1),
+	int3(0, -1, 0),
+	int3(0, -1, 1),
+	int3(0, 0, -1),
+	int3(0, 0, 0),
+	int3(0, 0, 1),
+	int3(0, 1, -1),
+	int3(0, 1, 0),
+	int3(0, 1, 1),
+	int3(1, -1, -1),
+	int3(1, -1, 0),
+	int3(1, -1, 1),
+	int3(1, 0, -1),
+	int3(1, 0, 0),
+	int3(1, 0, 1),
+	int3(1, 1, -1),
+	int3(1, 1, 0),
+	int3(1, 1, 1)
 };
 
 // Constants used for hashing
@@ -108,6 +108,83 @@ uint KeyFromHash(uint hash, uint tableSize)
 //----------------------------------------------------------------------------
 
 static const float PI = 3.1415926f;
+
+// 3d conversion: done
+float DerivativeSpikyPow2(float dst, float radius)
+{
+    if (dst <= radius)
+    {
+        float scale = 15 / (pow(radius, 5) * PI);
+        float v = radius - dst;
+        return -v * scale;
+    }
+    return 0;
+}
+
+float DensityDerivative(float dst, float radius)
+{
+    return DerivativeSpikyPow2(dst, radius);
+}
+
+float DerivativeSpikyPow3(float dst, float radius)
+{
+    if (dst <= radius)
+    {
+        float scale = 45 / (pow(radius, 6) * PI);
+        float v = radius - dst;
+        return -v * v * scale;
+    }
+    return 0;
+}
+
+float NearDensityDerivative(float dst, float radius)
+{
+    return DerivativeSpikyPow3(dst, radius);
+}
+
+float SpikyKernelPow2(float dst, float radius)
+{
+    if (dst < radius)
+    {
+        float scale = 15 / (2 * PI * pow(radius, 5));
+        float v = radius - dst;
+        return v * v * scale;
+    }
+    return 0;
+}
+
+float DensityKernel(float dst, float radius)
+{
+	//return SmoothingKernelPoly6(dst, radius);
+    return SpikyKernelPow2(dst, radius);
+}
+
+float SpikyKernelPow3(float dst, float radius)
+{
+    if (dst < radius)
+    {
+        float scale = 15 / (PI * pow(radius, 6));
+        float v = radius - dst;
+        return v * v * v * scale;
+    }
+    return 0;
+}
+
+float NearDensityKernel(float dst, float radius)
+{
+    return SpikyKernelPow3(dst, radius);
+}
+
+float SmoothingKernelPoly6(float dst, float radius)
+{
+    if (dst < radius)
+    {
+        float scale = 315 / (64 * PI * pow(abs(radius), 9));
+        float v = radius * radius - dst * dst;
+        return v * v * v * scale;
+    }
+    return 0;
+}
 
  //HELPER FUNCTIONS-----------------------------------------------------------
 void ResolveCollisions(int particleIndex)
@@ -197,82 +274,6 @@ float NearPressureFromDensity(float nearDensity)
 }
 
 
-//Integrate[(h-r)^2 r^2 Sin[?], {r, 0, h}, {?, 0, ?}, {?, 0, 2*?}]
-float SpikyKernelPow2(float dst, float radius)
-{
-    if (dst < radius)
-    {
-        float scale = 15 / (2 * PI * pow(radius, 5));
-        float v = radius - dst;
-        return v * v * scale;
-    }
-    return 0;
-}
-
-float DensityKernel(float dst, float radius)
-{
-	//return SmoothingKernelPoly6(dst, radius);
-    return SpikyKernelPow2(dst, radius);
-}
-
-float SpikyKernelPow3(float dst, float radius)
-{
-    if (dst < radius)
-    {
-        float scale = 15 / (PI * pow(radius, 6));
-        float v = radius - dst;
-        return v * v * v * scale;
-    }
-    return 0;
-}
-
-float NearDensityKernel(float dst, float radius)
-{
-    return SpikyKernelPow3(dst, radius);
-}
-
-float DerivativeSpikyPow2(float dst, float radius)
-{
-    if (dst <= radius)
-    {
-        float scale = 15 / (pow(radius, 5) * PI);
-        float v = radius - dst;
-        return -v * scale;
-    }
-    return 0;
-}
-
-float DensityDerivative(float dst, float radius)
-{
-    return DerivativeSpikyPow2(dst, radius);
-}
-
-float DerivativeSpikyPow3(float dst, float radius)
-{
-    if (dst <= radius)
-    {
-        float scale = 45 / (pow(radius, 6) * PI);
-        float v = radius - dst;
-        return -v * v * scale;
-    }
-    return 0;
-}
-
-float NearDensityDerivative(float dst, float radius)
-{
-    return DerivativeSpikyPow3(dst, radius);
-}
-
-float SmoothingKernelPoly6(float dst, float radius)
-{
-    if (dst < radius)
-    {
-        float scale = 315 / (64 * PI * pow(abs(radius), 9));
-        float v = radius * radius - dst * dst;
-        return v * v * v * scale;
-    }
-    return 0;
-}
 
 
 //SIMULATION FUNCTIONS---------------------------------------------------------
@@ -280,10 +281,10 @@ void CalculatePressureForce(uint3 thread)
 {
     if (thread.x >= numParticles)
         return;
-    
+
 	// Calculate pressure
-    float density = particleData[thread.x].density.x;
-    float densityNear = particleData[thread.x].density.y;
+    float density = particleData[thread.x].density[0];
+    float densityNear = particleData[thread.x].density[1];
     float pressure = PressureFromDensity(density);
     float nearPressure = NearPressureFromDensity(densityNear);
     float3 pressureForce = 0;
@@ -304,13 +305,13 @@ void CalculatePressureForce(uint3 thread)
             uint3 indexData = particleData[currIndex].spatialIndices;
             currIndex++;
 			// Exit if no longer looking at correct bin
-            if (indexData.z != key)
+            if (indexData[2] != key)
                 break;
 			// Skip if hash does not match
-            if (indexData.y != hash)
+            if (indexData[1] != hash)
                 continue;
 
-            uint neighbourIndex = indexData.x;
+            uint neighbourIndex = indexData[0];
 			// Skip if looking at self
             if (neighbourIndex == thread.x)
                 continue;
@@ -324,8 +325,8 @@ void CalculatePressureForce(uint3 thread)
                 continue;
 
 			// Calculate pressure force
-            float densityNeighbour = particleData[neighbourIndex].density.x;
-            float nearDensityNeighbour = particleData[neighbourIndex].density.y;
+            float densityNeighbour = particleData[neighbourIndex].density[0];
+            float nearDensityNeighbour = particleData[neighbourIndex].density[1];
             float neighbourPressure = PressureFromDensity(densityNeighbour);
             float neighbourPressureNear = NearPressureFromDensity(nearDensityNeighbour);
 
@@ -356,7 +357,7 @@ void CalculateDensities(uint3 thread)
     float density = 0;
     float nearDensity = 0;
 
-    // Neighbour search
+	// Neighbour search
     for (int i = 0; i < 27; i++)
     {
         uint hash = HashCell3D(originCell + offsets3D[i]);
@@ -368,13 +369,13 @@ void CalculateDensities(uint3 thread)
             uint3 indexData = particleData[currIndex].spatialIndices;
             currIndex++;
 			// Exit if no longer looking at correct bin
-            if (indexData.z != key)
+            if (indexData[2] != key)
                 break;
 			// Skip if hash does not match
-            if (indexData.y != hash)
+            if (indexData[1] != hash)
                 continue;
 
-            uint neighbourIndex = indexData.x;
+            uint neighbourIndex = indexData[0];
             float3 neighbourPos = particleData[neighbourIndex].predictedPosition;
             float3 offsetToNeighbour = neighbourPos - pos;
             float sqrDstToNeighbour = dot(offsetToNeighbour, offsetToNeighbour);
@@ -418,13 +419,13 @@ void CalculateViscosity(uint3 thread)
             uint3 indexData = particleData[currIndex].spatialIndices;
             currIndex++;
 			// Exit if no longer looking at correct bin
-            if (indexData.z != key)
+            if (indexData[2] != key)
                 break;
 			// Skip if hash does not match
-            if (indexData.y != hash)
+            if (indexData[1] != hash)
                 continue;
 
-            uint neighbourIndex = indexData.x;
+            uint neighbourIndex = indexData[0];
 			// Skip if looking at self
             if (neighbourIndex == thread.x)
                 continue;
@@ -451,9 +452,8 @@ void UpdatePositions(uint3 thread)
 {
     if (thread.x >= numParticles)
         return;
-    
-    particleData[thread.x].position += particleData[thread.x].velocity * deltaTime;
 
+    particleData[thread.x].position += particleData[thread.x].velocity * deltaTime;
     ResolveCollisions(thread.x);
 }
 

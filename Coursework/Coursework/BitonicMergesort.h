@@ -25,10 +25,10 @@ private:
 	void initShader(const wchar_t* cfile, const wchar_t* blank);
 
 	struct BitonicMergesortSettingsBufferType {
-		int numParticles;
-		int groupWidth;
-		int groupHeight;
-		int stepIndex;
+		uint32_t numParticles;
+		uint32_t groupWidth;
+		uint32_t groupHeight;
+		uint32_t stepIndex;
 	};
 
 	//RW Structured Buffers-----------------------------------------------

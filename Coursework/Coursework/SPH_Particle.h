@@ -2,9 +2,9 @@
 #include "SphereMesh.h"
 
 struct uint3 {
-    unsigned int index = 0;
-    unsigned int hash = 0;
-    unsigned int key = 0;
+    uint32_t index = 0;
+    uint32_t hash = 0;
+    uint32_t key = 0;
 };
 
 struct ParticleData {
@@ -15,7 +15,7 @@ struct ParticleData {
     XMFLOAT3 velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
     XMFLOAT2 density = XMFLOAT2(0.0,0.0);
     uint3 spatialIndices;
-    unsigned int spatialOffsets = 0;
+    uint32_t spatialOffsets = 0;
 };
 
 class SPH_Particle :

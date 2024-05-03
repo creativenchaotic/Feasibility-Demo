@@ -1,38 +1,6 @@
 //compute shader used for SPH simulation
 static const int NumThreads = 64;
 
-//SPATIAL 3D HASH----------------------------------------------------------------
-static const int3 offsets3D[27] =
-{
-    int3(-1, -1, -1),
-	int3(-1, -1, 0),
-	int3(-1, -1, 1),
-	int3(-1, 0, -1),
-	int3(-1, 0, 0),
-	int3(-1, 0, 1),
-	int3(-1, 1, -1),
-	int3(-1, 1, 0),
-	int3(-1, 1, 1),
-	int3(0, -1, -1),
-	int3(0, -1, 0),
-	int3(0, -1, 1),
-	int3(0, 0, -1),
-	int3(0, 0, 0),
-	int3(0, 0, 1),
-	int3(0, 1, -1),
-	int3(0, 1, 0),
-	int3(0, 1, 1),
-	int3(1, -1, -1),
-	int3(1, -1, 0),
-	int3(1, -1, 1),
-	int3(1, 0, -1),
-	int3(1, 0, 0),
-	int3(1, 0, 1),
-	int3(1, 1, -1),
-	int3(1, 1, 0),
-	int3(1, 1, 1)
-};
-
 struct Particle
 {
     int particleNum;
@@ -49,7 +17,7 @@ StructuredBuffer<Particle> sphSimulationSecondPassOutput : register(t0);
 
 cbuffer cb_simConstants : register(b0)
 {
-    int numParticles;
+    uint numParticles;
     float gravity;
     float deltaTime;
     float collisionsDamping;
@@ -98,6 +66,7 @@ uint KeyFromHash(uint hash, uint tableSize)
     return hash % tableSize;
 }
 
+
 //SIMULATION FUNCTIONS---------------------------------------------------------
 void ExternalForces(uint3 thread)
 {
@@ -129,13 +98,12 @@ void UpdateSpatialHash(uint3 thread)
 
 void setValuesFromPreviousIterationToCurrentIteration(uint3 thread)
 {
-    particleData[thread.x] = (Particle)sphSimulationSecondPassOutput[thread.x];
+    particleData[thread.x] = sphSimulationSecondPassOutput[thread.x];
 }
 
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    //TODO: Check if the buffer from the previous iteration of the simulation is empty
     if (isFirstIteration == 0)
     {
         setValuesFromPreviousIterationToCurrentIteration(dispatchThreadID);

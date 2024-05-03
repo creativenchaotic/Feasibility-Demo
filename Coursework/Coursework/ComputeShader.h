@@ -28,7 +28,7 @@ private:
 	void initShader(const wchar_t* cfile, const wchar_t* blank);
 
 	struct SimulationConstantsBufferType {
-		int numParticles;
+		uint32_t numParticles;
 		float gravity;
 		float deltaTime;
 		float collisionsDamping;

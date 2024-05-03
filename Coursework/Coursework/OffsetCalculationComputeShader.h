@@ -21,7 +21,7 @@ private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
 
     struct OffsetCalculationsSettingsBufferType {
-        int numParticles;
+        uint32_t numParticles;
         XMFLOAT3 padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
     };
 

@@ -16,27 +16,28 @@ struct Entry
     //x is the original index
     //y is the hash
     //z is the key
-    float originalIndex;
-    float hash;
-    float key;
+    uint originalIndex;
+    uint hash;
+    uint key;
 };
 
-RWStructuredBuffer<uint3> particleData : register(u0); //Data we pass to and from the compute shader
+RWStructuredBuffer<Entry> particleData : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<Particle> particleDataOutputFromSPHSimFirstPass : register(t0);
 
 cbuffer cb_bitonicMergesortConstants : register(b0)
 {
     int numParticles;
-    int groupWidth;
-    int groupHeight;
-    int stepIndex;
+    uint groupWidth;
+    uint groupHeight;
+    uint stepIndex;
 }
 
 void bitonicMergesort(uint3 dispatchThreadID)
 {
-    particleData[dispatchThreadID.x] = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices;
-    
-    
+    particleData[dispatchThreadID.x].originalIndex = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices.x;
+    particleData[dispatchThreadID.x].hash = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices.y;
+    particleData[dispatchThreadID.x].key = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices.z;
+
     // Sort the given entries by their keys (smallest to largest)
     // This is done using bitonic merge sort, and takes multiple iterations
     uint i = dispatchThreadID.x;
@@ -50,23 +51,15 @@ void bitonicMergesort(uint3 dispatchThreadID)
     if (indexRight >= numParticles)
         return;
 
-    
-    uint valueLeft = particleData[indexLeft].z;
-    uint valueRight = particleData[indexRight].z;
+    uint valueLeft = particleData[indexLeft].key;
+    uint valueRight = particleData[indexRight].key;
 
-	// Swap entries if value is descending
+		// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
-        Entry temp;
-        temp.originalIndex = particleData[indexLeft].x;
-        temp.hash = particleData[indexLeft].y;
-        temp.key = particleData[indexLeft].z;
-        
+        Entry temp = particleData[indexLeft];
         particleData[indexLeft] = particleData[indexRight];
-
-        particleData[indexRight].x = temp.originalIndex;
-        particleData[indexRight].y = temp.hash;
-        particleData[indexRight].z = temp.key;
+        particleData[indexRight] = temp;
     }
 
 }
