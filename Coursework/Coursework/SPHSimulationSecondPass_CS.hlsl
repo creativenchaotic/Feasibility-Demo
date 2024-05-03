@@ -304,13 +304,13 @@ void CalculatePressureForce(uint3 thread)
             uint3 indexData = particleData[currIndex].spatialIndices;
             currIndex++;
 			// Exit if no longer looking at correct bin
-            if (indexData[2] != key)
+            if (indexData.z != key)
                 break;
 			// Skip if hash does not match
-            if (indexData[1] != hash)
+            if (indexData.y != hash)
                 continue;
 
-            uint neighbourIndex = indexData[0];
+            uint neighbourIndex = indexData.x;
 			// Skip if looking at self
             if (neighbourIndex == thread.x)
                 continue;
@@ -368,13 +368,13 @@ void CalculateDensities(uint3 thread)
             uint3 indexData = particleData[currIndex].spatialIndices;
             currIndex++;
 			// Exit if no longer looking at correct bin
-            if (indexData[2] != key)
+            if (indexData.z != key)
                 break;
 			// Skip if hash does not match
-            if (indexData[1] != hash)
+            if (indexData.y != hash)
                 continue;
 
-            uint neighbourIndex = indexData[0];
+            uint neighbourIndex = indexData.x;
             float3 neighbourPos = particleData[neighbourIndex].predictedPosition;
             float3 offsetToNeighbour = neighbourPos - pos;
             float sqrDstToNeighbour = dot(offsetToNeighbour, offsetToNeighbour);
@@ -418,13 +418,13 @@ void CalculateViscosity(uint3 thread)
             uint3 indexData = particleData[currIndex].spatialIndices;
             currIndex++;
 			// Exit if no longer looking at correct bin
-            if (indexData[2] != key)
+            if (indexData.z != key)
                 break;
 			// Skip if hash does not match
-            if (indexData[1] != hash)
+            if (indexData.y != hash)
                 continue;
 
-            uint neighbourIndex = indexData[0];
+            uint neighbourIndex = indexData.x;
 			// Skip if looking at self
             if (neighbourIndex == thread.x)
                 continue;
