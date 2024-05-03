@@ -443,7 +443,9 @@ void App1::gui()
 	if (!guiSettings.hideInstructions) {
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));//Adds spacing
 		ImGui::TextWrapped("This the artefact my project 'Evaluating Realistic Water Surface Creation in 3D Water Simulations for Video Games using Smoothed Particle Hydrodynamics (SPH)'");
-		ImGui::Dummy(ImVec2(0.0f, 5.0f));
+		ImGui::Spacing();
+		ImGui::TextWrapped("This artefact aims to construct the surface of the Smoothed Particle Hydrodynamics simulation particles by using Signed Distance Fields. The SDFs were computed in two different ways: using sphere tracing and SDF calculations in the pixel shader, and precomputing the SDFs and storing them in a 3D texture before rendering them using sphere tracing.\n\nTo figure out where in space to render the 3D Texture, a Ray-Box intersection was used. If the sphere tracing ray intersects with the box, the 3D Texture gets rendered.");
+		ImGui::Spacing();
 		ImGui::TextWrapped("Camera Controls\nLeft Mouse Button: Rotate Camera\nWASD: Move Camera\nEQ: Raise/Lower Camera");
 	}
 
@@ -464,7 +466,7 @@ void App1::gui()
 	//------------------------------------------------------------------------
 	//RENDER SETTINGS
 	if (!guiSettings.hideInstructions) {
-		ImGui::TextWrapped("Render Settings used to display different aspects of the scene in different ways. For example: showing the normals of the objects' surfaces or showing where objects are placed in the world.");
+		ImGui::TextWrapped("Render Settings used to display different aspects of the scene in different ways:\n-Render using PBR lighting calculations\n-Render the world-space position of the objects\n-Render the object normals\n-Render the Ray-Box Intersection ");
 	}
 	//Selecting a render method in the ImGui window
 	if (ImGui::BeginCombo("Rendering Settings", currentRenderSetting)) {
