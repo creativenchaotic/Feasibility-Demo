@@ -21,9 +21,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SunShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PlaneMeshTessellated.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -54,12 +51,21 @@
     <ClCompile Include="SDFComputeShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SPHSimPressureForcePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SPHSimViscosityPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SPHSimulationUpdatePositionsFinalPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SPHSimSpatialHashing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SunShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PlaneMeshTessellated.h">
@@ -95,14 +101,20 @@
     <ClInclude Include="SDFComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SPHSimPressureForcePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SPHSimViscosityPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SPHSimulationUpdatePositionsFinalPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SPHSimSpatialHashing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="SunShader_vs.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="SunShader_ps.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
     <FxCompile Include="DepthShader_vs.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
@@ -140,6 +152,18 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="SDF_cs.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="SPHSim_PressureForce.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="SPHSim_Viscosity.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="SPHSim_UpdatePositionsFinal.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="SPHSim_SpatialHashing.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

@@ -81,20 +81,6 @@ void ExternalForces(uint3 thread)
 }
 
 
-void UpdateSpatialHash(uint3 thread)
-{   
-    if (thread.x >= numParticles)
-        return;
-
-	// Reset offsets
-    particleData[thread.x].spatialOffsets = numParticles;
-	// Update index buffer
-    uint index = thread.x;
-    int3 cell = GetCell3D(particleData[index].predictedPosition, smoothingRadius);
-    uint hash = HashCell3D(cell);
-    uint key = KeyFromHash(hash, numParticles);
-    particleData[thread.x].spatialIndices = uint3(index, hash, key);
-}
 
 void setValuesFromPreviousIterationToCurrentIteration(uint3 thread)
 {
@@ -110,6 +96,6 @@ void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_Di
     }
         
     ExternalForces(dispatchThreadID);
-    UpdateSpatialHash(dispatchThreadID);
+   
 }
 

@@ -4,15 +4,18 @@
 
 // Includes
 #include "DXF.h"
-#include "SunShader.h"
 #include "PlaneMeshTessellated.h"
 #include "Externals.h"
 #include "SPH_Particle.h"
 #include "SPHShader.h"
 #include "ComputeShader.h"
-#include "SPHSimulationComputeShaderSecondPass.h"
+#include "SPHSimSpatialHashing.h"
 #include "BitonicMergesort.h"
 #include "OffsetCalculationComputeShader.h"
+#include "SPHSimulationComputeShaderSecondPass.h"
+#include "SPHSimPressureForcePass.h"
+#include "SPHSimViscosityPass.h"
+#include "SPHSimulationUpdatePositionsFinalPass.h"
 #include "SDFTestShader.h"
 
 #include "SDFComputeShader.h"
@@ -69,9 +72,15 @@ private:
 	//SPH
 	SPHShader* sphParticleShader;//Used to render the particles in the scene
 	ComputeShader* sphSimulationComputeShaderFirstPass;//Initial SPH sim compute shader pass
-	SPHSimulationComputeShaderSecondPass* sphSimulationComputeShaderSecondPass;//Second SPH sim compute shader pass
-	BitonicMergesort* bitonicMergesort;
+	SPHSimSpatialHashing* sphSimulationSpatialHashing;//Hashes the particles to speed up the simulation
+	BitonicMergesort* bitonicMergesort;//Sorts the particles based on the key for the hashing
 	OffsetCalculationComputeShader* spatialOffsetCalculationComputeShader;
+	SPHSimulationComputeShaderSecondPass* sphSimulationComputeShaderSecondPass;//Second SPH sim compute shader pass used to calculate particle densities
+	SPHSimPressureForcePass* sphSimulationPressurePass;//Used to calculate the pressure force on the particles
+	SPHSimViscosityPass* sphSimViscosityPass;//Used to calculate the velocity affected
+	SPHSimulationUpdatePositionsFinalPass* sphFinalPass;//Used to update the particle positions
+
+
 
 	//UI Values for SPH
 	SPHSimulationValues simulationSettings;
