@@ -60,21 +60,21 @@ struct LightValues {
 	XMFLOAT4 lightColour = XMFLOAT4(0.9f, 0.77f, 0.41f, 1.0f);
 	XMFLOAT4 lightAmbientColour = XMFLOAT4(0.59, 0.49, 0.33, 1.0f);
 	XMFLOAT3 lightPosition = XMFLOAT3(24.359, 11.538, 50.000);
-	XMFLOAT3 lightDirection = XMFLOAT3(0.538f, -0.385f, -1.f);
+	XMFLOAT3 lightDirection = XMFLOAT3(0.538f, 0.011f, 0.118f);
 	XMFLOAT4 lightSpecularColour = XMFLOAT4(1.0F, 1.0F, 1.0F, 1.0F);
 };
 
 struct PBRMaterialValues {
-	float materialRoughness = 0.017f;
+	float materialRoughness = 0.106f;
 	float metallicFactor = 0.001f;
-	float baseReflectivity = 1.0f;
+	float baseReflectivity = 0.515f;
 };
 
 struct GUISettings {
 	bool hideInstructions = true;
 	bool displaySPHSimulationParticles = false;
 	bool isLightOn = true;
-	bool displaySDFs = false;
+	bool displaySDFs = true;
 };
 
 struct SDFValues

@@ -47,16 +47,16 @@ float sdfCalculations(float3 position)
         
     float finalValue;
 
-    float sphere1 = sdfSphere(position - ((float3(particleData[0].xyz))), 1.0f); //Sphere SDF
-    float sphere2 = sdfSphere(position - ((float3(particleData[1].xyz))), 1.0f); //Sphere SDF
+    float sphere1 = sdfSphere(position - ((float3(particleInitialPositions[0].xyz))), 1.0f); //Sphere SDF
+    float sphere2 = sdfSphere(position - ((float3(particleInitialPositions[1].xyz))), 1.0f); //Sphere SDF
 
     finalValue = smoothUnion(sphere1, sphere2);
 
-    if (numParticles.x > 2)
+    if (numParticles > 2)
     {
-        for (int i = 2; i < numParticles.x; i++)
+        for (int i = 2; i < numParticles; i++)
         {
-            float sphere = sdfSphere(position - ((float3(particleData[i].xyz))), 1.0f); //Sphere SDF
+            float sphere = sdfSphere(position - ((float3(particleInitialPositions[i].xyz))), 1.0f); //Sphere SDF
 
             finalValue = smoothUnion(sphere, finalValue);
 
@@ -77,9 +77,9 @@ float sdfCalculationsSPHSim(float3 position)
 
     finalValue = smoothUnion(sphere1, sphere2);
 
-    if (numParticles.x > 2)
+    if (numParticles > 2)
     {
-        for (int i = 2; i < numParticles.x; i++)
+        for (int i = 2; i < numParticles; i++)
         {
             float sphere = sdfSphere(position - ((float3(simulationOutputData[i].position))), 1.0f); //Sphere SDF
 
@@ -105,7 +105,7 @@ void main( uint3 DTid : SV_DispatchThreadID)
         float3 position = lerp(worldMin, worldMax, DTid / (float3(resolution) - 1.0f)) * 0.5;
 
         float sdfCalc = sdfCalculations(position);
-        SDFImage[DTid.xyz] = sdfCalc; // Assign the calculated SDF value to the corresponding texel
+        SDFImage[DTid] = sdfCalc; // Assign the calculated SDF value to the corresponding texel
     }
     else if(simType.x == 1)
     {
@@ -118,7 +118,7 @@ void main( uint3 DTid : SV_DispatchThreadID)
         float3 position = lerp(worldMin, worldMax, DTid / (float3(resolution) - 1.0f)) * 0.5;
 
         float sdfCalc = sdfCalculationsSPHSim(position);
-        SDFImage[DTid.xyz] = sdfCalc; // Assign the calculated SDF value to the corresponding texel
+        SDFImage[DTid] = sdfCalc; // Assign the calculated SDF value to the corresponding texel
     }
     else if(simType.x == 2)
     {

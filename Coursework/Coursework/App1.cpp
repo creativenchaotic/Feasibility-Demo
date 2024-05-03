@@ -368,7 +368,7 @@ void App1::renderSceneShaders(float time)
 	if (guiSettings.displaySDFs) {
 		//SDF Compute Shader-----------------------------------------------------------------------------------------
 		sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
-		sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.RightSide, currentSimTypeRendered);
+		sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.Back, currentSimTypeRendered);
 		sdfComputeShader->compute(renderer->getDeviceContext(), 768 / 32, 768 / 32, 768);
 		sdfComputeShader->unbind(renderer->getDeviceContext());
 

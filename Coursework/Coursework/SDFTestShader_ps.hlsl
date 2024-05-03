@@ -107,14 +107,22 @@ float3 calcNormal(float3 pos)
 }
 
 
-float3 calcNormal3DTexture(float3 pos)
+float3 calcNormal3DTexture(float3 pos, float3 worldMin, float3 worldMax)
 {
+    
     float3 step = float3(0.001f, 0.0f, 0.0f);
     float3 normal;
+
+    // Remap from world space to texture space
+    float3 texturePos = pos * 2.0f; // Undo the scaling by 0.5
+    float3 invLerp = (texturePos - worldMin) / (worldMax - worldMin);
+    float3 worldSpaceRemapping = worldMin + invLerp * (worldMax - worldMin);
     
-    normal.x = texture3d.SampleLevel(Sampler3D, pos / 20 + step.xyy, 0) / 20 - texture3d.SampleLevel(Sampler3D, pos / 20 - step.xyy, 0) / 20;
-    normal.y = texture3d.SampleLevel(Sampler3D, pos / 20 + step.yxy, 0) / 20 - texture3d.SampleLevel(Sampler3D, pos / 20 - step.yxy, 0) / 20;
-    normal.z = texture3d.SampleLevel(Sampler3D, pos / 20 + step.yyx, 0) / 20 - texture3d.SampleLevel(Sampler3D, pos / 20 - step.yyx, 0) / 20;
+    // Calculate the normal using world-space coordinates
+    normal.x = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 + step.xyy, 0) / 20 - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 - step.xyy, 0) / 20;
+    normal.y = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 + step.yxy, 0) / 20 - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 - step.yxy, 0) / 20;
+    normal.z = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 + step.yyx, 0) / 20 - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 - step.yyx, 0) / 20;
+    
     return normalize(normal);
 }
 
@@ -262,13 +270,14 @@ float4 main(InputType input) : SV_TARGET
     float4 waterColour = float4(0.23, 0.56, 0.96f, 1.0f);
 
     //Initialising variables used for raymarching
-    //float3 rayOrigin = float3(-0.5,0.5,-5);
     float3 rayOrigin = cameraPos;
-    float aspectRatio = 675 * 1248;
-    float3 rayDirection = normalize(float3((input.tex.x) * 2.0f - 0.5f, input.tex.y * 2.0f - 0.5f, 3));
-
-
+    float aspectRatio =  1248.0f / 675.f; //Apply aspect ratio so that SDFs dont appear stretched out
+    float3 rayDirection = normalize(float3((input.tex.x * 2.0f - 1.0f) * aspectRatio, input.tex.y * 2.0f - 1.0f, 3)); // Adjusted ray direction with aspect ratio
     rayDirection = normalize(mul(float4(rayDirection.x, rayDirection.y, rayDirection.z, 1), viewMatrix).xyz);
+
+    //Bounds of simulation
+    float3 worldMin = float3(-20, -20, -20);
+    float3 worldMax = float3(20, 20, 20);
 
     float totalDistanceTravelled = 0.f; //Total distance travelled by ray from the camera's position
     float3 positionInRay;
@@ -276,7 +285,7 @@ float4 main(InputType input) : SV_TARGET
     float distanceToScene;
     float2 intersectionPoints;
 
-    bool res = intersectionCheck(rayOrigin, rayDirection, intersectionPoints);
+    bool res = intersectionCheck(rayOrigin, rayDirection, intersectionPoints);//Checks if the raymarching intersects with the box where we want to render the 3D texture in space
     
     if (res)
     {
@@ -285,9 +294,22 @@ float4 main(InputType input) : SV_TARGET
         {
 			if (simType == 0) //Using 3D Texture
 			{
-				positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
-				distanceToScene = texture3d.SampleLevel(Sampler3D, positionInRay / 20, 0) / 20; //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-				normal = calcNormal3DTexture(positionInRay);
+                positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
+
+
+                //Mapping from 3D texture space to world space positions
+                float3 texturePos = positionInRay * 2.0f; // Undo the scaling by 0.5
+
+				// Undo the lerp
+				float3 invLerp = (texturePos - worldMin) / (worldMax - worldMin);
+				float3 worldSpaceRemapping = worldMin + invLerp * (worldMax - worldMin);
+
+	
+                distanceToScene = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40, 0);
+
+				// Calculate normal using world-space coords instead of texture-space
+				normal = calcNormal3DTexture(positionInRay, worldMin, worldMax);
+
 			}
             else if(simType == 1) //Using normal SDFs
             {
@@ -306,12 +328,12 @@ float4 main(InputType input) : SV_TARGET
                     if (simType == 0)
                     {
                         finalLight = calcLighting(positionInRay / 20, normal, waterColour);
-                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+                        return (float4(finalLight.xyz, 0.7f) * waterColour);
                     }
                     if (simType == 1)
                     {
                         finalLight = calcLighting(positionInRay, normal, waterColour);
-                        return (float4(finalLight.xyz, 1.0f) * waterColour);
+                        return (float4(finalLight.xyz, 0.7f) * waterColour);
                     }
 				}
 
