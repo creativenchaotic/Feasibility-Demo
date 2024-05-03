@@ -90,5 +90,6 @@ void SetValuesFromPreviousStage(uint3 thread)
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
+    SetValuesFromPreviousStage(dispatchThreadID);
     UpdateSpatialHash(dispatchThreadID);
 }

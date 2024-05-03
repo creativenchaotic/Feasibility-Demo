@@ -115,8 +115,8 @@ void SPHSimSpatialHashing::unbind(ID3D11DeviceContext* dc)
     dc->CSSetShader(nullptr, nullptr, 0);
 }
 
-void SPHSimSpatialHashing::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimViscosityPassOutput)
+void SPHSimSpatialHashing::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimFirstPassOutput)
 {
-    deviceContext->CSSetShaderResources(0, 1, &sphSimViscosityPassOutput);
+    deviceContext->CSSetShaderResources(0, 1, &sphSimFirstPassOutput);
 }
 
