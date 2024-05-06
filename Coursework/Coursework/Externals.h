@@ -72,13 +72,32 @@ struct PBRMaterialValues {
 
 struct GUISettings {
 	bool hideInstructions = true;
-	bool displaySPHSimulationParticles = true;
+	bool displaySPHSimulationParticles = false;
 	bool isLightOn = true;
-	bool displaySDFs = false;
+	bool displaySDFs = true;
 };
 
 struct SDFValues
 {
 	float blendAmount = 0.1f;
 	int stride = 20;
+};
+
+struct SampleWaterValues
+{
+	XMFLOAT3 waveDirection1;
+	XMFLOAT3 waveDirection2;
+	XMFLOAT3 waveDirection3;
+	float amplitude1;
+	float amplitude2;
+	float amplitude3;
+	float frequency1;
+	float frequency2;
+	float frequency3;
+	float waveSpeed1;
+	float waveSpeed2;
+	float waveSpeed3;
+	float steepness;
+	bool isSampleWater = true;
+	int sampleWaterState = 1;
 };

@@ -9,7 +9,6 @@ struct uint3 {
 
 struct ParticleData {
     int particleNum = 0;
-
     XMFLOAT3 position = XMFLOAT3(0.0f, 0.0f, 0.0f);
     XMFLOAT3 predictedPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
     XMFLOAT3 velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);

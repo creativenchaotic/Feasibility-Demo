@@ -350,7 +350,14 @@ float4 main(InputType input) : SV_TARGET
                         return float4(finalColour, 1);
                     
                     case 2:
-                        normal = calcNormal3DTexture(positionInRay, worldMin, worldMax);
+                        if (simType == 0)
+                        {
+                            normal = calcNormal3DTexture(positionInRay, worldMin, worldMax);
+                        }
+	                    if(simType == 1)
+	                    {
+                            normal = calcNormal(positionInRay);
+                        }
                         finalColour = float3(normal);
                         return float4(finalColour, 1);
                     case 3:

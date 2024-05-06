@@ -8,6 +8,13 @@ SDFComputeShader::SDFComputeShader(ID3D11Device* device, HWND hwnd) : BaseShader
 SDFComputeShader::~SDFComputeShader()
 {
     release();
+
+    // Release the time buffer.
+    if (timeBuffer)
+    {
+        timeBuffer->Release();
+        timeBuffer = 0;
+    }
 }
 
 void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -53,6 +60,17 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
     vUAVDesc.Texture3D.FirstWSlice = 0;
     vUAVDesc.Texture3D.WSize = volumeDesc.Depth;
     if (FAILED(renderer->CreateUnorderedAccessView(texture3DComputeShaderOutput, &vUAVDesc, &texture3DComputeShaderOutputWritable)))throw std::exception();
+
+    D3D11_BUFFER_DESC timeBufferDesc;
+
+    // Setup time buffer
+    timeBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    timeBufferDesc.ByteWidth = sizeof(TimeBufferType);
+    timeBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    timeBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    timeBufferDesc.MiscFlags = 0;
+    timeBufferDesc.StructureByteStride = 0;
+    renderer->CreateBuffer(&timeBufferDesc, NULL, &timeBuffer);
 }
 
 void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset, RenderSimulationType currentSimType)
@@ -186,3 +204,39 @@ void SDFComputeShader::unbind(ID3D11DeviceContext* dc)
 }
 
 
+void SDFComputeShader::setWaveParameters(ID3D11DeviceContext* deviceContext, float deltaTime, float ampl, float freq, float speed, XMFLOAT3 direction, float ampl2, float freq2, float speed2, XMFLOAT3 direction2, float ampl3, float freq3, float speed3, XMFLOAT3 direction3, float steepnessFactor, int isSampleWave)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+    //Additional
+    // Send time data to vertex shader
+    TimeBufferType* timePtr;
+    deviceContext->Map(timeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    timePtr = (TimeBufferType*)mappedResource.pData;
+
+    timePtr->time = deltaTime;
+    timePtr->amplitude1 = ampl;
+    timePtr->frequency1 = freq;
+    timePtr->speed1 = speed;
+
+    timePtr->direction1 = XMFLOAT4(direction.x, direction.y, direction.z, 0.0f);
+
+    timePtr->amplitude2 = ampl2;
+    timePtr->frequency2 = freq2;
+    timePtr->speed2 = speed2;
+    timePtr->steepnessFactor = steepnessFactor;
+
+    timePtr->direction2 = XMFLOAT4(direction2.x, direction2.y, direction2.z, 0.0f);
+
+    timePtr->amplitude3 = ampl3;
+    timePtr->frequency3 = freq3;
+    timePtr->speed3 = speed3;
+
+    timePtr->isSampleWave = isSampleWave;
+
+    timePtr->direction3 = XMFLOAT4(direction3.x, direction3.y, direction3.z, 0.0f);
+
+    deviceContext->Unmap(timeBuffer, 0);
+    deviceContext->VSSetConstantBuffers(1, 1, &timeBuffer);
+    deviceContext->PSSetConstantBuffers(2, 1, &timeBuffer);
+}

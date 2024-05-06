@@ -126,8 +126,10 @@ private:
 	RenderSettings currentRenderSettingForShader;
 
 	const char* simRenderType[4];
-	const char* currentSimType = "3D Texture with Static Particles";
+	const char* currentSimType = "SDFs in Pixel Shader with SPH Particles";
 	RenderSimulationType currentSimTypeRendered;
+
+	SampleWaterValues sampleWater;
 
 
 	int currentNumParticles = simulationSettings.numParticles;

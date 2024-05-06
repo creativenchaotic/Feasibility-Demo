@@ -405,16 +405,7 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 	XMMATRIX viewMatrix = camera->getViewMatrix();
 	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
-	XMMATRIX translateSun = XMMatrixTranslation(directionalLightValues.lightPosition.x, directionalLightValues.lightPosition.y + 10.f, directionalLightValues.lightPosition.z);
-	XMMATRIX scaleSun = XMMatrixScaling(3.0f, 3.0f, 3.0f);
-	XMMATRIX shadowMapScaleMatrix = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
-
-	XMMATRIX translateSDFPlane = XMMatrixTranslation(0, 0, 0);
-	XMMATRIX scaleSDFPlane = XMMatrixScaling(120,120.0f,120);
-	XMMATRIX rotateSDFPlane = XMMatrixRotationRollPitchYaw(-1.57f, 0.0f, 0.f);
-	
-	
 	
 	//SPH PARTICLES---------------------------------------------------------------------------
 	if (guiSettings.displaySPHSimulationParticles) {
@@ -442,6 +433,7 @@ void App1::renderSceneShaders(float time)
 		sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
 		sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.Back, currentSimTypeRendered);
 		sdfComputeShader->setSimulationDataSRV(renderer->getDeviceContext(), sphFinalPass->getComputeShaderOutput());
+		sdfComputeShader->setWaveParameters(renderer->getDeviceContext(), time, sampleWater.amplitude1, sampleWater.frequency1, sampleWater.waveSpeed1, sampleWater.waveDirection1, sampleWater.amplitude2, sampleWater.frequency2, sampleWater.waveSpeed2, sampleWater.waveDirection2, sampleWater.amplitude3, sampleWater.frequency3, sampleWater.waveSpeed3, sampleWater.waveDirection3, sampleWater.steepness, sampleWater.sampleWaterState);
 		sdfComputeShader->compute(renderer->getDeviceContext(), 768 / 32, 768 / 32, 768);
 		sdfComputeShader->unbind(renderer->getDeviceContext());
 
@@ -513,11 +505,11 @@ void App1::gui()
 
 	if (!guiSettings.hideInstructions) {
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));//Adds spacing
-		ImGui::TextWrapped("This the artefact my project 'Evaluating Realistic Water Surface Creation in 3D Water Simulations for Video Games using Smoothed Particle Hydrodynamics (SPH)'");
+		ImGui::TextWrapped("This is the artefact for my project 'Evaluating Realistic Water Surface Creation in 3D Water Simulations for Video Games using Smoothed Particle Hydrodynamics (SPH)'");
 		ImGui::Spacing();
-		ImGui::TextWrapped("This artefact aims to construct the surface of the Smoothed Particle Hydrodynamics simulation particles by using Signed Distance Fields. The SDFs were computed in two different ways: using sphere tracing and SDF calculations in the pixel shader, and precomputing the SDFs and storing them in a 3D texture before rendering them using sphere tracing.\n\nTo figure out where in space to render the 3D Texture, a Ray-Box intersection was used. If the sphere tracing ray intersects with the box, the 3D Texture gets rendered.");
+		ImGui::TextWrapped("This artefact aims to construct the surface of the Smoothed Particle Hydrodynamics simulation by using Signed Distance Fields (SDFs). The SDFs were computed in two different ways: using sphere tracing and SDF calculations in the pixel shader, and precomputing the SDFs and storing them in a 3D texture before rendering them using sphere tracing.\n\nTo figure out where in space to render the 3D Texture, a Ray-Box intersection was used. If the sphere tracing ray intersects with the box, the 3D Texture gets rendered.");
 		ImGui::Spacing();
-		ImGui::TextWrapped("Camera Controls\nLeft Mouse Button: Rotate Camera\nWASD: Move Camera\nEQ: Raise/Lower Camera");
+		ImGui::TextWrapped("Camera Controls\nWASD: Move Camera\nEQ: Raise/Lower Camera");
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));
@@ -536,10 +528,41 @@ void App1::gui()
 
 	//------------------------------------------------------------------------
 	//RENDER SETTINGS
+
+
+	ImGui::Spacing();
+	if (!guiSettings.hideInstructions) {
+		ImGui::TextWrapped("Press 'Display SDFs' to select wether the SDFs or the SPH simulation is displayed.\n-Display SDFs: displays the surface generation\nDisplay SPH Simulation: only displays the SPH simulation particles without surface generation");
+	}
+
+
+	ImGui::Checkbox("Display SDFs", &guiSettings.displaySDFs);
+	if (guiSettings.displaySDFs == true)
+	{
+		guiSettings.displaySPHSimulationParticles = false;
+	}
+	else
+	{
+		guiSettings.displaySPHSimulationParticles = true;
+	}
+
+	ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
+	if (guiSettings.displaySDFs == true)
+	{
+		guiSettings.displaySPHSimulationParticles = false;
+	}
+	else
+	{
+		guiSettings.displaySPHSimulationParticles = true;
+	}
+
+	ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+	//Selecting a render method in the ImGui window
 	if (!guiSettings.hideInstructions) {
 		ImGui::TextWrapped("Render Settings used to display different aspects of the scene in different ways:\n-Render using PBR lighting calculations\n-Render the world-space position of the objects\n-Render the object normals\n-Render the Ray-Box Intersection ");
 	}
-	//Selecting a render method in the ImGui window
+
 	if (ImGui::BeginCombo("Rendering Settings", currentRenderSetting)) {
 		for (int i = 0; i < IM_ARRAYSIZE(renderSettings); i++) {
 
@@ -571,22 +594,34 @@ void App1::gui()
 		currentRenderSettingForShader = RenderSettings::Intersection;
 	}
 
-	//Selecting a render method in the ImGui window
-	if (ImGui::BeginCombo("Type of Simulation", currentSimType)) {
-		for (int i = 0; i < IM_ARRAYSIZE(simRenderType); i++) {
+	ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
-			bool isSelected = (currentSimType == simRenderType[i]);
+	if (guiSettings.displaySDFs) {
 
-			if (ImGui::Selectable(simRenderType[i], isSelected)) {
-				currentSimType = simRenderType[i];
-			}
-			if (isSelected) {
-				ImGui::SetItemDefaultFocus();
-			}
+		if (!guiSettings.hideInstructions) {
+			ImGui::TextWrapped("Different methods of rendering were set up to test the performance of rendering SDFs in different ways.\n-3D Texture with static particles renders the SPH simulation particles using the starting position of the particles\n-3D Texture with SPH particles renders the SDFs using the positions calculated by the SPH simulation\n-The SDF methods do the same as above but without using a 3D Texture");
 		}
-		ImGui::EndCombo();
+
+		//Selecting a render method in the ImGui window
+		if (ImGui::BeginCombo("Type of Simulation", currentSimType)) {
+			for (int i = 0; i < IM_ARRAYSIZE(simRenderType); i++) {
+
+				bool isSelected = (currentSimType == simRenderType[i]);
+
+				if (ImGui::Selectable(simRenderType[i], isSelected)) {
+					currentSimType = simRenderType[i];
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+
+		}
 
 	}
+
+	
 
 	//Setting the current render method
 	if (currentSimType == "3D Texture with Static Particles") {
@@ -603,9 +638,14 @@ void App1::gui()
 		currentSimTypeRendered = RenderSimulationType::PlainSDFsSPHSimulation;
 	}
 
+	ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
 	//------------------------------------------------------------------------
 	//SKY
 	if (ImGui::TreeNode("Sky")) {
+		if (!guiSettings.hideInstructions) {
+			ImGui::TextWrapped("Change Sky colour");
+		}
 		//SkyColour
 		ImGui::ColorEdit4("Sky Colour", (float*)&skyColour);
 
@@ -615,39 +655,55 @@ void App1::gui()
 	//SDF---------------------------------------------------------------------
 	if(ImGui::TreeNode("Signed Distance Fields"))
 	{
-		ImGui::Checkbox("Display SDFs", &guiSettings.displaySDFs);
-		if(guiSettings.displaySDFs == true)
-		{
-			guiSettings.displaySPHSimulationParticles = false;
+		if (!guiSettings.hideInstructions) {
+			ImGui::TextWrapped("Amount that the SDF shapes should be blended by using smooth union");
+		}
+		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0.01, 20);
+
+		if (!guiSettings.hideInstructions) {
+			ImGui::TextWrapped("Since the SPH simulation does not work correctly (though its still a good test to see how well the surface generation would run while using the simulation since all the equations needed for SPH are being calculated), a sample wave pattern was included to see what the surface generation would look like when combining it with particles which are moving.\nWhen this is toggled the SPH simulation stops running in the background and Gerstner Waves get used instead.");
+		}
+		ImGui::Checkbox("Use Sample Waves Instead of SPH", &sampleWater.isSampleWater);
+
+		if (sampleWater.isSampleWater) {
+
+			sampleWater.sampleWaterState = 1;
+
+			if (ImGui::TreeNode("Water Manipulation")) {
+				//To manipulate terrain with waves
+				ImGui::SliderFloat("Wave steepness", &sampleWater.steepness, 0.00f, 2.f);
+				ImGui::Text("WAVE 1");
+				ImGui::SliderFloat("Amplitude 1", &sampleWater.amplitude1, 0, 10);
+				ImGui::SliderFloat("Frequency 1", &sampleWater.frequency1, 0, 3.14);
+				ImGui::SliderFloat("Speed 1", &sampleWater.waveSpeed1, 0, 30);
+				ImGui::SliderFloat3("Wave 1 Direction (X,Y,Z)", (float*)&sampleWater.waveDirection1, -10.f, 10.f);
+				ImGui::Spacing();
+				ImGui::Text("WAVE 2");
+				ImGui::SliderFloat("Amplitude 2", &sampleWater.amplitude2, 0, 10);
+				ImGui::SliderFloat("Frequency 2", &sampleWater.frequency2, 0, 3.14);
+				ImGui::SliderFloat("Speed 2", &sampleWater.waveSpeed2, 0, 30);
+				ImGui::SliderFloat3("Wave 2 Direction (X,Y,Z)", (float*)&sampleWater.waveDirection2, -10.f, 10.f);
+				ImGui::Spacing();
+				ImGui::Text("WAVE 3");
+				ImGui::SliderFloat("Amplitude 3", &sampleWater.amplitude3, 0, 10);
+				ImGui::SliderFloat("Frequency 3", &sampleWater.frequency3, 0, 3.14);
+				ImGui::SliderFloat("Speed 3", &sampleWater.waveSpeed3, 0, 30);
+				ImGui::SliderFloat3("Wave 3 Direction (X,Y,Z)", (float*)&sampleWater.waveDirection3, -10.f, 10.f);
+
+				ImGui::TreePop();
+			}
 		}
 		else
 		{
-			guiSettings.displaySPHSimulationParticles = true;
+			sampleWater.sampleWaterState = 0;
 		}
-		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0.01, 20);
-		ImGui::SliderInt("Texture3D Stride", &sdfVal.stride, 1, 50);
 
 		ImGui::TreePop();
 	}
 	//------------------------------------------------------------------------
 	//SPH
 	if (ImGui::TreeNode("Smoothed Particle Hydrodynamics")) {
-		if (!guiSettings.hideInstructions) {
-			ImGui::TextWrapped("In the final project the SPH simulation should not be visible since the main focus of the project is the generation of the surface. For this reason there is a toggle to turn the SPH simulation rendering on or off. I added the possibility of still rendering it so that the user can ensure that the simulation is working correctly.");
-			ImGui::Dummy(ImVec2(0.0f, 10.0f));
-		}
 
-		//Changing the number of particles in the simulation
-		ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
-		if (guiSettings.displaySDFs == true)
-		{
-			guiSettings.displaySPHSimulationParticles = false;
-		}
-		else
-		{
-			guiSettings.displaySPHSimulationParticles = true;
-		}
-		ImGui::Dummy(ImVec2(0.0f, 10.0f));
 		if (!guiSettings.hideInstructions) {
 			ImGui::TextWrapped("For changes to values in the simulation to be applied, press the Rebuild Simulation button");
 		}
@@ -663,10 +719,9 @@ void App1::gui()
 
 
 		//Spacing between particles and resolution
-		ImGui::SliderInt("Particle Size", &simulationSettings.particleScale, 1, 100);
-		ImGui::SliderFloat3("Particles Spawnpoint Centre", (float*) & simulationSettings.particlesSpawnCenter, -10,10);
-		ImGui::SliderFloat3("Spawnpoint Size",(float*)& simulationSettings.sizeOfSpawner, 2, 100);
-
+		//ImGui::SliderInt("Particle Size", &simulationSettings.particleScale, 1, 100);
+		//ImGui::SliderFloat3("Particles Spawnpoint Centre", (float*) & simulationSettings.particlesSpawnCenter, -10,10);
+		ImGui::SliderFloat3("Spawnpoint Size",(float*)& simulationSettings.sizeOfSpawner, 2, 20);
 		ImGui::SliderFloat("Gravity", &simulationSettings.gravity, -20, 20);
 		ImGui::SliderFloat("Collision Damping", &simulationSettings.collisionDamping, 0, 3);
 		ImGui::SliderFloat("Smoothing Radius", &simulationSettings.smoothingRadius, 0, 1);
@@ -706,7 +761,7 @@ void App1::gui()
 		//Directional Light
 		ImGui::ColorEdit4("Directional Light Diffuse Colour", (float*)&directionalLightValues.lightColour);
 		/*ImGui::ColorEdit4("Directional Light Ambient Colour", (float*)&directionalLightAmbientColour);*/
-		ImGui::SliderFloat3("Directional Light Position", (float*)&directionalLightValues.lightPosition, -50,50);
+		//ImGui::SliderFloat3("Directional Light Position", (float*)&directionalLightValues.lightPosition, -50,50);
 		ImGui::SliderFloat3("Directional Light Direction", (float*)&directionalLightValues.lightDirection, -1.f, 1.f);
 		ImGui::Checkbox("Turn on directional light", &guiSettings.isLightOn);
 
