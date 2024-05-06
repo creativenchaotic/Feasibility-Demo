@@ -17,6 +17,8 @@ public:
 	void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
 	void setParticleIndex(ID3D11DeviceContext* deviceContext, int index);
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
+	void unbind(ID3D11DeviceContext* dc);
+
 private:
     void initShader(const wchar_t* cs, const wchar_t* ps);
 

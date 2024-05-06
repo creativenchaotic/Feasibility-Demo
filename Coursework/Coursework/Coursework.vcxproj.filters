@@ -24,9 +24,6 @@
     <ClCompile Include="PlaneMeshTessellated.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DepthShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SPH_Particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,9 +68,6 @@
     <ClInclude Include="PlaneMeshTessellated.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DepthShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SPH_Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,15 +109,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="DepthShader_vs.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="DepthShader_ps.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="ShadowShader_ps.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
     <FxCompile Include="HeightmapDepthShader_vs.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>

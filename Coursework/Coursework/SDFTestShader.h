@@ -47,6 +47,7 @@ public:
 	void setSDFParameters(ID3D11DeviceContext*, float blendVal, int numParticles, RenderSettings currentRenderSetting, RenderSimulationType currentSimType);
     void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light);
     void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
+    void unbind(ID3D11DeviceContext* dc);
 
 
 private:

@@ -200,3 +200,20 @@ void SPHShader::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11S
 {
 	deviceContext->VSSetShaderResources(0, 1, &computeShaderSRV);
 }
+
+void SPHShader::unbind(ID3D11DeviceContext* dc)
+{
+	ID3D11Buffer* nullBuffer[] = { NULL };
+	dc->VSSetConstantBuffers(0, 1, nullBuffer);
+	dc->VSSetConstantBuffers(1, 1, nullBuffer);
+	dc->PSSetConstantBuffers(0, 1, nullBuffer);
+	dc->PSSetConstantBuffers(1, 1, nullBuffer);
+	dc->PSSetConstantBuffers(2, 1, nullBuffer);
+
+	ID3D11ShaderResourceView* nullSRV[] = { NULL };
+	dc->VSSetShaderResources(0, 1, nullSRV);
+
+	// Disable Shaders
+	dc->VSSetShader(nullptr, nullptr, 0);
+	dc->PSSetShader(nullptr, nullptr, 0);
+}

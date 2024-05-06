@@ -2,16 +2,13 @@
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
 struct Particle
 {
-    int size;
-    float3 startPosition;
-    float3 currentPosition;
-    float density;
+    int particleNum;
+    float3 position;
     float3 predictedPosition;
-    float nearDensity;
     float3 velocity;
-    int spatialOffsets;
-    float3 spatialIndices;
-    float padding;
+    float2 density;
+    uint3 spatialIndices;
+    uint spatialOffsets;
 };
 
 StructuredBuffer<Particle> particleData : register(t0);
@@ -49,7 +46,7 @@ OutputType main(InputType input)
 {
     OutputType output;
 	
-    input.position += float4(particleData[particleIndex].currentPosition, 0.0f);
+    input.position += float4(particleData[particleIndex].position, 0.0f);
 	
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);

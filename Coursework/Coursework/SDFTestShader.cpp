@@ -183,8 +183,8 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 
 void SDFTestShader::setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV, ID3D11ShaderResourceView* texture3d)
 {
-	deviceContext->PSSetShaderResources(1, 1, &computeShaderSRV);
 	deviceContext->PSSetShaderResources(0, 1, &texture3d);
+	deviceContext->PSSetShaderResources(1, 1, &computeShaderSRV);
 }
 
 void SDFTestShader::setSDFParameters(ID3D11DeviceContext* deviceContext, float blendVal, int numParticles, RenderSettings currentRenderSetting, RenderSimulationType currentSimType)
@@ -267,6 +267,25 @@ void SDFTestShader::setMaterialValues(ID3D11DeviceContext* deviceContext, float 
 	materialPtr->padding = 0.f;
 	deviceContext->Unmap(materialBuffer, 0);
 	deviceContext->PSSetConstantBuffers(2, 1, &materialBuffer);
+}
+
+void SDFTestShader::unbind(ID3D11DeviceContext* dc)
+{
+	ID3D11Buffer* nullBuffer[] = { NULL };
+	dc->VSSetConstantBuffers(0, 1, nullBuffer);
+	dc->VSSetConstantBuffers(1, 1, nullBuffer);
+	dc->PSSetConstantBuffers(0, 1, nullBuffer);
+	dc->PSSetConstantBuffers(1, 1, nullBuffer);
+	dc->PSSetConstantBuffers(2, 1, nullBuffer);
+	dc->PSSetConstantBuffers(3, 1, nullBuffer);
+
+	ID3D11ShaderResourceView* nullSRV[] = { NULL };
+	dc->PSSetShaderResources(0, 1, nullSRV);
+	dc->PSSetShaderResources(1, 1, nullSRV);
+
+	// Disable Shaders
+	dc->VSSetShader(nullptr, nullptr, 0);
+	dc->PSSetShader(nullptr, nullptr, 0);
 }
 
 

@@ -429,7 +429,7 @@ void App1::renderSceneShaders(float time)
 			sphParticleShader->setSimulationDataSRV(renderer->getDeviceContext(), sphFinalPass->getComputeShaderOutput());
 			sphParticleShader->setParticleIndex(renderer->getDeviceContext(), i);
 			sphParticleShader->render(renderer->getDeviceContext(), simulationParticles[i]->getIndexCount());
-
+			sphParticleShader->unbind(renderer->getDeviceContext());
 		}
 
 		renderer->setAlphaBlending(false);
@@ -471,9 +471,7 @@ void App1::renderSceneShaders(float time)
 		sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
 		sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
 		sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
-
-		ID3D11ShaderResourceView* nullSRV[] = { NULL,NULL };
-		renderer->getDeviceContext()->PSSetShaderResources(0, 2, nullSRV);
+		sdfShader->unbind(renderer->getDeviceContext());
 
 		renderer->setAlphaBlending(false);
 	}
