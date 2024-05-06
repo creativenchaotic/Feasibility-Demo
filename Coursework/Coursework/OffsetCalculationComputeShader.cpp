@@ -78,6 +78,13 @@ void OffsetCalculationComputeShader::unbind(ID3D11DeviceContext* dc)
     ID3D11UnorderedAccessView* nullUAV[] = { NULL };
     dc->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
 
+    ID3D11ShaderResourceView* nullSRV[] = { NULL };
+    dc->CSSetShaderResources(0, 1, nullSRV);
+
+    ID3D11Buffer* nullBuffer[] = { NULL };
+    dc->CSSetConstantBuffers(0, 1, nullBuffer);
+
+
     // Disable Compute Shader
     dc->CSSetShader(nullptr, nullptr, 0);
 }

@@ -15,7 +15,6 @@ public:
 
 	void setShaderParameters(ID3D11DeviceContext* dc);
 	void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles);
-	void createDebugUAV(ID3D11Device* pd3dDevice);
 	void setBitonicMergesortSettings(ID3D11DeviceContext* dc, int numParticlesVal, int groupWidthVal, int groupHeightVal, int stepIndexVal);
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
 	void unbind(ID3D11DeviceContext* dc);

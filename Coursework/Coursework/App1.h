@@ -134,7 +134,7 @@ private:
 
 
 	GUISettings guiSettings;
-	float isFirstIteration = 1.0f;
+	int isFirstIteration = 1.0f;
 
 	int windowWidth;
 	int windowHeight;

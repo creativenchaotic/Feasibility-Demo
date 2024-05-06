@@ -10,13 +10,13 @@ enum class RenderSimulationType
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 10;
+	int numParticlesPerAxis = 2;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	float gravity = -10.f;
 	float deltaTime;
 
 	float collisionDamping = 0.95f;
-	float smoothingRadius = 1.2f;
+	float smoothingRadius = 0.2f;
 	float targetDensity = 630.f;
 	float pressureMultiplier = 288.f;
 

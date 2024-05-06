@@ -136,6 +136,10 @@ void SDFComputeShader::unbind(ID3D11DeviceContext* dc)
 {
 	ID3D11ShaderResourceView* nullSRV[] = { NULL };
 	dc->CSSetShaderResources(0, 1, nullSRV);
+    dc->CSSetShaderResources(1, 1, nullSRV);
+
+    ID3D11Buffer* nullBuffer[] = { NULL };
+    dc->CSSetConstantBuffers(0, 1, nullBuffer);
 
 	// Unbind output from compute shader
 	ID3D11UnorderedAccessView* nullUAV[] = { NULL };
