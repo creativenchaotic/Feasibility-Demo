@@ -20,6 +20,8 @@ public:
     //Passes simulation values into compute shader buffer
     void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset, RenderSimulationType currentSimType);
 
+    void release();
+
 private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
 

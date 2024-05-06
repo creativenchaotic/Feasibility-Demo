@@ -8,7 +8,7 @@ SPHSimPressureForcePass::SPHSimPressureForcePass(ID3D11Device* device, HWND hwnd
 
 SPHSimPressureForcePass::~SPHSimPressureForcePass()
 {
-
+    release();
 }
 
 void SPHSimPressureForcePass::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -118,5 +118,27 @@ void SPHSimPressureForcePass::unbind(ID3D11DeviceContext* dc)
 void SPHSimPressureForcePass::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimDensityOutput)
 {
     deviceContext->CSSetShaderResources(0, 1, &sphSimDensityOutput);
+}
+
+void SPHSimPressureForcePass::release()
+{
+    if(particlesComputeShaderOutput)
+    {
+        particlesComputeShaderOutput->Release();
+        particlesComputeShaderOutput = 0;
+    }
+
+    if (particlesOutputReadable)
+    {
+        particlesOutputReadable->Release();
+        particlesOutputReadable = 0;
+    }
+
+    if (particlesOutputWritable)
+    {
+        particlesOutputWritable->Release();
+        particlesOutputWritable = 0;
+    }
+
 }
 

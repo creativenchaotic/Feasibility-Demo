@@ -14,7 +14,7 @@ public:
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return particlesOutputReadable; };
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimViscosityPassOutput);
-
+	void release();
 
 private:
 

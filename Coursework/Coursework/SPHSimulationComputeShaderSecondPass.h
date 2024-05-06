@@ -16,7 +16,7 @@ public:
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return particlesOutputReadable; };
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimulationFirstPassOutput, ID3D11ShaderResourceView* computeShaderSRVBitonicMergesortParticleIndices, ID3D11ShaderResourceView* computeShaderSRVOffsetsCalculationOutput);
-
+	void release();
 
 private:
 

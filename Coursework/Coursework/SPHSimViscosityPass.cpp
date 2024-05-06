@@ -9,7 +9,7 @@ SPHSimViscosityPass::SPHSimViscosityPass(ID3D11Device* device, HWND hwnd) : Base
 
 SPHSimViscosityPass::~SPHSimViscosityPass()
 {
-
+    release();
 }
 
 void SPHSimViscosityPass::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -118,5 +118,28 @@ void SPHSimViscosityPass::unbind(ID3D11DeviceContext* dc)
 void SPHSimViscosityPass::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimPressureForceOutput)
 {
     deviceContext->CSSetShaderResources(0, 1, &sphSimPressureForceOutput);
+}
+
+void SPHSimViscosityPass::release()
+{
+
+    if(particlesComputeShaderOutput)
+    {
+        particlesComputeShaderOutput->Release();
+        particlesComputeShaderOutput = 0;
+    }
+
+    if (particlesOutputReadable)
+    {
+        particlesOutputReadable->Release();
+        particlesOutputReadable = 0;
+    }
+
+    if (particlesOutputWritable)
+    {
+        particlesOutputWritable->Release();
+        particlesOutputWritable = 0;
+    }
+
 }
 

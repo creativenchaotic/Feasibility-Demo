@@ -9,7 +9,7 @@ SPHSimulationUpdatePositionsFinalPass::SPHSimulationUpdatePositionsFinalPass(ID3
 
 SPHSimulationUpdatePositionsFinalPass::~SPHSimulationUpdatePositionsFinalPass()
 {
-
+    release();
 }
 
 void SPHSimulationUpdatePositionsFinalPass::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -118,5 +118,28 @@ void SPHSimulationUpdatePositionsFinalPass::unbind(ID3D11DeviceContext* dc)
 void SPHSimulationUpdatePositionsFinalPass::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimViscosityPassOutput)
 {
     deviceContext->CSSetShaderResources(0, 1, &sphSimViscosityPassOutput);
+}
+
+void SPHSimulationUpdatePositionsFinalPass::release()
+{
+
+    if(particlesComputeShaderOutput)
+    {
+        particlesComputeShaderOutput->Release();
+        particlesComputeShaderOutput = 0;
+    }
+
+    if (particlesOutputReadable)
+    {
+        particlesOutputReadable->Release();
+        particlesOutputReadable = 0;
+    }
+
+    if (particlesOutputWritable)
+    {
+        particlesOutputWritable->Release();
+        particlesOutputWritable = 0;
+    }
+
 }
 

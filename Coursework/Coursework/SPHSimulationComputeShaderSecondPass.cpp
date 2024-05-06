@@ -8,7 +8,7 @@ SPHSimulationComputeShaderSecondPass::SPHSimulationComputeShaderSecondPass(ID3D1
 
 SPHSimulationComputeShaderSecondPass::~SPHSimulationComputeShaderSecondPass()
 {
-
+    release();
 }
 
 void SPHSimulationComputeShaderSecondPass::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -121,4 +121,26 @@ void SPHSimulationComputeShaderSecondPass::setSimulationDataSRV(ID3D11DeviceCont
     deviceContext->CSSetShaderResources(0, 1, &sphSimulationFirstPassOutput);
     deviceContext->CSSetShaderResources(1, 1, &computeShaderSRVBitonicMergesortParticleIndices);
     deviceContext->CSSetShaderResources(2, 1, &computeShaderSRVOffsetsCalculationOutput);
+}
+
+void SPHSimulationComputeShaderSecondPass::release()
+{
+    if(particlesComputeShaderOutput)
+    {
+        particlesComputeShaderOutput->Release();
+        particlesComputeShaderOutput = 0;
+    }
+
+    if (particlesOutputReadable)
+    {
+        particlesOutputReadable->Release();
+        particlesOutputReadable = 0;
+    }
+
+    if (particlesOutputWritable)
+    {
+        particlesOutputWritable->Release();
+        particlesOutputWritable = 0;
+    }
+
 }

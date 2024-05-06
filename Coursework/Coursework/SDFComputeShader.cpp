@@ -7,6 +7,7 @@ SDFComputeShader::SDFComputeShader(ID3D11Device* device, HWND hwnd) : BaseShader
 
 SDFComputeShader::~SDFComputeShader()
 {
+    release();
 }
 
 void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -86,6 +87,40 @@ void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numPartic
 
     dc->Unmap(sdfConstantsBuffer, 0);
     dc->CSSetConstantBuffers(0, 1, &sdfConstantsBuffer);
+}
+
+void SDFComputeShader::release()
+{
+    if(particlesComputeShaderOutput)
+    {
+        particlesComputeShaderOutput->Release();
+        particlesComputeShaderOutput = 0;
+    }
+
+    if (sdfPixelCalcOutputReadable)
+    {
+        sdfPixelCalcOutputReadable->Release();
+        sdfPixelCalcOutputReadable = 0;
+    }
+
+    if (sdfPixelCalcOutputWritable)
+    {
+        sdfPixelCalcOutputWritable->Release();
+        sdfPixelCalcOutputWritable = 0;
+    }
+
+    if (particlesInitialData)
+    {
+        particlesInitialData->Release();
+        particlesInitialData = 0;
+    }
+
+    if (particlesInitialDataReadable)
+    {
+        particlesInitialDataReadable->Release();
+        particlesInitialDataReadable = 0;
+    }
+
 }
 
 void SDFComputeShader::setShaderParameters(ID3D11DeviceContext* dc)

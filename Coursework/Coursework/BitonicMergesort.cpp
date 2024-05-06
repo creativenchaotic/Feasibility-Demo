@@ -7,6 +7,7 @@ BitonicMergesort::BitonicMergesort(ID3D11Device* device, HWND hwnd) : BaseShader
 
 BitonicMergesort::~BitonicMergesort()
 {
+    release();
 }
 
 void BitonicMergesort::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -98,6 +99,28 @@ void BitonicMergesort::unbind(ID3D11DeviceContext* dc)
 
 	// Disable Compute Shader
 	dc->CSSetShader(nullptr, nullptr, 0);
+}
+
+void BitonicMergesort::release()
+{
+    if(bitonicMergesortOutput)
+    {
+        bitonicMergesortOutput->Release();
+        bitonicMergesortOutput = 0;
+    }
+
+
+    if (bitonicMergesortOutputReadable)
+    {
+        bitonicMergesortOutputReadable->Release();
+        bitonicMergesortOutputReadable = 0;
+    }
+
+    if (bitonicMergesortOutputWritable)
+    {
+        bitonicMergesortOutputWritable->Release();
+        bitonicMergesortOutputWritable = 0;
+    }
 }
 
 

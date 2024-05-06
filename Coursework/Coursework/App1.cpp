@@ -184,15 +184,18 @@ void App1::rebuildSPHParticles()//Used for when the number of particles is chang
 	simulationParticlesData.clear();
 	particlePositionSampleData.clear();
 
-	sphSimulationComputeShaderFirstPass->unbind(renderer->getDeviceContext());
-	sphSimulationSpatialHashing->unbind(renderer->getDeviceContext());
-	bitonicMergesort->unbind(renderer->getDeviceContext());
-	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
-	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());
-	sphSimulationPressurePass->unbind(renderer->getDeviceContext());
-	sphSimViscosityPass->unbind(renderer->getDeviceContext());
-	sphFinalPass->unbind(renderer->getDeviceContext());
-	sdfComputeShader->unbind(renderer->getDeviceContext());
+	isFirstIteration = 1.0f;
+
+	sphSimulationComputeShaderFirstPass->release();
+	sphSimulationSpatialHashing->release();
+	bitonicMergesort->release();
+	spatialOffsetCalculationComputeShader->release();
+	sphSimulationComputeShaderSecondPass->release();
+	sphSimulationPressurePass->release();
+	sphSimViscosityPass->release();
+	sphFinalPass->release();
+	sdfComputeShader->release();
+
 
 	initialiseSPHParticles();
 	
@@ -247,7 +250,6 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 	sphSimulationPressurePass->createOutputUAVs(renderer->getDevice(), currentNumParticles);
 	sphSimViscosityPass->createOutputUAVs(renderer->getDevice(), currentNumParticles);
 	sphFinalPass->createOutputUAVs(renderer->getDevice(), currentNumParticles);
-
 	sdfComputeShader->createOutputUAVs(renderer->getDevice(), &particlePositionSampleData);
 
 }
@@ -655,7 +657,7 @@ void App1::gui()
 			rebuildSPHParticles();
 		}
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));
-		ImGui::SliderInt("Number of Particles per Axis", &simulationSettings.numParticlesPerAxis, 1, 100);
+		ImGui::SliderInt("Number of Particles per Axis", &simulationSettings.numParticlesPerAxis, 2, 20);
 		simulationSettings.numParticles = simulationSettings.numParticlesPerAxis * simulationSettings.numParticlesPerAxis * simulationSettings.numParticlesPerAxis;
 		ImGui::Text("Total Number of Particles: %i", simulationSettings.numParticles);
 

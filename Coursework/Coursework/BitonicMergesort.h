@@ -19,6 +19,7 @@ public:
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return bitonicMergesortOutputReadable; };
+	void release();
 
 private:
 	void initShader(const wchar_t* cfile, const wchar_t* blank);

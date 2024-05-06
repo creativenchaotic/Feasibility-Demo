@@ -8,7 +8,7 @@ ComputeShader::ComputeShader(ID3D11Device* device, HWND hwnd) : BaseShader(devic
 
 ComputeShader::~ComputeShader()
 {
-
+    release();
 }
 
 void ComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -118,5 +118,25 @@ void ComputeShader::unbind(ID3D11DeviceContext* dc)
 
 	// Disable Compute Shader
 	dc->CSSetShader(nullptr, nullptr, 0);
+}
+
+void ComputeShader::release()
+{
+   if(particlesComputeShaderOutput)
+   {
+       particlesComputeShaderOutput->Release();
+       particlesComputeShaderOutput = 0;
+   }
+
+    if(particlesOutputReadable){
+        particlesOutputReadable->Release();
+        particlesOutputReadable = 0;
+    }
+
+    if (particlesOutputWritable) {
+        particlesOutputWritable->Release();
+        particlesOutputWritable = 0;
+    }
+
 }
 

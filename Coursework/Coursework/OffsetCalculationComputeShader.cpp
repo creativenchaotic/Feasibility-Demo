@@ -7,6 +7,7 @@ OffsetCalculationComputeShader::OffsetCalculationComputeShader(ID3D11Device* dev
 
 OffsetCalculationComputeShader::~OffsetCalculationComputeShader()
 {
+    release();
 }
 
 void OffsetCalculationComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -92,5 +93,27 @@ void OffsetCalculationComputeShader::unbind(ID3D11DeviceContext* dc)
 void OffsetCalculationComputeShader::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV)
 {
     deviceContext->CSSetShaderResources(0, 1, &computeShaderSRV);
+}
+
+void OffsetCalculationComputeShader::release()
+{
+    if(offsetCalculationsOutput)
+    {
+        offsetCalculationsOutput->Release();
+        offsetCalculationsOutput = 0;
+    }
+
+    if (offsetCalculationsOutputReadable)
+    {
+        offsetCalculationsOutputReadable->Release();
+        offsetCalculationsOutputReadable = 0;
+    }
+
+    if (offsetCalculationsOutputWritable)
+    {
+        offsetCalculationsOutputWritable->Release();
+        offsetCalculationsOutputWritable = 0;
+    }
+
 }
 

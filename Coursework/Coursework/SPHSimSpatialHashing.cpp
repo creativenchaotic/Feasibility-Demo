@@ -9,7 +9,7 @@ SPHSimSpatialHashing::SPHSimSpatialHashing(ID3D11Device* device, HWND hwnd) : Ba
 
 SPHSimSpatialHashing::~SPHSimSpatialHashing()
 {
-
+    release();
 }
 
 void SPHSimSpatialHashing::initShader(const wchar_t* cfile, const wchar_t* blank)
@@ -118,5 +118,24 @@ void SPHSimSpatialHashing::unbind(ID3D11DeviceContext* dc)
 void SPHSimSpatialHashing::setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimFirstPassOutput)
 {
     deviceContext->CSSetShaderResources(0, 1, &sphSimFirstPassOutput);
+}
+
+void SPHSimSpatialHashing::release()
+{
+    if(particlesComputeShaderOutput)
+    {
+        particlesComputeShaderOutput->Release();
+        particlesComputeShaderOutput = 0;
+    }
+    if (particlesOutputReadable)
+    {
+        particlesOutputReadable->Release();
+        particlesOutputReadable = 0;
+    }
+    if (particlesOutputWritable)
+    {
+        particlesOutputWritable->Release();
+        particlesOutputWritable = 0;
+    }
 }
 
