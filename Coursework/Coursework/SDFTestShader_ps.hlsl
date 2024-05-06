@@ -109,19 +109,21 @@ float3 calcNormal(float3 pos)
 
 float3 calcNormal3DTexture(float3 pos, float3 worldMin, float3 worldMax)
 {
-    
+
     float3 step = float3(0.001f, 0.0f, 0.0f);
     float3 normal;
 
-    // Remap from world space to texture space
+   //Mapping from 3D texture space to world space positions
     float3 texturePos = pos * 2.0f; // Undo the scaling by 0.5
+
+				// Undo the lerp
     float3 invLerp = (texturePos - worldMin) / (worldMax - worldMin);
-    float3 worldSpaceRemapping = worldMin + invLerp * (worldMax - worldMin);
+    float3 worldSpaceRemapping = (worldMin + invLerp * (worldMax - worldMin)) / 40;
     
     // Calculate the normal using world-space coordinates
-    normal.x = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 + step.xyy, 0) / 20 - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 - step.xyy, 0) / 20;
-    normal.y = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 + step.yxy, 0) / 20 - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 - step.yxy, 0) / 20;
-    normal.z = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 + step.yyx, 0) / 20 - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40 - step.yyx, 0) / 20;
+    normal.x = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping + step.xyy, 0) - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping - step.xyy, 0);
+    normal.y = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping + step.yxy, 0) - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping - step.yxy, 0);
+    normal.z = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping + step.yyx, 0) - texture3d.SampleLevel(Sampler3D, worldSpaceRemapping - step.yyx, 0);
     
     return normalize(normal);
 }
@@ -307,31 +309,34 @@ float4 main(InputType input) : SV_TARGET
 	
                 distanceToScene = texture3d.SampleLevel(Sampler3D, worldSpaceRemapping / 40, 0);
 
-				// Calculate normal using world-space coords instead of texture-space
-				normal = calcNormal3DTexture(positionInRay, worldMin, worldMax);
+				
 
 			}
             else if(simType == 1) //Using normal SDFs
             {
                 positionInRay = rayOrigin + rayDirection * (totalDistanceTravelled + intersectionPoints.x); //Current position along the ray based on the distance from the rays origin
                 distanceToScene = sdfCalculations(positionInRay); //Current distance to the scene. Safe distance the point can travel to in any direction without overstepping an object
-				normal = calcNormal(positionInRay);
+				
 			}
 
-			normal = calcNormal(positionInRay);
+			//normal = calcNormal(positionInRay);
             totalDistanceTravelled += distanceToScene;
 
             if (distanceToScene < 0.01f)//If the distance to an SDF shape becomes smaller than 0.001 stop iterating
             {
+
                 if(renderSetting == 0)
                 {
                     if (simType == 0)
                     {
+                        // Calculate normal using world-space coords instead of texture-space
+                        normal = calcNormal3DTexture(positionInRay, worldMin, worldMax);
                         finalLight = calcLighting(positionInRay / 20, normal, waterColour);
                         return (float4(finalLight.xyz, 0.7f) * waterColour);
                     }
                     if (simType == 1)
                     {
+                        normal = calcNormal(positionInRay);
                         finalLight = calcLighting(positionInRay, normal, waterColour);
                         return (float4(finalLight.xyz, 0.7f) * waterColour);
                     }
@@ -345,6 +350,7 @@ float4 main(InputType input) : SV_TARGET
                         return float4(finalColour, 1);
                     
                     case 2:
+                        normal = calcNormal3DTexture(positionInRay, worldMin, worldMax);
                         finalColour = float3(normal);
                         return float4(finalColour, 1);
                     case 3:
