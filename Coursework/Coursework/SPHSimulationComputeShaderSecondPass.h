@@ -12,7 +12,7 @@ public:
 
 	void setShaderParameters(ID3D11DeviceContext* dc);
 	void createOutputUAVs(ID3D11Device* pd3dDevice, int numParticles);
-	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping, float smoothingRadiusVal, float targetDensityVal, float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, float bb_Top, float bb_Bottom, float bb_LeftSide, float bb_rightSide, float bb_Back, float bb_front, XMMATRIX localToWorld, XMMATRIX worldToLocal);//Used to pass in constant variables such as gravity or damping values
+	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping, float smoothingRadiusVal, float targetDensityVal, float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, float bb_Top, float bb_Bottom, float bb_LeftSide, float bb_rightSide, float bb_Back, float bb_front, XMMATRIX localToWorld, XMMATRIX worldToLocal, int isSampleWave);//Used to pass in constant variables such as gravity or damping values
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return particlesOutputReadable; };
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* sphSimulationFirstPassOutput, ID3D11ShaderResourceView* computeShaderSRVBitonicMergesortParticleIndices, ID3D11ShaderResourceView* computeShaderSRVOffsetsCalculationOutput);
@@ -34,7 +34,7 @@ private:
 		float viscosityStrength;
 		float edgeForce;
 		float edgeForceDst;
-		float padding = 0.0f;
+		int isSampleWave;
 
 		float boundingBoxTop;
 		float boundingBoxBottom;

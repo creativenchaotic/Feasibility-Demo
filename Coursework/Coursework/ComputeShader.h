@@ -18,7 +18,7 @@ public:
 	void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV);//Sets the SRV for the compute shader
 
 	//Passes simulation values into compute shader buffer
-	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping,float smoothingRadiusVal, float targetDensityVal,float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, float bb_Top,float bb_Bottom,float bb_LeftSide, float bb_rightSide, float bb_Back, float bb_front, int isFirstIterationVal);//Used to pass in constant variables such as gravity or damping values
+	void setSimulationConstants(ID3D11DeviceContext* dc, int numParticlesVal, float gravityVal, float delta, float bounceDamping,float smoothingRadiusVal, float targetDensityVal,float pressureMultiplierVal, float nearPressureMultVal, float viscosity, float edgeForceVal, float edgeForceDistanceVal, float bb_Top,float bb_Bottom,float bb_LeftSide, float bb_rightSide, float bb_Back, float bb_front, int isFirstIterationVal, int isSampleWave);//Used to pass in constant variables such as gravity or damping values
 
 	void unbind(ID3D11DeviceContext* dc);
 	ID3D11ShaderResourceView* getComputeShaderOutput() { return particlesOutputReadable; } ;
@@ -42,7 +42,7 @@ private:
 		float viscosityStrength;
 		float edgeForce;
 		float edgeForceDst;
-		float padding = 0.0f;
+		int isSampleWave;
 
 		float boundingBoxTop;
 		float boundingBoxBottom;

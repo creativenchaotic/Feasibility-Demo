@@ -30,7 +30,7 @@ cbuffer cb_simConstants : register(b0)
     float viscosityStrength;
     float edgeForce;
     float edgeForceDst;
-    float padding;
+    int isSampleWave;
 
     float boundingBoxTop;
     float boundingBoxBottom;
@@ -90,12 +90,19 @@ void setValuesFromPreviousIterationToCurrentIteration(uint3 thread)
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    if (isFirstIteration == 0)
+    if(isSampleWave == 1)
     {
-        setValuesFromPreviousIterationToCurrentIteration(dispatchThreadID);
+	    
     }
+    else
+    {
+        if (isFirstIteration == 0)
+        {
+            setValuesFromPreviousIterationToCurrentIteration(dispatchThreadID);
+        }
         
-    ExternalForces(dispatchThreadID);
+        ExternalForces(dispatchThreadID);
+    }
    
 }
 

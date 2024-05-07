@@ -29,7 +29,7 @@ cbuffer cb_simConstants : register(b0)
     float viscosityStrength;
     float edgeForce;
     float edgeForceDst;
-    float padding;
+    int isSampleWave;
 
     float boundingBoxTop;
     float boundingBoxBottom;
@@ -179,6 +179,13 @@ void SetParticleValuesFromPreviousStage(uint3 thread)
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    SetParticleValuesFromPreviousStage(dispatchThreadID);
-    CalculateViscosity(dispatchThreadID);
+    if (isSampleWave == 1)
+    {
+	    
+    }
+    else
+    {
+        SetParticleValuesFromPreviousStage(dispatchThreadID);
+        CalculateViscosity(dispatchThreadID);
+    }
 }

@@ -34,7 +34,7 @@ cbuffer cb_simConstants : register(b0)
     float viscosityStrength;
     float edgeForce;
     float edgeForceDst;
-    float padding;
+    int isSampleWave;
 
     float boundingBoxTop;
     float boundingBoxBottom;
@@ -210,7 +210,14 @@ void SetParticleDataOffsetsAndIndices(uint3 thread)
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    SetParticleDataOffsetsAndIndices(dispatchThreadID);
-    CalculateDensities(dispatchThreadID);
+    if (isSampleWave == 1)
+    {
+	    
+    }
+    else
+    {
+        SetParticleDataOffsetsAndIndices(dispatchThreadID);
+        CalculateDensities(dispatchThreadID);
+    }
   
 }
