@@ -131,7 +131,7 @@ private:
 	RenderSettings currentRenderSettingForShader;
 
 	const char* simRenderType[4];
-	const char* currentSimType = "SDFs in Pixel Shader with SPH Particles";
+	const char* currentSimType = "SDFs in Pixel Shader with Static Particles";
 	RenderSimulationType currentSimTypeRendered;
 
 	SampleWaterValues sampleWater;
