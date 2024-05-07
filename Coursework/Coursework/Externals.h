@@ -98,6 +98,6 @@ struct SampleWaterValues
 	float waveSpeed2 = 0.19f;
 	float waveSpeed3 = 0.19f;
 	float steepness = 2.0f;
-	bool isSampleWater = true;
-	int sampleWaterState = 1;
+	bool isSampleWater = false;
+	int sampleWaterState = 0;
 };

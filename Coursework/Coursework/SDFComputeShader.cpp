@@ -237,6 +237,6 @@ void SDFComputeShader::setWaveParameters(ID3D11DeviceContext* deviceContext, flo
     timePtr->direction3 = XMFLOAT4(direction3.x, direction3.y, direction3.z, 0.0f);
 
     deviceContext->Unmap(timeBuffer, 0);
-    deviceContext->VSSetConstantBuffers(1, 1, &timeBuffer);
-    deviceContext->PSSetConstantBuffers(2, 1, &timeBuffer);
+    deviceContext->CSSetConstantBuffers(1, 1, &timeBuffer);
+
 }
