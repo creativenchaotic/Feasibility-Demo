@@ -38,8 +38,6 @@ void bitonicMergesort(uint3 dispatchThreadID)
     particleData[dispatchThreadID.x].hash = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices.y;
     particleData[dispatchThreadID.x].key = particleDataOutputFromSPHSimFirstPass[dispatchThreadID.x].spatialIndices.z;
 
-    // Sort the given entries by their keys (smallest to largest)
-    // This is done using bitonic merge sort, and takes multiple iterations
     uint i = dispatchThreadID.x;
 
     uint hIndex = i & (groupWidth - 1);
@@ -54,7 +52,7 @@ void bitonicMergesort(uint3 dispatchThreadID)
     uint valueLeft = particleData[indexLeft].key;
     uint valueRight = particleData[indexRight].key;
 
-		// Swap entries if value is descending
+	// Swap entries if value is descending
     if (valueLeft > valueRight)
     {
         Entry temp = particleData[indexLeft];

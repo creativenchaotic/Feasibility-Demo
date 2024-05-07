@@ -43,6 +43,11 @@ protected:
 	int NextPowerOfTwo(int value);//Used for bitonic mergesort
 	float logarithm(int x, int base);//Used for bitonic mergesort
 
+	int CeilToInt(float value)
+	{
+		return static_cast<int>(std::ceil(value));
+	}
+
 
 private:
 

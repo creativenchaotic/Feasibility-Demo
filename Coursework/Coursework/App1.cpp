@@ -1,6 +1,7 @@
 
 #include "App1.h"
 #include <imGUI/imgui_internal.h>
+#include <cmath>
 
 App1::App1()
 {
@@ -276,6 +277,8 @@ float App1::logarithm(int x, int base)
 }
 //-------------------------------------------
 
+
+
 void App1::sphSimulationComputePass()//Runs all the compute shaders needed to run the SPH simulation
 {
 	//SPH SIMULATION FIRST PASS----------------------------------------
@@ -286,14 +289,14 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	//Passes simulation values into compute shader buffer
 	sphSimulationComputeShaderFirstPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, isFirstIteration, sampleWater.sampleWaterState);
 	//Dispatches the shader
-	sphSimulationComputeShaderFirstPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sphSimulationComputeShaderFirstPass->compute(renderer->getDeviceContext(), CeilToInt(currentNumParticles/ (float)64), 1, 1);
 	sphSimulationComputeShaderFirstPass->unbind(renderer->getDeviceContext());
 
 	//SPATIAL HASHING------------------------------------------------
 	sphSimulationSpatialHashing->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationSpatialHashing->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderFirstPass->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
 	sphSimulationSpatialHashing->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, simulationSettings.localToWorld, simulationSettings.worldToLocal, sampleWater.sampleWaterState);
-	sphSimulationSpatialHashing->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sphSimulationSpatialHashing->compute(renderer->getDeviceContext(), CeilToInt(currentNumParticles / (float)64), 1, 1);
 	sphSimulationSpatialHashing->unbind(renderer->getDeviceContext());
 	
 	//BITONIC MERGESORT------------------------------------------------
@@ -318,7 +321,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 			bitonicMergesort->setBitonicMergesortSettings(renderer->getDeviceContext(), currentNumParticles, groupWidth, groupHeight, stepIndex);
 
 			//Run the pair-wise sorting step
-			bitonicMergesort->compute(renderer->getDeviceContext(), NextPowerOfTwo(currentNumParticles) / 2, 1, 1);
+			bitonicMergesort->compute(renderer->getDeviceContext(), CeilToInt((NextPowerOfTwo(currentNumParticles) / 2)/ (float)128), 1, 1);
 		}
 	}
 
@@ -330,7 +333,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	spatialOffsetCalculationComputeShader->setShaderParameters(renderer->getDeviceContext());
 	spatialOffsetCalculationComputeShader->setSimulationDataSRV(renderer->getDeviceContext(), bitonicMergesort->getComputeShaderOutput());//Passing otuput from bitonic mergesort to calculating offsets compute shader to do calculations
 	spatialOffsetCalculationComputeShader->setOffsetCalculationsSettings(renderer->getDeviceContext(), currentNumParticles);
-	spatialOffsetCalculationComputeShader->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	spatialOffsetCalculationComputeShader->compute(renderer->getDeviceContext(), CeilToInt(currentNumParticles / (float)128), 1, 1);
 	spatialOffsetCalculationComputeShader->unbind(renderer->getDeviceContext());
 
 
@@ -338,14 +341,14 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	sphSimulationComputeShaderSecondPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationComputeShaderSecondPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front,simulationSettings.localToWorld, simulationSettings.worldToLocal, sampleWater.sampleWaterState);
 	sphSimulationComputeShaderSecondPass->setSimulationDataSRV(renderer->getDeviceContext(),sphSimulationSpatialHashing->getComputeShaderOutput(), bitonicMergesort->getComputeShaderOutput(), spatialOffsetCalculationComputeShader->getComputeShaderOutput());//Passing output from bitonic mergesort and calculating offsets compute shader to sph simulation second pass
-	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sphSimulationComputeShaderSecondPass->compute(renderer->getDeviceContext(), CeilToInt(currentNumParticles / (float)64), 1, 1);
 	sphSimulationComputeShaderSecondPass->unbind(renderer->getDeviceContext());
 
 	//PRESSURE FORCE-----------------
 	sphSimulationPressurePass->setShaderParameters(renderer->getDeviceContext());
 	sphSimulationPressurePass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, simulationSettings.localToWorld, simulationSettings.worldToLocal, sampleWater.sampleWaterState);
 	sphSimulationPressurePass->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationComputeShaderSecondPass->getComputeShaderOutput());
-	sphSimulationPressurePass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sphSimulationPressurePass->compute(renderer->getDeviceContext(), CeilToInt(currentNumParticles / (float)64), 1, 1);
 	sphSimulationPressurePass->unbind(renderer->getDeviceContext());
 
 	//VISCOSITY-----------------
@@ -353,7 +356,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	sphSimViscosityPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, simulationSettings.localToWorld, simulationSettings.worldToLocal, sampleWater.sampleWaterState);
 	sphSimViscosityPass->setShaderParameters(renderer->getDeviceContext());
 	sphSimViscosityPass->setSimulationDataSRV(renderer->getDeviceContext(), sphSimulationPressurePass->getComputeShaderOutput());
-	sphSimViscosityPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sphSimViscosityPass->compute(renderer->getDeviceContext(), CeilToInt(currentNumParticles / (float)64), 1, 1);
 	sphSimViscosityPass->unbind(renderer->getDeviceContext());
 
 	//UPDATE FINAL POSITIONS-----------------
@@ -362,7 +365,7 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 	sphFinalPass->setShaderParameters(renderer->getDeviceContext());
 	sphFinalPass->setSimulationDataSRV(renderer->getDeviceContext(), sphSimViscosityPass->getComputeShaderOutput());
 	sphFinalPass->setWaveParameters(renderer->getDeviceContext(), time, sampleWater.amplitude1, sampleWater.frequency1, sampleWater.waveSpeed1, sampleWater.waveDirection1, sampleWater.amplitude2, sampleWater.frequency2, sampleWater.waveSpeed2, sampleWater.waveDirection2, sampleWater.amplitude3, sampleWater.frequency3, sampleWater.waveSpeed3, sampleWater.waveDirection3, sampleWater.steepness, sampleWater.sampleWaterState);
-	sphFinalPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
+	sphFinalPass->compute(renderer->getDeviceContext(), CeilToInt((float)currentNumParticles / 64), 1, 1);
 	sphFinalPass->unbind(renderer->getDeviceContext());
 
 	isFirstIteration = 0.0f;
