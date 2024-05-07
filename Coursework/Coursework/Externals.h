@@ -10,7 +10,7 @@ enum class RenderSimulationType
 };
 
 struct SPHSimulationValues {
-	int numParticlesPerAxis = 3;
+	int numParticlesPerAxis = 2;
 	int numParticles = numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis;
 	float gravity = -10.f;
 	float deltaTime;
@@ -72,9 +72,9 @@ struct PBRMaterialValues {
 
 struct GUISettings {
 	bool hideInstructions = true;
-	bool displaySPHSimulationParticles = true;
+	bool displaySPHSimulationParticles = false;
 	bool isLightOn = true;
-	bool displaySDFs = false;
+	bool displaySDFs = true;
 };
 
 struct SDFValues
@@ -98,6 +98,6 @@ struct SampleWaterValues
 	float waveSpeed2 = 0.19f;
 	float waveSpeed3 = 0.19f;
 	float steepness = 2.0f;
-	bool isSampleWater = false;
-	int sampleWaterState = 0;
+	bool isSampleWater = true;
+	int sampleWaterState = 1;
 };
