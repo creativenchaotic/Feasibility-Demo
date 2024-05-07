@@ -29,7 +29,7 @@ cbuffer cb_simConstants : register(b0)
     float viscosityStrength;
     float edgeForce;
     float edgeForceDst;
-    float padding;
+    int padding;
 
     float boundingBoxTop;
     float boundingBoxBottom;
@@ -44,8 +44,38 @@ cbuffer cb_simConstants : register(b0)
     float4x4 worldToLocal;
 };
 
+
+//Wave manipulation values used for Gerstner Waves
+cbuffer TimeBuffer : register(b1)
+{
+    float time;
+    float amplitude1;
+    float frequency1;
+    float speed1;
+    
+    float4 direction1;
+    
+    float amplitude2;
+    float frequency2;
+    float speed2;
+    
+    float steepnessFactor;
+    
+    float4 direction2;
+    
+    float amplitude3;
+    float frequency3;
+    float speed3;
+    
+    int isSampleWave;
+    
+    float4 direction3;
+    
+};
+
 RWStructuredBuffer<Particle> particleData : register(u0); //Data we pass to and from the compute shader
 StructuredBuffer<Particle> sphViscosityPassOutput : register(t0);
+StructuredBuffer<float4> initialParticlePos : register(t1);
 
  //HELPER FUNCTIONS-----------------------------------------------------------
 void ResolveCollisions(int particleIndex)
@@ -134,6 +164,23 @@ void UpdatePositions(uint3 thread)
     ResolveCollisions(thread.x);
 }
 
+void waterPlaneCalc(uint3 thread)
+{
+
+     //RESETTING PARTICLE POSITIONS
+    particleData[thread.x].position.x = initialParticlePos[thread.x].x;
+    particleData[thread.x].position.y = initialParticlePos[thread.x].y;
+    particleData[thread.x].position.z = initialParticlePos[thread.x].z;
+
+    	//Changing the height of the water particles
+    float wave1Pos = 2 * amplitude1 * pow((((sin((dot(direction1.xz, float2(initialParticlePos[thread.x].x, initialParticlePos[thread.x].z))) * frequency1 + (time * (speed1 * frequency1)))) + 1) / 2), steepnessFactor);
+    float wave2Pos = 2 * amplitude2 * pow((((sin((dot(direction2.xz, float2(initialParticlePos[thread.x].x, initialParticlePos[thread.x].z))) * frequency2 + (time * (speed2 * frequency2)))) + 1) / 2), steepnessFactor);
+    float wave3Pos = 2 * amplitude3 * pow((((sin((dot(direction3.xz, float2(initialParticlePos[thread.x].x, initialParticlePos[thread.x].z))) * frequency3 + (time * (speed3 * frequency3)))) + 1) / 2), steepnessFactor);
+
+
+    particleData[thread.x].position.y = wave1Pos + wave2Pos + wave3Pos;
+}
+
 
 void SetParticleValuesFromPreviousStage(uint3 thread)
 {
@@ -143,6 +190,13 @@ void SetParticleValuesFromPreviousStage(uint3 thread)
 [numthreads(NumThreads, 1, 1)]
 void main(uint3 groupThreadID : SV_GroupThreadID, uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    SetParticleValuesFromPreviousStage(dispatchThreadID);
-    UpdatePositions(dispatchThreadID);
+    if (isSampleWave == 0)
+    {
+        SetParticleValuesFromPreviousStage(dispatchThreadID);
+        UpdatePositions(dispatchThreadID);
+    }
+    else
+    {
+        waterPlaneCalc(dispatchThreadID);
+    }
 }

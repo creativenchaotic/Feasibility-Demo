@@ -250,6 +250,7 @@ void App1::initialiseSPHParticles()	//Setting the positions of the SPH particles
 	sphSimulationPressurePass->createOutputUAVs(renderer->getDevice(), currentNumParticles);
 	sphSimViscosityPass->createOutputUAVs(renderer->getDevice(), currentNumParticles);
 	sphFinalPass->createOutputUAVs(renderer->getDevice(), currentNumParticles);
+	sphFinalPass->createInitialDataSRV(renderer->getDevice(), &particlePositionSampleData);
 	sdfComputeShader->createOutputUAVs(renderer->getDevice(), &particlePositionSampleData);
 
 }
@@ -357,9 +358,10 @@ void App1::sphSimulationComputePass()//Runs all the compute shaders needed to ru
 
 	//UPDATE FINAL POSITIONS-----------------
 	sphFinalPass->setShaderParameters(renderer->getDeviceContext());
-	sphFinalPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, simulationSettings.localToWorld, simulationSettings.worldToLocal);
+	sphFinalPass->setSimulationConstants(renderer->getDeviceContext(), currentNumParticles, simulationSettings.gravity, time, simulationSettings.collisionDamping, simulationSettings.smoothingRadius, simulationSettings.targetDensity, simulationSettings.pressureMultiplier, simulationSettings.nearPressureMultiplier, simulationSettings.viscosityStrength, simulationSettings.edgeForce, simulationSettings.edgeForceDst, boundingBox.Top, boundingBox.Bottom, boundingBox.LeftSide, boundingBox.RightSide, boundingBox.Back, boundingBox.Front, simulationSettings.localToWorld, simulationSettings.worldToLocal, sampleWater.sampleWaterState);
 	sphFinalPass->setShaderParameters(renderer->getDeviceContext());
 	sphFinalPass->setSimulationDataSRV(renderer->getDeviceContext(), sphSimViscosityPass->getComputeShaderOutput());
+	sphFinalPass->setWaveParameters(renderer->getDeviceContext(), time, sampleWater.amplitude1, sampleWater.frequency1, sampleWater.waveSpeed1, sampleWater.waveDirection1, sampleWater.amplitude2, sampleWater.frequency2, sampleWater.waveSpeed2, sampleWater.waveDirection2, sampleWater.amplitude3, sampleWater.frequency3, sampleWater.waveSpeed3, sampleWater.waveDirection3, sampleWater.steepness, sampleWater.sampleWaterState);
 	sphFinalPass->compute(renderer->getDeviceContext(), currentNumParticles, 1, 1);
 	sphFinalPass->unbind(renderer->getDeviceContext());
 
@@ -435,7 +437,6 @@ void App1::renderSceneShaders(float time)
 		sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
 		sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.Back, currentSimTypeRendered);
 		sdfComputeShader->setSimulationDataSRV(renderer->getDeviceContext(), sphFinalPass->getComputeShaderOutput());
-		sdfComputeShader->setWaveParameters(renderer->getDeviceContext(), time, sampleWater.amplitude1, sampleWater.frequency1, sampleWater.waveSpeed1, sampleWater.waveDirection1, sampleWater.amplitude2, sampleWater.frequency2, sampleWater.waveSpeed2, sampleWater.waveDirection2, sampleWater.amplitude3, sampleWater.frequency3, sampleWater.waveSpeed3, sampleWater.waveDirection3, sampleWater.steepness, sampleWater.sampleWaterState);
 		sdfComputeShader->compute(renderer->getDeviceContext(), 768 / 32, 768 / 32, 768);
 		sdfComputeShader->unbind(renderer->getDeviceContext());
 
@@ -486,9 +487,8 @@ bool App1::render()
 	//Add delta time
 	time += timer->getTime();
 
-	if (!sampleWater.isSampleWater) {
-		sphSimulationComputePass();//Runs the SPH simulation compute shaders
-	}
+
+	sphSimulationComputePass();//Runs the SPH simulation compute shaders
 
 	renderSceneShaders(time);//Renders the actual water simulation in the scene
 

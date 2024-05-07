@@ -22,7 +22,7 @@ public:
 
     void release();
 
-    void setWaveParameters(ID3D11DeviceContext* deviceContext, float deltaTime, float ampl, float freq, float speed, XMFLOAT3 direction, float ampl2, float freq2, float speed2, XMFLOAT3 direction2, float ampl3, float freq3, float speed3, XMFLOAT3 direction3, float steepnessFactor, int isSampleWave);
+
 
 private:
     void initShader(const wchar_t* cfile, const wchar_t* blank);
@@ -36,31 +36,6 @@ private:
         XMFLOAT4 renderSetting;
     };
 
-    //Wave manipulation values
-    struct TimeBufferType {
-        float time;
-        float amplitude1;
-        float frequency1;
-        float speed1;
-
-        XMFLOAT4 direction1;
-
-        float amplitude2;
-        float frequency2;
-        float speed2;
-
-        float steepnessFactor;
-
-        XMFLOAT4 direction2;
-
-        float amplitude3;
-        float frequency3;
-        float speed3;
-
-        int isSampleWave;
-
-        XMFLOAT4 direction3;
-    };
 
     //RW Structured Buffers-----------------------------------------------
     ID3D11Buffer* particlesComputeShaderOutput;
@@ -76,7 +51,7 @@ private:
 
     //Constant Buffer-----------------------------------------------------
     ID3D11Buffer* sdfConstantsBuffer;
-    ID3D11Buffer* timeBuffer;
+
 
 
 };
