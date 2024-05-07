@@ -82,7 +82,7 @@ void SDFComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)
 
 }
 
-void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset, RenderSimulationType currentSimType)
+void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, float particleSize, int offset, RenderSimulationType currentSimType)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -93,7 +93,7 @@ void SDFComputeShader::setBufferConstants(ID3D11DeviceContext* dc, int numPartic
 
     simulationConstPtr->numParticles = numParticlesVal;
     simulationConstPtr->blendAmount = blendAmount;
-    simulationConstPtr->stride = stride;
+    simulationConstPtr->particleSize = particleSize;
     simulationConstPtr->offset = offset;
 
     switch(currentSimType)

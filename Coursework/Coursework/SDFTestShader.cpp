@@ -266,7 +266,7 @@ void SDFTestShader::setLightingParameters(ID3D11DeviceContext* deviceContext, Li
 	deviceContext->PSSetConstantBuffers(3, 1, &lightBuffer);
 }
 
-void SDFTestShader::setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity)
+void SDFTestShader::setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity, float particleSize)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -277,7 +277,7 @@ void SDFTestShader::setMaterialValues(ID3D11DeviceContext* deviceContext, float 
 	materialPtr->baseReflectivity = reflectivity;
 	materialPtr->metallic = metallic;
 	materialPtr->roughness = roughness;
-	materialPtr->padding = 0.f;
+	materialPtr->particleSize = particleSize;
 	deviceContext->Unmap(materialBuffer, 0);
 	deviceContext->PSSetConstantBuffers(2, 1, &materialBuffer);
 }

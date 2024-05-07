@@ -80,7 +80,7 @@ struct GUISettings {
 struct SDFValues
 {
 	float blendAmount = 0.1f;
-	int stride = 20;
+	float particleSize = 1.0f;
 };
 
 struct SampleWaterValues

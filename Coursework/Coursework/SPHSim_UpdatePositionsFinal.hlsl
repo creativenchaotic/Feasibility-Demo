@@ -168,9 +168,37 @@ void waterPlaneCalc(uint3 thread)
 {
 
      //RESETTING PARTICLE POSITIONS
-    particleData[thread.x].position.x = initialParticlePos[thread.x].x;
-    particleData[thread.x].position.y = initialParticlePos[thread.x].y;
-    particleData[thread.x].position.z = initialParticlePos[thread.x].z;
+    if (thread.x % 2)
+    {
+        particleData[thread.x].position.x = initialParticlePos[thread.x].x * 2.0;
+        particleData[thread.x].position.y = initialParticlePos[thread.x].y;
+        particleData[thread.x].position.z = initialParticlePos[thread.x].z;
+    }
+    if (thread.x % 5)
+    {
+        particleData[thread.x].position.x = initialParticlePos[thread.x].x * 2.0;
+        particleData[thread.x].position.y = initialParticlePos[thread.x].y;
+        particleData[thread.x].position.z = initialParticlePos[thread.x].z;
+    }
+    if (thread.x % 3)
+    {
+        particleData[thread.x].position.x = initialParticlePos[thread.x].x * 1.5;
+        particleData[thread.x].position.y = initialParticlePos[thread.x].y;
+        particleData[thread.x].position.z = initialParticlePos[thread.x].z;
+    }
+    if (thread.x % 7)
+    {
+        particleData[thread.x].position.x = initialParticlePos[thread.x].x * 2.5;
+        particleData[thread.x].position.y = initialParticlePos[thread.x].y;
+        particleData[thread.x].position.z = initialParticlePos[thread.x].z;
+    }
+    else 
+    {
+        particleData[thread.x].position.x = initialParticlePos[thread.x].x;
+        particleData[thread.x].position.y = initialParticlePos[thread.x].y;
+        particleData[thread.x].position.z = initialParticlePos[thread.x].z;
+    }
+   
 
     	//Changing the height of the water particles
     float wave1Pos = 2 * amplitude1 * pow((((sin((dot(direction1.xz, float2(initialParticlePos[thread.x].x, initialParticlePos[thread.x].z))) * frequency1 + (time * (speed1 * frequency1)))) + 1) / 2), steepnessFactor);

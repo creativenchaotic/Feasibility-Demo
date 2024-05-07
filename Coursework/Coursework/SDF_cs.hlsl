@@ -20,7 +20,7 @@ StructuredBuffer<float4> particleInitialPositions : register(t1);
 cbuffer cb_simConstants : register(b0){
     int numParticles;
     float blendAmount;
-    int stride;
+    float particleSize;
     float offset;
     float4 simType;
 }
@@ -46,8 +46,8 @@ float sdfCalculations(float3 position)
         
     float finalValue;
 
-    float sphere1 = sdfSphere(position - ((float3(particleInitialPositions[0].xyz))), 1.0f); //Sphere SDF
-    float sphere2 = sdfSphere(position - ((float3(particleInitialPositions[1].xyz))), 1.0f); //Sphere SDF
+    float sphere1 = sdfSphere(position - ((float3(particleInitialPositions[0].xyz))), particleSize); //Sphere SDF
+    float sphere2 = sdfSphere(position - ((float3(particleInitialPositions[1].xyz))), particleSize); //Sphere SDF
 
     finalValue = smoothUnion(sphere1, sphere2);
 
@@ -55,7 +55,7 @@ float sdfCalculations(float3 position)
     {
         for (int i = 2; i < numParticles; i++)
         {
-            float sphere = sdfSphere(position - ((float3(particleInitialPositions[i].xyz))), 1.0f); //Sphere SDF
+            float sphere = sdfSphere(position - ((float3(particleInitialPositions[i].xyz))), particleSize); //Sphere SDF
 
             finalValue = smoothUnion(sphere, finalValue);
 
@@ -70,8 +70,8 @@ float sdfCalculationsSPHSim(float3 position)
 {
     float finalValue;
 
-    float sphere1 = sdfSphere(position - ((float3(simulationOutputData[0].position))), 1.0f); //Sphere SDF
-    float sphere2 = sdfSphere(position - ((float3(simulationOutputData[1].position))), 1.0f); //Sphere SDF
+    float sphere1 = sdfSphere(position - ((float3(simulationOutputData[0].position))), particleSize); //Sphere SDF
+    float sphere2 = sdfSphere(position - ((float3(simulationOutputData[1].position))), particleSize); //Sphere SDF
 
     finalValue = smoothUnion(sphere1, sphere2);
 
@@ -79,7 +79,7 @@ float sdfCalculationsSPHSim(float3 position)
     {
         for (int i = 2; i < numParticles; i++)
         {
-            float sphere = sdfSphere(position - ((float3(simulationOutputData[i].position))), 1.0f); //Sphere SDF
+            float sphere = sdfSphere(position - ((float3(simulationOutputData[i].position))), particleSize); //Sphere SDF
 
             finalValue = smoothUnion(sphere, finalValue);
 

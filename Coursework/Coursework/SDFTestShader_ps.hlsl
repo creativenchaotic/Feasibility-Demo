@@ -37,7 +37,7 @@ cbuffer MaterialBuffer : register(b2)
     float roughness;
     float metallic;
     float baseReflectivity;
-    float padding;
+    float particleSize;
 }
 
 //Lighting values
@@ -77,15 +77,15 @@ float sdfCalculations(float3 position)
     
     float finalValue;
 
-    float sphere1 = sdfSphere(position - float3(sdfParticlePositions[0].xyz), 1.f); //Sphere SDF
-    float sphere2 = sdfSphere(position - float3(sdfParticlePositions[1].xyz), 1.f); //Sphere SDF
+    float sphere1 = sdfSphere(position - float3(sdfParticlePositions[0].xyz), particleSize); //Sphere SDF
+    float sphere2 = sdfSphere(position - float3(sdfParticlePositions[1].xyz), particleSize); //Sphere SDF
 
     finalValue = smoothUnion(sphere1, sphere2);
 
 	if(numParticles.x>2){
 	    for (int i = 2; i < numParticles.x; i++)
 	    {
-	        float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz), 1.f); //Sphere SDF
+            float sphere = sdfSphere(position - float3(sdfParticlePositions[i].xyz), particleSize); //Sphere SDF
 
     		finalValue = smoothUnion(sphere, finalValue);
 

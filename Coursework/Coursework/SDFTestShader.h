@@ -35,7 +35,7 @@ class SDFTestShader :
         float roughness;
         float metallic;
         float baseReflectivity;
-        float padding;
+        float particleSize;
     };
 
 public:
@@ -46,7 +46,7 @@ public:
     void setParticlePositionsSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* computeShaderSRV, ID3D11ShaderResourceView* texture3d);//Sets the SRV for the compute shader
 	void setSDFParameters(ID3D11DeviceContext*, float blendVal, int numParticles, RenderSettings currentRenderSetting, RenderSimulationType currentSimType);
     void setLightingParameters(ID3D11DeviceContext* deviceContext, Light* light);
-    void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity);
+    void setMaterialValues(ID3D11DeviceContext* deviceContext, float roughness, float metallic, float reflectivity, float particleSize);
     void unbind(ID3D11DeviceContext* dc);
 
 

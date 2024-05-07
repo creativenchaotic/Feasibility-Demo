@@ -442,7 +442,7 @@ void App1::renderSceneShaders(float time)
 	if (guiSettings.displaySDFs) {
 		//SDF Compute Shader-----------------------------------------------------------------------------------------
 		sdfComputeShader->setShaderParameters(renderer->getDeviceContext());
-		sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.stride, boundingBox.Back, currentSimTypeRendered);
+		sdfComputeShader->setBufferConstants(renderer->getDeviceContext(), currentNumParticles, sdfVal.blendAmount, sdfVal.particleSize, boundingBox.Back, currentSimTypeRendered);
 		sdfComputeShader->setSimulationDataSRV(renderer->getDeviceContext(), sphFinalPass->getComputeShaderOutput());
 		sdfComputeShader->compute(renderer->getDeviceContext(), 768 / 32, 768 / 32, 768);
 		sdfComputeShader->unbind(renderer->getDeviceContext());
@@ -473,7 +473,7 @@ void App1::renderSceneShaders(float time)
 		sdfShader->setParticlePositionsSRV(renderer->getDeviceContext(), sdfComputeShader->getComputeShaderOutput(), sdfComputeShader->getTexture3D());
 		sdfShader->setSDFParameters(renderer->getDeviceContext(), sdfVal.blendAmount, currentNumParticles, currentRenderSettingForShader, currentSimTypeRendered);
 		sdfShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
-		sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
+		sdfShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity, sdfVal.particleSize);
 		sdfShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
 		sdfShader->unbind(renderer->getDeviceContext());
 
@@ -670,6 +670,7 @@ void App1::gui()
 			ImGui::TextWrapped("Amount that the SDF shapes should be blended by using smooth union");
 		}
 		ImGui::SliderFloat("SDF Blending", &sdfVal.blendAmount, 0.01, 20);
+		ImGui::SliderFloat("Particle Size", &sdfVal.particleSize, 0.1, 10);
 
 		if (!guiSettings.hideInstructions) {
 			ImGui::TextWrapped("Since the SPH simulation does not work correctly (though its still a good test to see how well the surface generation would run while using the simulation since all the equations needed for SPH are being calculated), a sample wave pattern was included to see what the surface generation would look like when combining it with particles which are moving.\nWhen this is toggled the SPH simulation stops running in the background and Gerstner Waves get used instead.");
@@ -730,8 +731,6 @@ void App1::gui()
 
 
 		//Spacing between particles and resolution
-		//ImGui::SliderInt("Particle Size", &simulationSettings.particleScale, 1, 100);
-		//ImGui::SliderFloat3("Particles Spawnpoint Centre", (float*) & simulationSettings.particlesSpawnCenter, -10,10);
 		ImGui::SliderFloat3("Spawnpoint Size",(float*)& simulationSettings.sizeOfSpawner, 2, 20);
 		ImGui::SliderFloat("Gravity", &simulationSettings.gravity, -20, 20);
 		ImGui::SliderFloat("Collision Damping", &simulationSettings.collisionDamping, 0, 3);

@@ -18,7 +18,7 @@ public:
     void setSimulationDataSRV(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* simulationOutputRV);
 
     //Passes simulation values into compute shader buffer
-    void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, int stride, int offset, RenderSimulationType currentSimType);
+    void setBufferConstants(ID3D11DeviceContext* dc, int numParticlesVal, float blendAmount, float particleSize, int offset, RenderSimulationType currentSimType);
 
     void release();
 
@@ -31,7 +31,7 @@ private:
     {
         int numParticles;
         float blendAmount;
-        int stride;
+        float particleSize;
         float offset;
         XMFLOAT4 renderSetting;
     };
