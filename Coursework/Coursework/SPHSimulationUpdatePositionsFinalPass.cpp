@@ -11,6 +11,12 @@ SPHSimulationUpdatePositionsFinalPass::~SPHSimulationUpdatePositionsFinalPass()
 {
     release();
 
+    if (simulationConstantsBuffer)
+    {
+        simulationConstantsBuffer->Release();
+        simulationConstantsBuffer = 0;
+    }
+
     // Release the time buffer.
     if (timeBuffer)
     {

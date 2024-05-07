@@ -10,6 +10,12 @@ SPHSimViscosityPass::SPHSimViscosityPass(ID3D11Device* device, HWND hwnd) : Base
 SPHSimViscosityPass::~SPHSimViscosityPass()
 {
     release();
+
+    if (simulationConstantsBuffer)
+    {
+        simulationConstantsBuffer->Release();
+        simulationConstantsBuffer = 0;
+    }
 }
 
 void SPHSimViscosityPass::initShader(const wchar_t* cfile, const wchar_t* blank)

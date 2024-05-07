@@ -9,6 +9,29 @@ SDFComputeShader::~SDFComputeShader()
 {
     release();
 
+    if(texture3DComputeShaderOutput)
+    {
+        texture3DComputeShaderOutput->Release();
+        texture3DComputeShaderOutput = 0;
+    }
+
+    if(texture3DComputeShaderOutputReadable)
+    {
+        texture3DComputeShaderOutputReadable->Release();
+        texture3DComputeShaderOutputReadable = 0;
+    }
+
+    if (texture3DComputeShaderOutputWritable)
+    {
+        texture3DComputeShaderOutputWritable->Release();
+        texture3DComputeShaderOutputWritable = 0;
+    }
+
+    if (sdfConstantsBuffer)
+    {
+        sdfConstantsBuffer->Release();
+        sdfConstantsBuffer = 0;
+    }
 
 }
 

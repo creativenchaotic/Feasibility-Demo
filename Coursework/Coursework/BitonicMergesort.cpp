@@ -8,6 +8,12 @@ BitonicMergesort::BitonicMergesort(ID3D11Device* device, HWND hwnd) : BaseShader
 BitonicMergesort::~BitonicMergesort()
 {
     release();
+
+    if(bitonicMergesortSettingsBuffer)
+    {
+        bitonicMergesortSettingsBuffer->Release();
+        bitonicMergesortSettingsBuffer = 0;
+    }
 }
 
 void BitonicMergesort::initShader(const wchar_t* cfile, const wchar_t* blank)

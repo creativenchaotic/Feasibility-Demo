@@ -28,6 +28,20 @@ SDFTestShader::~SDFTestShader()
 
 	}
 
+	if (materialBuffer)
+	{
+		materialBuffer->Release();
+		materialBuffer = 0;
+
+	}
+
+	if (lightBuffer)
+	{
+		lightBuffer->Release();
+		lightBuffer = 0;
+
+	}
+
 	if(cameraBuffer)
 	{
 		cameraBuffer->Release();
@@ -176,7 +190,6 @@ void SDFTestShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	deviceContext->PSSetConstantBuffers(0, 1, &cameraBuffer);
 
 	// Set shader texture and sampler resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &renderTexture);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 	deviceContext->PSSetSamplers(1, 1, &sampleState3D);
 }

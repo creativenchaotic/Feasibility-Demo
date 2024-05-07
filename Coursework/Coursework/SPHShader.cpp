@@ -40,6 +40,11 @@ SPHShader::~SPHShader()
 		cameraBuffer = 0;
 	}
 
+	if (particleIndexBuffer) {
+		particleIndexBuffer->Release();
+		particleIndexBuffer = 0;
+	}
+
 	//Release base shader components
 	BaseShader::~BaseShader();
 }

@@ -8,6 +8,12 @@ OffsetCalculationComputeShader::OffsetCalculationComputeShader(ID3D11Device* dev
 OffsetCalculationComputeShader::~OffsetCalculationComputeShader()
 {
     release();
+
+    if(offsetCalculationsSettingsBuffer)
+    {
+        offsetCalculationsSettingsBuffer->Release();
+        offsetCalculationsSettingsBuffer = 0;
+    }
 }
 
 void OffsetCalculationComputeShader::initShader(const wchar_t* cfile, const wchar_t* blank)

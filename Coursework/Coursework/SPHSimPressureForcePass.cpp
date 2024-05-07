@@ -9,6 +9,12 @@ SPHSimPressureForcePass::SPHSimPressureForcePass(ID3D11Device* device, HWND hwnd
 SPHSimPressureForcePass::~SPHSimPressureForcePass()
 {
     release();
+
+    if(simulationConstantsBuffer)
+    {
+        simulationConstantsBuffer->Release();
+        simulationConstantsBuffer = 0;
+    }
 }
 
 void SPHSimPressureForcePass::initShader(const wchar_t* cfile, const wchar_t* blank)

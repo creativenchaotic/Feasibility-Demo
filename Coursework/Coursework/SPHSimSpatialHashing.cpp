@@ -10,6 +10,12 @@ SPHSimSpatialHashing::SPHSimSpatialHashing(ID3D11Device* device, HWND hwnd) : Ba
 SPHSimSpatialHashing::~SPHSimSpatialHashing()
 {
     release();
+
+    if(simulationConstantsBuffer)
+    {
+        simulationConstantsBuffer->Release();
+        simulationConstantsBuffer = 0;
+    }
 }
 
 void SPHSimSpatialHashing::initShader(const wchar_t* cfile, const wchar_t* blank)

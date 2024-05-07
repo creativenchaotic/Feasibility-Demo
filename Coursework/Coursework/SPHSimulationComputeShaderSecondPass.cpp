@@ -9,6 +9,12 @@ SPHSimulationComputeShaderSecondPass::SPHSimulationComputeShaderSecondPass(ID3D1
 SPHSimulationComputeShaderSecondPass::~SPHSimulationComputeShaderSecondPass()
 {
     release();
+
+    if (simulationConstantsBuffer)
+    {
+        simulationConstantsBuffer->Release();
+        simulationConstantsBuffer = 0;
+    }
 }
 
 void SPHSimulationComputeShaderSecondPass::initShader(const wchar_t* cfile, const wchar_t* blank)

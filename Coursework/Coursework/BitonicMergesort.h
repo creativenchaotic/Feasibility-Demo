@@ -36,10 +36,6 @@ private:
 	ID3D11ShaderResourceView* bitonicMergesortOutputReadable;
 	ID3D11UnorderedAccessView* bitonicMergesortOutputWritable;
 
-	ID3D11Buffer* debugBuffer;
-	ID3D11ShaderResourceView* debugBufferReadable;
-	ID3D11UnorderedAccessView* debugBufferWritable;
-
 	//Constant Buffer-----------------------------------------------------
 	ID3D11Buffer* bitonicMergesortSettingsBuffer;
 };

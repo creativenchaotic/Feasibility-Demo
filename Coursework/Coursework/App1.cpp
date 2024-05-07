@@ -155,6 +155,12 @@ App1::~App1()
 		delete sphSimulationSpatialHashing;
 		sphSimulationSpatialHashing = 0;
 	}
+
+	if(orthoMesh)
+	{
+		delete orthoMesh;
+		orthoMesh = 0;
+	}
 }
 
 
