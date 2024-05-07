@@ -406,26 +406,28 @@ void App1::renderSceneShaders(float time)
 	XMMATRIX viewMatrix = camera->getViewMatrix();
 	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
 	XMMATRIX sph_particleScaleMatrix = XMMatrixScaling(simulationSettings.particleScale, simulationSettings.particleScale, simulationSettings.particleScale);
-	
-	//SPH PARTICLES---------------------------------------------------------------------------
-	if (guiSettings.displaySPHSimulationParticles) {
-		renderer->setAlphaBlending(true);
 
-		for (int i = 0; i < currentNumParticles; i++) {
+	if (!sampleWater.isSampleWater) {
+		//SPH PARTICLES---------------------------------------------------------------------------
+		if (guiSettings.displaySPHSimulationParticles) {
+			renderer->setAlphaBlending(true);
 
-			XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->particleData.position.x, simulationParticles[i]->particleData.position.y, simulationParticles[i]->particleData.position.z);
+			for (int i = 0; i < currentNumParticles; i++) {
 
-			simulationParticles[i]->sendData(renderer->getDeviceContext());
-			sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
-			sphParticleShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
-			sphParticleShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
-			sphParticleShader->setSimulationDataSRV(renderer->getDeviceContext(), sphFinalPass->getComputeShaderOutput());
-			sphParticleShader->setParticleIndex(renderer->getDeviceContext(), i);
-			sphParticleShader->render(renderer->getDeviceContext(), simulationParticles[i]->getIndexCount());
-			sphParticleShader->unbind(renderer->getDeviceContext());
+				XMMATRIX particlePosMatrix = XMMatrixTranslation(simulationParticles[i]->particleData.position.x, simulationParticles[i]->particleData.position.y, simulationParticles[i]->particleData.position.z);
+
+				simulationParticles[i]->sendData(renderer->getDeviceContext());
+				sphParticleShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * sph_particleScaleMatrix * particlePosMatrix, viewMatrix, projectionMatrix, XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 0.0F), currentRenderSettingForShader);
+				sphParticleShader->setLightingParameters(renderer->getDeviceContext(), directionalLight);
+				sphParticleShader->setMaterialValues(renderer->getDeviceContext(), waterMaterial.materialRoughness, waterMaterial.metallicFactor, waterMaterial.baseReflectivity);
+				sphParticleShader->setSimulationDataSRV(renderer->getDeviceContext(), sphFinalPass->getComputeShaderOutput());
+				sphParticleShader->setParticleIndex(renderer->getDeviceContext(), i);
+				sphParticleShader->render(renderer->getDeviceContext(), simulationParticles[i]->getIndexCount());
+				sphParticleShader->unbind(renderer->getDeviceContext());
+			}
+
+			renderer->setAlphaBlending(false);
 		}
-
-		renderer->setAlphaBlending(false);
 	}
 
 	if (guiSettings.displaySDFs) {
@@ -484,7 +486,9 @@ bool App1::render()
 	//Add delta time
 	time += timer->getTime();
 
-	sphSimulationComputePass();//Runs the SPH simulation compute shaders
+	if (!sampleWater.isSampleWater) {
+		sphSimulationComputePass();//Runs the SPH simulation compute shaders
+	}
 
 	renderSceneShaders(time);//Renders the actual water simulation in the scene
 
@@ -546,14 +550,16 @@ void App1::gui()
 		guiSettings.displaySPHSimulationParticles = true;
 	}
 
-	ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
-	if (guiSettings.displaySDFs == true)
-	{
-		guiSettings.displaySPHSimulationParticles = false;
-	}
-	else
-	{
-		guiSettings.displaySPHSimulationParticles = true;
+	if (!sampleWater.isSampleWater) {
+		ImGui::Checkbox("Display SPH simulation", &guiSettings.displaySPHSimulationParticles);
+		if (guiSettings.displaySDFs == true)
+		{
+			guiSettings.displaySPHSimulationParticles = false;
+		}
+		else
+		{
+			guiSettings.displaySPHSimulationParticles = true;
+		}
 	}
 
 	ImGui::Dummy(ImVec2(0.0f, 10.0f));
@@ -620,8 +626,6 @@ void App1::gui()
 		}
 
 	}
-
-	
 
 	//Setting the current render method
 	if (currentSimType == "3D Texture with Static Particles") {

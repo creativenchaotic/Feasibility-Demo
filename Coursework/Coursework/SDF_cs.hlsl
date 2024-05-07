@@ -198,7 +198,7 @@ void main( uint3 DTid : SV_DispatchThreadID)
 
         float3 position = lerp(worldMin, worldMax, DTid / (float3(resolution) - 1.0f)) * 0.5;
 
-        if (isSampleWave)//USE GERSTNER WAVE SAMPLE POSITIONS
+        if (isSampleWave == 1)//USE GERSTNER WAVE SAMPLE POSITIONS
         {
             waterPlaneCalc();
         	sdfCalc = sdfCalculationsSampleWave(position);
@@ -223,7 +223,7 @@ void main( uint3 DTid : SV_DispatchThreadID)
     //USE BASIC SDFs WITH SPHERE TRACING IN THE PIXEL SHADER USING SIMULATED PARTICLES------------------------
     else if(simType.x == 3)
     {
-        if (isSampleWave)//USE GERSTNER WAVES
+        if (isSampleWave == 1)//USE GERSTNER WAVES
         {
             waterPlaneCalc();
         }

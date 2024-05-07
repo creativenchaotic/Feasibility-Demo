@@ -85,19 +85,19 @@ struct SDFValues
 
 struct SampleWaterValues
 {
-	XMFLOAT3 waveDirection1;
-	XMFLOAT3 waveDirection2;
-	XMFLOAT3 waveDirection3;
-	float amplitude1;
-	float amplitude2;
-	float amplitude3;
-	float frequency1;
-	float frequency2;
-	float frequency3;
-	float waveSpeed1;
-	float waveSpeed2;
-	float waveSpeed3;
-	float steepness;
+	XMFLOAT3 waveDirection1 = XMFLOAT3(3.812f,0.0f,-0.638f);
+	XMFLOAT3 waveDirection2 = XMFLOAT3(0.12f,0.0f,8.952f);
+	XMFLOAT3 waveDirection3 = XMFLOAT3(2.0,0.0,-2.889);
+	float amplitude1 = 0.585f;
+	float amplitude2 = 0.245f;
+	float amplitude3 = 0.447f;
+	float frequency1 = 0.358f;
+	float frequency2 = 0.199f;
+	float frequency3 = 0.139f;
+	float waveSpeed1 = 1.519f;
+	float waveSpeed2 = 0.19f;
+	float waveSpeed3 = 0.19f;
+	float steepness = 2.0f;
 	bool isSampleWater = true;
 	int sampleWaterState = 1;
 };
